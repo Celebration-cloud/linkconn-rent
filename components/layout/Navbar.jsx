@@ -1,5 +1,3 @@
-"use client";
-
 import {
   Navbar as HeroUINavbar,
   NavbarContent,
@@ -16,16 +14,17 @@ import { Input } from "@heroui/input";
 import { link as linkStyles } from "@heroui/theme";
 import NextLink from "next/link";
 import clsx from "clsx";
+
+import { siteConfig } from "@/config/site";
 import { ThemeSwitch } from "@/components/theme-switch";
 import {
-  Search,
-  Home,
-  Building2,
-  User,
-  LogIn,
-  Heart,
-  Menu,
-} from "lucide-react";
+  TwitterIcon,
+  GithubIcon,
+  DiscordIcon,
+  HeartFilledIcon,
+  SearchIcon,
+  Logo,
+} from "@/components/ui/Icons";
 
 export const Navbar = () => {
   const searchInput = (
@@ -36,52 +35,39 @@ export const Navbar = () => {
         input: "text-sm",
       }}
       endContent={
-        <Kbd className="hidden lg:inline-block" keys={["⌘"]}>
+        <Kbd className="hidden lg:inline-block" keys={["command"]}>
           K
         </Kbd>
       }
       labelPlacement="outside"
-      placeholder="Search properties..."
+      placeholder="Search..."
       startContent={
-        <Search className="text-base text-default-400 pointer-events-none flex-shrink-0" />
+        <SearchIcon className="text-base text-default-400 pointer-events-none flex-shrink-0" />
       }
       type="search"
     />
   );
 
-  const navItems = [
-    { href: "/", label: "Home", icon: <Home size={16} /> },
-    { href: "/properties", label: "Browse", icon: <Building2 size={16} /> },
-    { href: "/agents", label: "Agents", icon: <User size={16} /> },
-    { href: "/dashboard", label: "Dashboard", icon: <User size={16} /> },
-  ];
-
   return (
-    <HeroUINavbar
-      maxWidth="xl"
-      position="sticky"
-      className="shadow-sm backdrop-blur-md"
-    >
-      {/* Left side: Brand + Nav links */}
+    <HeroUINavbar maxWidth="xl" position="sticky">
       <NavbarContent className="basis-1/5 sm:basis-full" justify="start">
-        <NavbarBrand as="li" className="gap-2 max-w-fit">
-          <NextLink className="flex items-center gap-1" href="/">
-            <Building2 className="text-primary" />
-            <p className="font-bold text-inherit text-lg">LinkConn Rent</p>
+        <NavbarBrand as="li" className="gap-3 max-w-fit">
+          <NextLink className="flex justify-start items-center gap-1" href="/">
+            <Logo />
+            <p className="font-bold text-inherit">ACME</p>
           </NextLink>
         </NavbarBrand>
         <ul className="hidden lg:flex gap-4 justify-start ml-2">
-          {navItems.map((item) => (
+          {siteConfig.navItems.map((item) => (
             <NavbarItem key={item.href}>
               <NextLink
                 className={clsx(
                   linkStyles({ color: "foreground" }),
-                  "data-[active=true]:text-primary data-[active=true]:font-medium flex items-center gap-1"
+                  "data-[active=true]:text-primary data-[active=true]:font-medium"
                 )}
                 color="foreground"
                 href={item.href}
               >
-                {item.icon}
                 {item.label}
               </NextLink>
             </NavbarItem>
@@ -89,68 +75,65 @@ export const Navbar = () => {
         </ul>
       </NavbarContent>
 
-      {/* Right side: Search, Theme, Auth */}
       <NavbarContent
         className="hidden sm:flex basis-1/5 sm:basis-full"
         justify="end"
       >
-        <NavbarItem className="hidden lg:flex">{searchInput}</NavbarItem>
-        <NavbarItem className="flex items-center gap-3">
+        <NavbarItem className="hidden sm:flex gap-2">
+          <Link isExternal aria-label="Twitter" href={siteConfig.links.twitter}>
+            <TwitterIcon className="text-default-500" />
+          </Link>
+          <Link isExternal aria-label="Discord" href={siteConfig.links.discord}>
+            <DiscordIcon className="text-default-500" />
+          </Link>
+          <Link isExternal aria-label="Github" href={siteConfig.links.github}>
+            <GithubIcon className="text-default-500" />
+          </Link>
           <ThemeSwitch />
+        </NavbarItem>
+        <NavbarItem className="hidden lg:flex">{searchInput}</NavbarItem>
+        <NavbarItem className="hidden md:flex">
           <Button
-            as={NextLink}
-            href="/auth/login"
-            size="sm"
+            isExternal
+            as={Link}
+            className="text-sm font-normal text-default-600 bg-default-100"
+            href={siteConfig.links.sponsor}
+            startContent={<HeartFilledIcon className="text-danger" />}
             variant="flat"
-            startContent={<LogIn size={16} />}
           >
-            Login
-          </Button>
-          <Button
-            as={NextLink}
-            href="/auth/signup"
-            size="sm"
-            color="primary"
-            variant="solid"
-          >
-            Get Started
+            Sponsor
           </Button>
         </NavbarItem>
       </NavbarContent>
 
-      {/* Mobile Menu */}
       <NavbarContent className="sm:hidden basis-1 pl-4" justify="end">
+        <Link isExternal aria-label="Github" href={siteConfig.links.github}>
+          <GithubIcon className="text-default-500" />
+        </Link>
         <ThemeSwitch />
-        <NavbarMenuToggle icon={<Menu />} />
+        <NavbarMenuToggle />
       </NavbarContent>
 
-      {/* Collapsed Menu Items */}
       <NavbarMenu>
         {searchInput}
         <div className="mx-4 mt-2 flex flex-col gap-2">
-          {navItems.map((item, index) => (
-            <NavbarMenuItem key={`${item.href}-${index}`}>
+          {siteConfig.navMenuItems.map((item, index) => (
+            <NavbarMenuItem key={`${item}-${index}`}>
               <Link
-                href={item.href}
-                color={index === 0 ? "primary" : "foreground"}
+                color={
+                  index === 2
+                    ? "primary"
+                    : index === siteConfig.navMenuItems.length - 1
+                      ? "danger"
+                      : "foreground"
+                }
+                href="#"
                 size="lg"
-                className="flex items-center gap-2"
               >
-                {item.icon}
                 {item.label}
               </Link>
             </NavbarMenuItem>
           ))}
-          <NavbarMenuItem>
-            <Link
-              href="/auth/login"
-              color="primary"
-              size="lg"
-              className="flex items-center gap-2"
-            >
-              <LogIn size={16} /> Login / Sign Up
-            </Link>
-          </NavbarMenuItem>
         </div>
       </NavbarMenu>
     </HeroUINavbar>
