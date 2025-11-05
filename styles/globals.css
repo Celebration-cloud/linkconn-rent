@@ -1,3 +1,51 @@
 @import "tailwindcss";
 
-@config "../tailwind.config.js"
+@config "../tailwind.config.js";
+@plugin '../hero.ts';
+
+.leaflet-div-icon {
+  background: transparent !important;
+  border: none !important;
+}
+
+@media (prefers-color-scheme: dark) {
+  .distance-label div {
+    background: #22d3ee !important;
+    color: #0f172a !important;
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  .distance-label div {
+    background: #2563EB !important;
+    color: #fff !important;
+  }
+}
+
+/* Custom Scrollbar Styling */
+.styled-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.styled-scrollbar::-webkit-scrollbar-track {
+  background: hsl(var(--background));
+  border-radius: 9999px;
+}
+
+.styled-scrollbar::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted-foreground) / 0.4);
+  border-radius: 9999px;
+  transition: background 0.2s ease;
+}
+
+.styled-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.6);
+}
+
+/* Firefox support */
+@supports (scrollbar-width: thin) {
+  .styled-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--muted-foreground) / 0.5) hsl(var(--background));
+  }
+}

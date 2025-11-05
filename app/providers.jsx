@@ -7,7 +7,8 @@ import { ThemeProvider as NextThemesProvider } from "next-themes";
 import { Provider as ReduxProvider } from "react-redux";
 import { SessionProvider } from "next-auth/react";
 import { store } from "@/lib/redux/store";
-
+import { ToastProvider } from "@heroui/react";
+import { PropertiesUIProvider } from "@/hooks/usePropertiesUI";
 export function Providers({ children, themeProps }) {
   const router = useRouter();
 
@@ -15,7 +16,13 @@ export function Providers({ children, themeProps }) {
     <SessionProvider>
       <ReduxProvider store={store}>
         <HeroUIProvider navigate={router.push}>
-          <NextThemesProvider {...themeProps}>{children}</NextThemesProvider>
+          <ToastProvider />
+          <NextThemesProvider {...themeProps}>
+                <PropertiesUIProvider>
+
+            {children}
+                </PropertiesUIProvider>
+            </NextThemesProvider>
         </HeroUIProvider>
       </ReduxProvider>
     </SessionProvider>
