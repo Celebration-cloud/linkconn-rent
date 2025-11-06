@@ -1,17 +1,53 @@
 "use client";
 
-import PropertyCard from "./PropertyCard";
+import { useEffect, useRef } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { Pagination } from "@heroui/react";
-import { SpinnerLoading } from "./shared/spinner-loading";
-import { usePropertiesUI } from "@/hooks/usePropertiesUI";
+import { useSearchParams, useRouter } from "next/navigation";
 
-export default function PropertyGrid({ properties = [] }) {
-  const { loading, error, page, setPage, totalPages } = usePropertiesUI();
+import PropertyCard from "./PropertyCard";
+import { SpinnerLoading } from "./shared/spinner-loading";
+import NoResults from "./NoResults";
+import { fetchProperties, setPage } from "@/lib/redux/slices/propertiesSlice";
+
+export default function PropertyGrid() {
+  const dispatch = useDispatch();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const initialized = useRef(false);
+
+  const { properties, loading, error, page, totalPages } = useSelector(
+    (state) => state.properties
+  );
+
+  // Sync URL params -> Redux state on first mount only
+  useEffect(() => {
+    if (initialized.current) return;
+    initialized.current = true;
+
+    const params = Object.fromEntries(searchParams.entries());
+    if (params.page) {
+      dispatch(setPage(Number(params.page)));
+    }
+    dispatch(fetchProperties());
+  }, [dispatch, searchParams]);
+
+  // Fetch when page changes
+  useEffect(() => {
+    if (!initialized.current) return;
+    dispatch(fetchProperties());
+  }, [page, dispatch]);
+
+  // Update URL when page changes (without retriggering fetch loop)
+  useEffect(() => {
+    const qs = new URLSearchParams(searchParams.toString());
+    qs.set("page", page);
+    router.replace(`?${qs.toString()}`, { scroll: false });
+  }, [page, router]);
 
   if (loading) return <SpinnerLoading message="Loading properties..." />;
-  // if (error) return <p>Error: {error}</p>;
-
-  // Trigger Next.js not-found route if there are no properties
+  if (error) return <p className="text-center text-red-500">{error}</p>;
   if (!properties.length) return <NoResults />;
 
   return (
@@ -24,12 +60,12 @@ export default function PropertyGrid({ properties = [] }) {
       </div>
 
       {/* Pagination */}
-      {totalPages >= 1 && (
+      {totalPages > 1 && (
         <div className="flex justify-center">
           <Pagination
             page={page}
             total={totalPages}
-            onChange={setPage}
+            onChange={(newPage) => dispatch(setPage(newPage))}
             showControls
           />
         </div>

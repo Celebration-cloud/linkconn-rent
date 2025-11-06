@@ -1,7 +1,9 @@
 @import "tailwindcss";
+@import "leaflet/dist/leaflet.css";
 
 @config "../tailwind.config.js";
 @plugin '../hero.ts';
+
 
 .leaflet-div-icon {
   background: transparent !important;
