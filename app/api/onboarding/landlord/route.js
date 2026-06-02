@@ -3,8 +3,8 @@ import { NextResponse } from "next/server";
 import {
   landlordIdentitySchema,
   landlordPropertySchema,
-  payoutSchema,
-} from "@/schemas/onboarding";
+  landlordPayoutSchema as payoutSchema,
+} from "@/lib/zodSchemas";
 import { supabaseServer } from "@/lib/superbaseServer";
 
 export async function POST(req) {

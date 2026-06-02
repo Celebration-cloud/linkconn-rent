@@ -4,7 +4,7 @@ import {
   tenantIdentitySchema,
   tenantEmploymentSchema,
   tenantPreferenceSchema,
-} from "@/schemas/onboarding";
+} from "@/lib/zodSchemas";
 import { supabaseServer } from "@/lib/superbaseServer";
 
 export async function POST(req) {
