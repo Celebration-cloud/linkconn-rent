@@ -3,31 +3,66 @@
 import {
   Navbar as HeroUINavbar,
   NavbarContent,
-  NavbarMenu,
-  NavbarMenuToggle,
   NavbarBrand,
   NavbarItem,
+  NavbarMenu,
+  NavbarMenuToggle,
   NavbarMenuItem,
 } from "@heroui/navbar";
 import { Button } from "@heroui/button";
+import { Input } from "@heroui/input";
 import { Kbd } from "@heroui/kbd";
 import { Link } from "@heroui/link";
-import { Input } from "@heroui/input";
-import { link as linkStyles } from "@heroui/theme";
+import { Image } from "@heroui/image";
+import {
+  Dropdown,
+  DropdownTrigger,
+  DropdownMenu,
+  DropdownItem,
+} from "@heroui/dropdown";
+import { usePathname, useRouter } from "next/navigation";
+import { useSession, signOut } from "next-auth/react";
 import NextLink from "next/link";
+import { useState } from "react";
 import clsx from "clsx";
-import { ThemeSwitch } from "@/components/theme-switch";
 import {
   Search,
   Home,
   Building2,
   User,
   LogIn,
-  Heart,
+  LogOut,
   Menu,
 } from "lucide-react";
+import { Avatar } from "@heroui/avatar";
 
-export const Navbar = () => {
+import { siteConfig } from "@/config/site";
+import { ThemeSwitch } from "@/components/theme-switch";
+
+export default function Navbar() {
+  const { data: session } = useSession();
+  const user = session?.user;
+
+  console.log("Navbar session user:", user);
+  const pathname = usePathname();
+  const router = useRouter();
+  const [showSearch, setShowSearch] = useState(false);
+
+  const navItems = [
+    { href: "/", label: "Home", icon: <Home size={16} /> },
+    { href: "/properties", label: "Browse", icon: <Building2 size={16} /> },
+    { href: "/landlords", label: "Landlords", icon: <User size={16} /> },
+    ...(user
+      ? [
+          {
+            href: `/dashboard?role=${user.role}`,
+            label: "Dashboard",
+            icon: <User size={16} />,
+          },
+        ]
+      : []),
+  ];
+
   const searchInput = (
     <Input
       aria-label="Search"
@@ -40,7 +75,6 @@ export const Navbar = () => {
           K
         </Kbd>
       }
-      labelPlacement="outside"
       placeholder="Search properties..."
       startContent={
         <Search className="text-base text-default-400 pointer-events-none flex-shrink-0" />
@@ -49,36 +83,38 @@ export const Navbar = () => {
     />
   );
 
-  const navItems = [
-    { href: "/", label: "Home", icon: <Home size={16} /> },
-    { href: "/properties", label: "Browse", icon: <Building2 size={16} /> },
-    { href: "/agents", label: "Agents", icon: <User size={16} /> },
-    { href: "/dashboard", label: "Dashboard", icon: <User size={16} /> },
-  ];
+  const handleLogout = async () => {
+    await signOut({ redirect: true, callbackUrl: "/" });
+  };
 
   return (
     <HeroUINavbar
+      className="shadow-sm backdrop-blur-md transition-all"
       maxWidth="xl"
       position="sticky"
-      className="shadow-sm backdrop-blur-md"
     >
-      {/* Left side: Brand + Nav links */}
-      <NavbarContent className="basis-1/5 sm:basis-full" justify="start">
-        <NavbarBrand as="li" className="gap-2 max-w-fit">
-          <NextLink className="flex items-center gap-1" href="/">
-            <Building2 className="text-primary" />
-            <p className="font-bold text-inherit text-lg">LinkConn Rent</p>
+      {/* Left section */}
+      <NavbarContent justify="start">
+        <NavbarBrand className="gap-2 cursor-pointer">
+          <NextLink
+            className="flex items-center gap-1 hover:scale-105 transition-transform"
+            href="/"
+          >
+            <Image alt="Logo" height={30} src={siteConfig.logo} width={30} />
+            <p className="font-bold text-lg">LinkConn Rent</p>
           </NextLink>
         </NavbarBrand>
-        <ul className="hidden lg:flex gap-4 justify-start ml-2">
+
+        <ul className="hidden lg:flex gap-4 ml-4">
           {navItems.map((item) => (
             <NavbarItem key={item.href}>
               <NextLink
                 className={clsx(
-                  linkStyles({ color: "foreground" }),
-                  "data-[active=true]:text-primary data-[active=true]:font-medium flex items-center gap-1"
+                  "flex items-center gap-1 text-sm transition-colors",
+                  pathname === item.href
+                    ? "text-primary font-semibold"
+                    : "text-foreground hover:text-primary",
                 )}
-                color="foreground"
                 href={item.href}
               >
                 {item.icon}
@@ -89,70 +125,114 @@ export const Navbar = () => {
         </ul>
       </NavbarContent>
 
-      {/* Right side: Search, Theme, Auth */}
+      {/* Right section */}
       <NavbarContent
-        className="hidden sm:flex basis-1/5 sm:basis-full"
+        className="hidden sm:flex items-center gap-4"
         justify="end"
       >
-        <NavbarItem className="hidden lg:flex">{searchInput}</NavbarItem>
-        <NavbarItem className="flex items-center gap-3">
-          <ThemeSwitch />
-          <Button
-            as={NextLink}
-            href="/auth/login"
-            size="sm"
-            variant="flat"
-            startContent={<LogIn size={16} />}
-          >
-            Login
-          </Button>
-          <Button
-            as={NextLink}
-            href="/auth/signup"
-            size="sm"
-            color="primary"
-            variant="solid"
-          >
-            Get Started
-          </Button>
-        </NavbarItem>
+        <NavbarItem className="hidden lg:flex w-60">{searchInput}</NavbarItem>
+        <ThemeSwitch />
+        {user ? (
+          <Dropdown placement="bottom-end">
+            <DropdownTrigger>
+              <Avatar
+                alt="User Avatar"
+                className="cursor-pointer border border-default-200"
+                name={user?.name || "User"}
+                size="sm"
+                src={user?.image}
+              />
+            </DropdownTrigger>
+            <DropdownMenu aria-label="User menu" variant="flat">
+              <DropdownItem key="name" className="text-center font-semibold">
+                {user.name || "User"}
+              </DropdownItem>
+              <DropdownItem
+                key="dashboard"
+                onClick={() => router.push(`/dashboard?role=${user.role}`)}
+              >
+                Dashboard
+              </DropdownItem>
+              <DropdownItem key="favorites" href="/favorites">
+                Favorites
+              </DropdownItem>
+              <DropdownItem key="logout" color="danger" onClick={handleLogout}>
+                Logout
+              </DropdownItem>
+            </DropdownMenu>
+          </Dropdown>
+        ) : (
+          <>
+            <Button
+              as={NextLink}
+              href="/auth/login"
+              size="sm"
+              startContent={<LogIn size={16} />}
+              variant="flat"
+            >
+              Login
+            </Button>
+            <Button as={NextLink} color="primary" href="/auth/signup" size="sm">
+              Get Started
+            </Button>
+          </>
+        )}
       </NavbarContent>
 
-      {/* Mobile Menu */}
-      <NavbarContent className="sm:hidden basis-1 pl-4" justify="end">
+      {/* Mobile controls */}
+      <NavbarContent className="sm:hidden basis-1 pl-2" justify="end">
         <ThemeSwitch />
+        <Button
+          isIconOnly
+          variant="light"
+          onPress={() => setShowSearch(!showSearch)}
+        >
+          <Search size={18} />
+        </Button>
         <NavbarMenuToggle icon={<Menu />} />
       </NavbarContent>
 
-      {/* Collapsed Menu Items */}
+      {/* Mobile menu */}
       <NavbarMenu>
-        {searchInput}
-        <div className="mx-4 mt-2 flex flex-col gap-2">
-          {navItems.map((item, index) => (
-            <NavbarMenuItem key={`${item.href}-${index}`}>
-              <Link
-                href={item.href}
-                color={index === 0 ? "primary" : "foreground"}
-                size="lg"
-                className="flex items-center gap-2"
-              >
-                {item.icon}
-                {item.label}
-              </Link>
-            </NavbarMenuItem>
-          ))}
+        {showSearch && <div className="p-3">{searchInput}</div>}
+        {navItems.map((item) => (
+          <NavbarMenuItem key={item.href}>
+            <Link
+              className={clsx(
+                "flex items-center gap-2 text-base",
+                pathname === item.href
+                  ? "text-primary font-semibold"
+                  : "text-foreground hover:text-primary",
+              )}
+              href={item.href}
+            >
+              {item.icon}
+              {item.label}
+            </Link>
+          </NavbarMenuItem>
+        ))}
+        {user ? (
           <NavbarMenuItem>
             <Link
-              href="/auth/login"
-              color="primary"
-              size="lg"
+              className="flex items-center gap-2 cursor-pointer"
+              color="danger"
+              onClick={handleLogout}
+            >
+              <LogOut size={16} /> Logout
+            </Link>
+          </NavbarMenuItem>
+        ) : (
+          <NavbarMenuItem>
+            <Link
               className="flex items-center gap-2"
+              color="primary"
+              href="/auth/login"
             >
               <LogIn size={16} /> Login / Sign Up
             </Link>
           </NavbarMenuItem>
-        </div>
+        )}
       </NavbarMenu>
     </HeroUINavbar>
   );
-};
+}

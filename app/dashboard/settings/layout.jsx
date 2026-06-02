@@ -1,7 +1,3 @@
-export default function Layout({children}) {
-    return (
-        <section>
-            {children}
-        </section>
-    );
+export default function Layout({ children }) {
+  return <section>{children}</section>;
 }
