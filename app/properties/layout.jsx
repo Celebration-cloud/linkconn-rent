@@ -12,19 +12,24 @@ import {
   setView,
   fetchProperties,
 } from "@/lib/redux/slices/propertiesSlice";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 
 export default function PropertiesLayout({ children }) {
   const dispatch = useDispatch();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const pathname = usePathname();
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const isMobile = useMediaQuery("(max-width: 768px)");
   const { filters } = useSelector((state) => state.properties);
+  const initialized = useRef(false); // ✅ Move this above the conditional
 
-  // Prevent double-fetch
-  const initialized = useRef(false);
+  // Determine if this is a detail page
+  const pathSegments = pathname?.split("/").filter(Boolean) || [];
+  const isInProperties = pathSegments[0] === "properties";
+  const isDetailPage =
+    isInProperties && pathSegments.length >= 2 && pathSegments[1] !== "";
 
   // Sync URL params → Redux filters once on mount
   useEffect(() => {
@@ -34,9 +39,10 @@ export default function PropertiesLayout({ children }) {
     const params = Object.fromEntries(searchParams.entries());
     dispatch(setFilters(params));
     dispatch(fetchProperties());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, searchParams]);
 
-  // Search handler (updates query + redux)
+  // Search handler
   const handleSearch = (value) => {
     const qs = new URLSearchParams(searchParams.toString());
     if (value) qs.set("q", value);
@@ -47,21 +53,22 @@ export default function PropertiesLayout({ children }) {
     dispatch(fetchProperties());
   };
 
+  // ✅ Conditional rendering AFTER all hooks
+  if (isDetailPage) {
+    return <div className="min-h-screen bg-default-50">{children}</div>;
+  }
+
   return (
     <>
       <div className="flex flex-col md:flex-row max-w-7xl mx-auto w-full gap-4 px-3 pb-6 sm:px-4 md:px-6 h-[calc(100vh-4rem)]">
-        {/* Sidebar for desktop */}
         {!isMobile && (
           <aside className="w-72 rounded-xl p-4 bg-card h-full sticky top-16 overflow-y-auto styled-scrollbar">
             <PropertyFilters />
           </aside>
         )}
 
-        {/* Main content */}
         <div className="flex-1 flex flex-col h-full w-full overflow-hidden">
-          {/* Top controls */}
           <div className="flex flex-col sm:flex-row items-center justify-between sticky top-0 z-30 bg-background/80 backdrop-blur-md py-3 px-2 border-b border-border/40 gap-3 sm:gap-4 lg:gap-6">
-            {/* Filters button (mobile) */}
             <div className="flex items-center gap-2 w-full sm:w-auto">
               {isMobile && (
                 <button
@@ -74,7 +81,6 @@ export default function PropertiesLayout({ children }) {
               )}
             </div>
 
-            {/* Search + View toggle */}
             <div className="flex flex-1 items-center gap-3 sm:gap-4 lg:gap-6 w-full sm:w-auto">
               <div className="flex-1 min-w-0">
                 <SearchBar
@@ -87,14 +93,12 @@ export default function PropertiesLayout({ children }) {
             </div>
           </div>
 
-          {/* Main content */}
           <main className="flex-1 overflow-y-auto scrollbar-hide mt-2 sm:mt-0">
             {children}
           </main>
         </div>
       </div>
 
-      {/* Drawer for mobile filters */}
       <Drawer
         isOpen={sidebarOpen}
         onOpenChange={setSidebarOpen}

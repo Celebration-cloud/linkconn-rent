@@ -42,6 +42,7 @@ import { Avatar } from "@heroui/avatar";
 export default function Navbar() {
   const { data: session } = useSession();
   const user = session?.user;
+  console.log("Navbar session user:", user);
   const pathname = usePathname();
   const router = useRouter();
   const [showSearch, setShowSearch] = useState(false);
@@ -49,7 +50,7 @@ export default function Navbar() {
   const navItems = [
     { href: "/", label: "Home", icon: <Home size={16} /> },
     { href: "/properties", label: "Browse", icon: <Building2 size={16} /> },
-    { href: "/agents", label: "Agents", icon: <User size={16} /> },
+    { href: "/landlords", label: "Landlords", icon: <User size={16} /> },
     ...(user
       ? [
           {

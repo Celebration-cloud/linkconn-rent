@@ -1,6 +1,7 @@
 "use client";
 
 import { Fragment, useEffect, useState } from "react";
+import { Chip, Input } from "@heroui/react";
 import {
   MapContainer,
   TileLayer,
@@ -10,7 +11,6 @@ import {
   useMap,
 } from "react-leaflet";
 import L from "leaflet";
-import { Chip, Input } from "@heroui/react";
 import "leaflet/dist/leaflet.css";
 import "leaflet-fullscreen";
 import "leaflet-fullscreen/dist/leaflet.fullscreen.css";
@@ -50,8 +50,8 @@ export default function PropertyMap({ properties }) {
   const [selectedProperty, setSelectedProperty] = useState(properties?.[0]);
   const [userLocation, setUserLocation] = useState(null);
   const [distance, setDistance] = useState(null);
-  const [darkMode, setDarkMode] = useState(false);
   const [maxDistance, setMaxDistance] = useState(10); // Default radius 10 km
+  const [darkMode, setDarkMode] = useState(false);
 
   useEffect(() => {
     const observer = new MutationObserver(() => {
@@ -198,6 +198,18 @@ export default function PropertyMap({ properties }) {
                   <Chip size="sm" color="secondary" variant="flat">
                     {p.type}
                   </Chip>
+                  {p.amenities?.length > 0 && (
+                <div className="flex flex-wrap gap-1 mt-2 text-xs">
+                  {selectedProperty.amenities.map((a) => (
+                    <span
+                      key={a}
+                      className="px-2 py-0.5 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-200 rounded-full"
+                    >
+                      {a}
+                    </span>
+                  ))}
+                </div>
+              )}
                 </Popup>
               </Marker>
             ))}
@@ -208,6 +220,77 @@ export default function PropertyMap({ properties }) {
               />
             )}
           </MapContainer>
+          {/* Floating Property Card */}
+          {selectedProperty && (
+            <div
+              className="absolute bottom-4 left-4 z-50 w-72 p-4 rounded-xl shadow-lg
+               bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+            >
+              <h5 className="font-bold text-lg line-clamp-2">
+                {selectedProperty.title}
+              </h5>
+              <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2">
+                {selectedProperty.address ||
+                  `${selectedProperty.city}, ${selectedProperty.state}`}
+              </p>
+              <p className="text-sm font-bold mt-2">
+                ₦{Number(selectedProperty.price).toLocaleString()}
+              </p>
+
+              <div className="flex flex-wrap gap-2 mt-2 text-xs">
+                {selectedProperty.beds && (
+                  <span className="px-2 py-0.5 bg-gray-200 dark:bg-gray-700 rounded-full">
+                    {selectedProperty.beds} Beds
+                  </span>
+                )}
+                {selectedProperty.baths && (
+                  <span className="px-2 py-0.5 bg-gray-200 dark:bg-gray-700 rounded-full">
+                    {selectedProperty.baths} Baths
+                  </span>
+                )}
+                {selectedProperty.size && (
+                  <span className="px-2 py-0.5 bg-gray-200 dark:bg-gray-700 rounded-full">
+                    {selectedProperty.size} sqm
+                  </span>
+                )}
+                {selectedProperty.floor && (
+                  <span className="px-2 py-0.5 bg-gray-200 dark:bg-gray-700 rounded-full">
+                    Floor: {selectedProperty.floor}
+                  </span>
+                )}
+                {selectedProperty.verified && (
+                  <span className="px-2 py-0.5 bg-green-100 dark:bg-green-800 text-green-700 dark:text-green-200 rounded-full">
+                    Verified
+                  </span>
+                )}
+              </div>
+
+              {/* {selectedProperty.amenities?.length > 0 && (
+                <div className="flex flex-wrap gap-1 mt-2 text-xs">
+                  {selectedProperty.amenities.map((a) => (
+                    <span
+                      key={a}
+                      className="px-2 py-0.5 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-200 rounded-full"
+                    >
+                      {a}
+                    </span>
+                  ))}
+                </div>
+              )} */}
+
+              {userLocation && (
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                  {getDistanceKm(
+                    userLocation[0],
+                    userLocation[1],
+                    selectedProperty.lat,
+                    selectedProperty.lng
+                  )}{" "}
+                  km away
+                </p>
+              )}
+            </div>
+          )}
         </div>
       </>
 
@@ -231,27 +314,77 @@ export default function PropertyMap({ properties }) {
           </div>
         </div>
 
-        <div className="space-y-2 overflow-y-auto styled-scrollbar max-h-[65vh] pr-1">
+        <div className="space-y-3 overflow-y-auto styled-scrollbar max-h-[65vh] pr-1">
           {nearbyProperties.length > 0 ? (
             nearbyProperties.map((p) => (
               <div
                 key={p.id}
                 onClick={() => setSelectedProperty(p)}
-                className={`p-3 border rounded-md cursor-pointer transition-colors ${
+                className={`p-4 rounded-xl cursor-pointer transition-transform transform shadow-sm hover:shadow-md ${
                   selectedProperty?.id === p.id
-                    ? "bg-primary/10 border-primary"
-                    : "bg-card/40 hover:bg-card/70"
+                    ? "bg-primary/10 dark:bg-primary/20"
+                    : "bg-white dark:bg-gray-800"
                 }`}
               >
-                <p className="font-medium line-clamp-1">{p.title}</p>
-                <p className="text-sm text-muted-foreground line-clamp-1">
+                {/* Title & Address */}
+                <p className="font-semibold text-gray-900 dark:text-gray-100 line-clamp-2">
+                  {p.title}
+                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2">
                   {p.address || `${p.city}, ${p.state}`}
                 </p>
-                <p className="text-sm font-semibold mt-1">
+
+                {/* Price */}
+                <p className="text-sm font-bold text-gray-800 dark:text-gray-200 mt-2">
                   ₦{Number(p.price).toLocaleString()}
                 </p>
+
+                {/* Property details as chips */}
+                <div className="flex flex-wrap gap-2 mt-2 text-xs">
+                  {p.beds && (
+                    <span className="px-2 py-0.5 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100 rounded-full">
+                      {p.beds} Beds
+                    </span>
+                  )}
+                  {p.baths && (
+                    <span className="px-2 py-0.5 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100 rounded-full">
+                      {p.baths} Baths
+                    </span>
+                  )}
+                  {p.size && (
+                    <span className="px-2 py-0.5 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100 rounded-full">
+                      {p.size} sqm
+                    </span>
+                  )}
+                  {p.floor && (
+                    <span className="px-2 py-0.5 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100 rounded-full">
+                      Floor: {p.floor}
+                    </span>
+                  )}
+                  {p.verified && (
+                    <span className="px-2 py-0.5 bg-green-100 dark:bg-green-800 text-green-700 dark:text-green-200 rounded-full">
+                      Verified
+                    </span>
+                  )}
+                </div>
+
+                {/* Amenities chips */}
+                {p.amenities?.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mt-2 text-xs">
+                    {p.amenities.map((a) => (
+                      <span
+                        key={a}
+                        className="px-2 py-0.5 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-200 rounded-full"
+                      >
+                        {a}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                {/* Distance */}
                 {userLocation && (
-                  <p className="text-xs mt-1">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
                     {getDistanceKm(
                       userLocation[0],
                       userLocation[1],
@@ -264,7 +397,7 @@ export default function PropertyMap({ properties }) {
               </div>
             ))
           ) : (
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
               No properties found within {maxDistance} km.
             </p>
           )}

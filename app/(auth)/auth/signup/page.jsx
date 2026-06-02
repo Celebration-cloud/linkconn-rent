@@ -139,7 +139,6 @@ export default function SignupPage() {
                   }}
                 >
                   <SelectItem key="landlord">Landlord</SelectItem>
-                  <SelectItem key="agent">Agent</SelectItem>
                   <SelectItem key="tenant">Tenant</SelectItem>
                 </Select>
               )}
@@ -153,17 +152,6 @@ export default function SignupPage() {
                 variant="bordered"
                 isInvalid={!!formState.errors.companyName}
                 errorMessage={formState.errors.companyName?.message}
-              />
-            )}
-
-            {role === "agent" && (
-              <Input
-                {...register("agencyName")}
-                label="Agency Name"
-                placeholder="Enter your agency name"
-                variant="bordered"
-                isInvalid={!!formState.errors.agencyName}
-                errorMessage={formState.errors.agencyName?.message}
               />
             )}
 

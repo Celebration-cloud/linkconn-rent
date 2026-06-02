@@ -14,7 +14,7 @@ export default function AppWrapper({ children }) {
     initPuter();
   }, []);
 
-
+  const hideFooterInDashboard = pathname.startsWith("/dashboard/tenant");
   const hiddenLayoutRoutes = ["/auth", "/onboarding"];
   const hideLayout = hiddenLayoutRoutes.some((route) =>
     pathname.startsWith(route)
@@ -33,7 +33,7 @@ export default function AppWrapper({ children }) {
         {children}
       </main>
 
-      {!hideLayout && <AppFooter />}
+      {!hideFooterInDashboard && !hideLayout && <AppFooter />}
     </div>
   );
 }

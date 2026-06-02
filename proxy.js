@@ -10,7 +10,7 @@ const PUBLIC_PATHS = [
   "/contact",
 ];
 
-export async function middleware(req) {
+export async function proxy(req) {
   const { pathname } = req.nextUrl;
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
 

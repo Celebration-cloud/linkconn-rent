@@ -115,7 +115,6 @@ const onSubmit = (data) => {
                   }}
                 >
                   <SelectItem key="landlord">Landlord</SelectItem>
-                  <SelectItem key="agent">Agent</SelectItem>
                   <SelectItem key="tenant">Tenant</SelectItem>
                 </Select>
               )}

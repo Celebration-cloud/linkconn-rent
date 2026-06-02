@@ -15,7 +15,6 @@ import {
 export default function PropertyCard({ property }) {
   const coverImage =
     property.images?.length > 0 ? property.images[0] : "/placeholder.jpg";
-console.log("coverImage:", coverImage)
   return (
     <Card
       as={Link}
@@ -29,7 +28,7 @@ console.log("coverImage:", coverImage)
         <Image
           src={coverImage}
           alt={property.title}
-          className="object-cover w-full h-52"
+          className="object-cover w-full h-52 z-0"
           loading="lazy"
           removeWrapper
         />

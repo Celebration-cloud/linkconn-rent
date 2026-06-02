@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import bcrypt from "bcryptjs";
 import { loginSchema } from "@/lib/zodSchemas";
 import { supabaseServer } from "@/lib/superbaseServer";
 
@@ -15,26 +14,42 @@ export async function POST(req) {
     }
 
     const { email, password, role } = parsed.data;
+    console.log("Login attempt for:", email, "as", role);
 
+    // 1️⃣ Sign in via Supabase Auth
+    const { data: sessionData, error: sessionError } =
+      await supabaseServer.auth.signInWithPassword({ email, password });
+
+    if (sessionError || !sessionData.user) {
+      return NextResponse.json(
+        { error: "Invalid credentials" },
+        { status: 401 }
+      );
+    }
+
+    const authUserId = sessionData.user.id;
+
+    // 2️⃣ Fetch metadata from public users table
     const { data: baseUser, error: baseErr } = await supabaseServer
       .from("users")
       .select(
-        "id, email, password, role, ref_id, onboarded, verification_status, profile_pic, verified"
+        "id, auth_id, role, ref_id, onboarded, verification_status, profile_pic, verified"
       )
-      .eq("email", email)
-      .eq("role", role)
+      .eq("auth_id", authUserId)
       .maybeSingle();
 
     if (baseErr || !baseUser) {
-      return NextResponse.json({ error: "User not found" }, { status: 401 });
+      return NextResponse.json({ error: "User not found: ", baseErr }, { status: 404 });
     }
 
-    const isMatch = await bcrypt.compare(password, baseUser.password);
-    if (!isMatch) {
-      return NextResponse.json({ error: "Invalid password" }, { status: 401 });
+    if (baseUser?.role !== role) {
+      return NextResponse.json(
+        { error: `Role mismatch` },
+        { status: 403 }
+      );
     }
 
-    // Fetch role-specific info
+    // 3️⃣ Fetch role-specific info
     const { data: roleData } = await supabaseServer
       .from(`${role}s`)
       .select("full_name, address")
@@ -46,7 +61,7 @@ export async function POST(req) {
         message: "Login successful",
         user: {
           id: baseUser.id,
-          email: baseUser.email,
+          email,
           role: baseUser.role,
           refId: baseUser.ref_id,
           fullName: roleData?.full_name,

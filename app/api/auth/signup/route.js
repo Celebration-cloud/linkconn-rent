@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import bcrypt from "bcryptjs";
 import { supabaseServer } from "@/lib/superbaseServer";
 import { signupSchema } from "@/lib/zodSchemas";
 
@@ -8,6 +7,7 @@ export async function POST(req) {
     const formData = await req.formData();
     const data = Object.fromEntries(formData);
 
+    // Validate input
     const parsed = signupSchema.parse({
       fullName: data.fullName,
       email: data.email,
@@ -22,17 +22,7 @@ export async function POST(req) {
       moveInDate: data.moveInDate,
     });
 
-    const hashedPassword = await bcrypt.hash(parsed.password, 12);
-
-    // Pick role table
-    const table =
-      parsed.role === "landlord"
-        ? "landlords"
-        : parsed.role === "agent"
-          ? "agents"
-          : "tenants";
-
-    // Check if user already exists
+    // 1️⃣ Check if user already exists
     const { data: existingUser } = await supabaseServer
       .from("users")
       .select("id")
@@ -46,12 +36,43 @@ export async function POST(req) {
       );
     }
 
-    // Insert into role table first
+    // 2️⃣ Create user in Supabase Auth
+    const { data: authUser, error: authError } =
+      await supabaseServer.auth.admin.createUser({
+        email: parsed.email,
+        password: parsed.password,
+        email_confirm: true,
+      });
+    if (authError) throw new Error(authError.message);
+
+    // 3️⃣ Insert into public users table first (metadata)
+    const { data: userData, error: userError } = await supabaseServer
+      .from("users")
+      .insert([
+        {
+          auth_id: authUser.user.id,
+          email: parsed.email,
+          role: parsed.role,
+          profile_pic: parsed.profilePic || null,
+          onboarded: false,
+          verification_status: "pending",
+        },
+      ])
+      .select()
+      .single();
+    if (userError) throw new Error(userError.message);
+
+    // 4️⃣ Insert role-specific data and link user_id
+    const table =
+      parsed.role === "landlord"
+        ? "landlords"
+          : "tenants";
+
     const rolePayload = {
+      user_id: userData.id, // Link role row to user
       full_name: parsed.fullName,
       address: parsed.address,
       ...(parsed.role === "landlord" && { company_name: parsed.companyName }),
-      ...(parsed.role === "agent" && { agency_name: parsed.agencyName }),
       ...(parsed.role === "tenant" && {
         preferred_location: parsed.preferredLocation || null,
         budget_range: parsed.budgetRange || null,
@@ -64,25 +85,14 @@ export async function POST(req) {
       .insert([rolePayload])
       .select()
       .single();
-
     if (roleError) throw new Error(roleError.message);
 
-    // Insert into users and link ref_id
-    const { data: userData, error: userError } = await supabaseServer
+    // 5️⃣ Update users.ref_id to point to role row
+    const { error: refError } = await supabaseServer
       .from("users")
-      .insert([
-        {
-          email: parsed.email,
-          password: hashedPassword,
-          role: parsed.role,
-          ref_id: roleData.id,
-          profile_pic: parsed.profilePic || null,
-        },
-      ])
-      .select()
-      .single();
-
-    if (userError) throw new Error(userError.message);
+      .update({ ref_id: roleData.id })
+      .eq("id", userData.id);
+    if (refError) throw new Error(refError.message);
 
     return NextResponse.json(
       {

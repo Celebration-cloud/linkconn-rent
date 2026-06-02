@@ -10,21 +10,21 @@ export default function DashboardLayout({ children }) {
   const router = useRouter();
   const { data: session, status } = useSession();
 
-  useEffect(() => {
-    if (status === "loading") return;
+  // useEffect(() => {
+  //   if (status === "loading") return;
 
-    // No session, kick to login
-    if (!session?.user) {
-      router.replace("/auth/login");
-      return;
-    }
+  //   // No session, kick to login
+  //   if (!session?.user) {
+  //     router.replace("/auth/login");
+  //     return;
+  //   }
 
-    // Missing role in URL
-    if (!role) {
-      router.replace("/");
-      return;
-    }
-  }, [status, session, role, router]);
+  //   // Missing role in URL
+  //   if (!role) {
+  //     router.replace("/");
+  //     return;
+  //   }
+  // }, [status, session, role, router]);
 
   return <div className="min-h-screen">{children}</div>;
 }

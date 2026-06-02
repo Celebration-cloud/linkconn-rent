@@ -19,16 +19,6 @@ export async function setupUserTable() {
       { name: "onboarded", type: "boolean" },
       { name: "role", type: "text" },
     ],
-    agents: [
-      { name: "full_name", type: "text" },
-      { name: "email", type: "text" },
-      { name: "password", type: "text" },
-      { name: "agency_name", type: "text" },
-      { name: "address", type: "text" },
-      { name: "profile_pic", type: "text" },
-      { name: "onboarded", type: "boolean" },
-      { name: "role", type: "text" },
-    ],
     tenants: [
       { name: "full_name", type: "text" },
       { name: "email", type: "text" },

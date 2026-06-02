@@ -1,24 +1,32 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import { Accordion, AccordionItem } from "@heroui/react";
 import { Select, SelectItem } from "@heroui/select";
 import Input from "@/components/ui/Input";
 import { Switch } from "@heroui/switch";
 import Button from "@/components/ui/Button";
-import { usePropertiesUI } from "@/hooks/usePropertiesUI";
 import { siteConfig } from "@/config/site";
+import {
+  fetchProperties,
+  setFilters,
+  setPage,
+} from "@/lib/redux/slices/propertiesSlice";
 
 export default function PropertyFilters() {
-  const { filters, setFilters } = usePropertiesUI();
+  const dispatch = useDispatch();
+  const { filters } = useSelector((state) => state.properties);
   const [localFilters, setLocalFilters] = useState(filters);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
-      setFilters(localFilters);
+      dispatch(setFilters(localFilters));
+      dispatch(setPage(1));
+      dispatch(fetchProperties());
     }, 250);
     return () => clearTimeout(timeout);
-  }, [localFilters, setFilters]);
+  }, [localFilters, dispatch]);
 
   const typeOptions = useMemo(
     () => siteConfig.propertyTypes.flatMap((group) => group.items),
@@ -37,187 +45,175 @@ export default function PropertyFilters() {
       purpose: "",
       status: "",
       state: "",
+      states: [],
       city: "",
+      cities: [],
       minBeds: "",
+      maxBeds: "",
       minBaths: "",
+      maxBaths: "",
       minSize: "",
       maxSize: "",
+      minFloor: "",
+      maxFloor: "",
+      minFavorites: "",
+      maxFavorites: "",
       minPrice: "",
       maxPrice: "",
       verified: false,
-      kitchen_available: false,
-      toilet_available: false,
+      kitchen: "",
+      toilet: "",
+      amenities: [],
     };
     setLocalFilters(reset);
-    setFilters(reset);
+    dispatch(setFilters(reset));
   };
 
   return (
     <div className="w-full space-y-4 styled-scrollbar overflow-y-auto max-h-[calc(100vh-8rem)]">
       <Accordion
         variant="shadow"
-        defaultExpandedKeys={["general", "location", "pricing", "details"]}
+        defaultExpandedKeys={[
+          "general",
+          "location",
+          "pricing",
+          "details",
+          "amenities",
+        ]}
         itemClasses={{
           base: "rounded-xl mb-2",
           title: "text-sm font-semibold",
           content: "space-y-3",
         }}
       >
-        {/* General Section */}
+        {/* General */}
         <AccordionItem key="general" title="General">
-          <div>
-            <label className="block text-sm mb-1">Purpose</label>
-            <Select
-              placeholder="Select purpose"
-              selectedKeys={[localFilters.purpose]}
-              onSelectionChange={(keys) =>
-                handleChange("purpose", [...keys][0] || "")
-              }
-            >
-              <SelectItem key="">All</SelectItem>
-              <SelectItem key="rent">Rent</SelectItem>
-              <SelectItem key="sale">Sale</SelectItem>
-              <SelectItem key="lease">Lease</SelectItem>
-            </Select>
-          </div>
+          {["purpose", "status", "category", "type", "kitchen", "toilet"].map(
+            (key) => {
+              let options = [];
+              if (key === "purpose") options = ["", "rent", "sale", "lease"];
+              if (key === "status")
+                options = ["", "available", "occupied", "pending"];
+              if (key === "category")
+                options = ["", "residential", "commercial"];
+              if (key === "type")
+                options = ["", ...typeOptions.map((t) => t.key)];
+              if (key === "kitchen") options = ["", "standard", "modular"];
+              if (key === "toilet") options = ["", "standard", "ensuite"];
 
-          <div>
-            <label className="block text-sm mb-1">Status</label>
-            <Select
-              placeholder="Select status"
-              selectedKeys={[localFilters.status]}
-              onSelectionChange={(keys) =>
-                handleChange("status", [...keys][0] || "")
-              }
-            >
-              <SelectItem key="">All</SelectItem>
-              <SelectItem key="available">Available</SelectItem>
-              <SelectItem key="occupied">Occupied</SelectItem>
-              <SelectItem key="pending">Pending</SelectItem>
-            </Select>
-          </div>
-
-          <div>
-            <label className="block text-sm mb-1">Category</label>
-            <Select
-              placeholder="Select category"
-              selectedKeys={[localFilters.category]}
-              onSelectionChange={(keys) =>
-                handleChange("category", [...keys][0] || "")
-              }
-            >
-              <SelectItem key="">All</SelectItem>
-              <SelectItem key="residential">Residential</SelectItem>
-              <SelectItem key="commercial">Commercial</SelectItem>
-            </Select>
-          </div>
-
-          <div>
-            <label className="block text-sm mb-1">Type</label>
-            <Select
-              placeholder="Select type"
-              selectedKeys={[localFilters.type]}
-              onSelectionChange={(keys) =>
-                handleChange("type", [...keys][0] || "")
-              }
-            >
-              <SelectItem key="">All Types</SelectItem>
-              {typeOptions.map((item) => (
-                <SelectItem key={item.key}>{item.label}</SelectItem>
-              ))}
-            </Select>
-          </div>
+              return (
+                <div key={key}>
+                  <label className="block text-sm mb-1">
+                    {key.charAt(0).toUpperCase() + key.slice(1)}
+                  </label>
+                  <Select
+                    placeholder={`Select ${key}`}
+                    selectedKeys={[localFilters[key]]}
+                    onSelectionChange={(keys) =>
+                      handleChange(key, [...keys][0] || "")
+                    }
+                  >
+                    {options.map((opt) => (
+                      <SelectItem key={opt}>{opt || "All"}</SelectItem>
+                    ))}
+                  </Select>
+                </div>
+              );
+            }
+          )}
         </AccordionItem>
 
         {/* Location */}
         <AccordionItem key="location" title="Location">
+          {["city", "state"].map((key) => (
+            <div key={key}>
+              <label className="block text-sm mb-1">
+                {key.charAt(0).toUpperCase() + key.slice(1)}
+              </label>
+              <Input
+                placeholder={`Enter ${key}`}
+                value={localFilters[key]}
+                onChange={(e) => handleChange(key, e.target.value)}
+              />
+            </div>
+          ))}
+
+          {/* Multi-city/state */}
           <div>
-            <label className="block text-sm mb-1">City</label>
+            <label className="block text-sm mb-1">States (Multi)</label>
             <Input
-              placeholder="Enter city"
-              value={localFilters.city}
-              onChange={(e) => handleChange("city", e.target.value)}
+              placeholder="Comma separated states"
+              value={localFilters.states.join(",")}
+              onChange={(e) =>
+                handleChange(
+                  "states",
+                  e.target.value.split(",").map((v) => v.trim())
+                )
+              }
             />
           </div>
-
           <div>
-            <label className="block text-sm mb-1">State</label>
+            <label className="block text-sm mb-1">Cities (Multi)</label>
             <Input
-              placeholder="Enter state"
-              value={localFilters.state}
-              onChange={(e) => handleChange("state", e.target.value)}
+              placeholder="Comma separated cities"
+              value={localFilters.cities.join(",")}
+              onChange={(e) =>
+                handleChange(
+                  "cities",
+                  e.target.value.split(",").map((v) => v.trim())
+                )
+              }
             />
           </div>
         </AccordionItem>
 
-        {/* Price Range */}
-        <AccordionItem key="pricing" title="Price Range (₦)">
-          <div className="flex gap-3">
-            <div className="flex-1">
-              <label className="block text-sm mb-1">Min</label>
-              <Input
-                placeholder="Min"
-                type="number"
-                value={localFilters.minPrice}
-                onChange={(e) => handleChange("minPrice", e.target.value)}
-              />
-            </div>
-            <div className="flex-1">
-              <label className="block text-sm mb-1">Max</label>
-              <Input
-                placeholder="Max"
-                type="number"
-                value={localFilters.maxPrice}
-                onChange={(e) => handleChange("maxPrice", e.target.value)}
-              />
-            </div>
+        {/* Pricing */}
+        <AccordionItem key="pricing" title="Price & Favorites">
+          <div className="grid grid-cols-2 gap-3">
+            {["minPrice", "maxPrice", "minFavorites", "maxFavorites"].map(
+              (key) => (
+                <div key={key}>
+                  <label className="block text-sm mb-1">
+                    {key.replace(/([A-Z])/g, " $1")}
+                  </label>
+                  <Input
+                    placeholder={key.replace(/([A-Z])/g, " ")}
+                    type="number"
+                    value={localFilters[key]}
+                    onChange={(e) => handleChange(key, e.target.value)}
+                  />
+                </div>
+              )
+            )}
           </div>
         </AccordionItem>
 
         {/* Details */}
         <AccordionItem key="details" title="Property Details">
           <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-sm mb-1">Min Beds</label>
-              <Input
-                placeholder="Beds"
-                type="number"
-                value={localFilters.minBeds}
-                onChange={(e) => handleChange("minBeds", e.target.value)}
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm mb-1">Min Baths</label>
-              <Input
-                placeholder="Baths"
-                type="number"
-                value={localFilters.minBaths}
-                onChange={(e) => handleChange("minBaths", e.target.value)}
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm mb-1">Min Size (sqm)</label>
-              <Input
-                placeholder="Min size"
-                type="number"
-                value={localFilters.minSize}
-                onChange={(e) => handleChange("minSize", e.target.value)}
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm mb-1">Max Size (sqm)</label>
-              <Input
-                placeholder="Max size"
-                type="number"
-                value={localFilters.maxSize}
-                onChange={(e) => handleChange("maxSize", e.target.value)}
-              />
-            </div>
+            {[
+              "minBeds",
+              "maxBeds",
+              "minBaths",
+              "maxBaths",
+              "minSize m²",
+              "maxSize m²",
+              "minFloor",
+              "maxFloor",
+            ].map((key) => (
+              <div key={key}>
+                <label className="block text-sm mb-1">
+                  {key.replace(/([A-Z])/g, " $1")}
+                </label>
+                <Input
+                  placeholder={key.replace(/([A-Z])/g, " ")}
+                  type="number"
+                  value={localFilters[key]}
+                  onChange={(e) => handleChange(key, e.target.value)}
+                />
+              </div>
+            ))}
           </div>
-
           <div className="flex items-center justify-between pt-2">
             <label className="text-sm">Verified</label>
             <Switch
@@ -230,22 +226,25 @@ export default function PropertyFilters() {
 
         {/* Amenities */}
         <AccordionItem key="amenities" title="Amenities">
-          <div className="flex items-center justify-between">
-            <label className="text-sm">Kitchen Available</label>
-            <Switch
-              isSelected={localFilters.kitchen_available}
-              onValueChange={(v) => handleChange("kitchen_available", v)}
-              size="sm"
-            />
-          </div>
-
-          <div className="flex items-center justify-between">
-            <label className="text-sm">Toilet Available</label>
-            <Switch
-              isSelected={localFilters.toilet_available}
-              onValueChange={(v) => handleChange("toilet_available", v)}
-              size="sm"
-            />
+          <div className="">
+            {["amenities"].map((key) => (
+              <div key={key} className="">
+                <label className="block text-sm mb-1">
+                  Amenities (comma separated)
+                </label>
+                <Input
+                  placeholder="Pool, Gym, Garden..."
+                  value={localFilters[key].join(",")}
+                  className="w-full"
+                  onChange={(e) =>
+                    handleChange(
+                      key,
+                      e.target.value.split(",").map((v) => v.trim())
+                    )
+                  }
+                />
+              </div>
+            ))}
           </div>
         </AccordionItem>
       </Accordion>
