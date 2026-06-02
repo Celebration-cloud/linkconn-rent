@@ -77,7 +77,7 @@ export default function Navbar() {
       }
       placeholder="Search properties..."
       startContent={
-        <Search className="text-base text-default-400 pointer-events-none" />
+        <Search className="text-base text-default-400 pointer-events-none flex-shrink-0" />
       }
       type="search"
     />
