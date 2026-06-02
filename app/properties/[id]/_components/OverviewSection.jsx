@@ -17,12 +17,12 @@ export default function OverviewSection({ property }) {
 
   return (
     <motion.section
-      id="Overview"
-      variants={fadeUp}
-      initial="hidden"
-      whileInView="show"
-      viewport={{ once: true }}
       className="scroll-mt-24"
+      id="Overview"
+      initial="hidden"
+      variants={fadeUp}
+      viewport={{ once: true }}
+      whileInView="show"
     >
       <h2 className="text-3xl font-bold mb-4 text-blue-900 dark:text-blue-400">
         About this property
@@ -34,7 +34,7 @@ export default function OverviewSection({ property }) {
 
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mt-6 text-sm text-gray-600 dark:text-gray-400">
         <div className="flex items-start gap-2">
-          <MapPin size={16} className="mt-1 text-yellow-700" />
+          <MapPin className="mt-1 text-yellow-700" size={16} />
           <div>
             <div className="font-medium text-black dark:text-gray-200">
               Location
@@ -47,7 +47,7 @@ export default function OverviewSection({ property }) {
         </div>
 
         <div className="flex items-start gap-2">
-          <Square size={16} className="mt-1 text-blue-700" />
+          <Square className="mt-1 text-blue-700" size={16} />
           <div>
             <div className="font-medium text-black dark:text-gray-200">
               Size
@@ -57,7 +57,7 @@ export default function OverviewSection({ property }) {
         </div>
 
         <div className="flex items-start gap-2">
-          <Bed size={16} className="mt-1 text-blue-700" />
+          <Bed className="mt-1 text-blue-700" size={16} />
           <div>
             <div className="font-medium text-black dark:text-gray-200">
               Bedrooms
@@ -67,7 +67,7 @@ export default function OverviewSection({ property }) {
         </div>
 
         <div className="flex items-start gap-2">
-          <Bath size={16} className="mt-1 text-blue-700" />
+          <Bath className="mt-1 text-blue-700" size={16} />
           <div>
             <div className="font-medium text-black dark:text-gray-200">
               Bathrooms
@@ -77,7 +77,7 @@ export default function OverviewSection({ property }) {
         </div>
 
         <div className="flex items-start gap-2">
-          <Banknote size={16} className="mt-1 text-yellow-700" />
+          <Banknote className="mt-1 text-yellow-700" size={16} />
           <div>
             <div className="font-medium text-black dark:text-gray-200">
               Price

@@ -5,17 +5,12 @@ const priorityColors = {
   low: "bg-gray-500/10 text-gray-600 dark:text-gray-400",
   medium: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
   high: "bg-red-500/10 text-red-600 dark:text-red-400",
-}
+};
 
-
-
-export const MaintenanceCard = ({
-  request,
-  onSelect,
-}) => (
+export const MaintenanceCard = ({ request, onSelect }) => (
   <div
-    onClick={() => onSelect(request)}
     className="rounded-2xl p-6 bg-white shadow-sm transition hover:shadow-md cursor-pointer dark:bg-white/5"
+    onClick={() => onSelect(request)}
   >
     <div className="flex justify-between gap-4">
       <div>

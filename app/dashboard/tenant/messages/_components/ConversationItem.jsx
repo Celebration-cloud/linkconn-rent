@@ -1,12 +1,12 @@
 export default function ConversationItem({ conversation, active, onClick }) {
   return (
     <div
-      onClick={onClick}
       className={`p-4 cursor-pointer ${
         active
           ? "bg-blue-50 dark:bg-zinc-800"
           : "hover:bg-zinc-50 dark:hover:bg-zinc-800"
       }`}
+      onClick={onClick}
     >
       <div className="flex gap-3">
         <div className="w-10 h-10 rounded-full bg-zinc-400 text-white flex items-center justify-center">

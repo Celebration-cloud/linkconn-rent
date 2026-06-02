@@ -18,12 +18,14 @@ export default function UserAccessGuard({ children }) {
     // No user, send to login
     if (!user) {
       router.replace("/auth/login");
+
       return;
     }
 
     // Missing role param
     if (!role) {
       router.replace("/select-role");
+
       return;
     }
 
@@ -32,16 +34,19 @@ export default function UserAccessGuard({ children }) {
 
     if (!onboarded) {
       router.replace(`/onboarding/${role}`);
+
       return;
     }
 
     if (verification === "pending") {
       router.replace(`/pending/${role}`);
+
       return;
     }
 
     if (verification === "approved") {
       router.replace(`/dashboard/${role}`);
+
       return;
     }
 

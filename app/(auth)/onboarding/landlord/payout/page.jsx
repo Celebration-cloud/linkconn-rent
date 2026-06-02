@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { Select, SelectItem, Card, CardHeader, CardBody } from "@heroui/react";
 import { Banknote } from "lucide-react";
+
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import { landlordPayoutSchema } from "@/lib/zodSchemas";
@@ -30,6 +31,7 @@ export default function LandlordPayoutSetup() {
   const verifyAccount = async () => {
     const bank = form.getValues("bank");
     const acc = form.getValues("accountNumber");
+
     if (!bank || acc.length !== 10) return;
 
     // Simulated account name fetch
@@ -49,10 +51,10 @@ export default function LandlordPayoutSetup() {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
       className="w-full max-w-lg"
+      initial={{ opacity: 0, y: 20 }}
+      transition={{ duration: 0.5 }}
     >
       {/* Step tracker */}
       <div className="mb-4 flex justify-between items-center">
@@ -77,7 +79,7 @@ export default function LandlordPayoutSetup() {
         </CardHeader>
 
         <CardBody>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+          <form className="space-y-5" onSubmit={form.handleSubmit(onSubmit)}>
             {/* Bank Name */}
             <div>
               <label>Bank Name</label>
@@ -107,9 +109,9 @@ export default function LandlordPayoutSetup() {
               <label>Account Number</label>
               <Input
                 {...form.register("accountNumber")}
-                placeholder="e.g. 0123456789"
-                maxLength={10}
                 className="mt-1"
+                maxLength={10}
+                placeholder="e.g. 0123456789"
                 onBlur={verifyAccount}
               />
               {form.formState.errors.accountNumber && (
@@ -124,8 +126,8 @@ export default function LandlordPayoutSetup() {
               <label>Account Name</label>
               <Input
                 {...form.register("accountName")}
-                placeholder="Account Name"
                 className="mt-1 bg-muted cursor-not-allowed"
+                placeholder="Account Name"
               />
               {form.formState.errors.accountName && (
                 <p className="text-red-500 text-sm mt-1">
@@ -150,9 +152,9 @@ export default function LandlordPayoutSetup() {
             )}
 
             <Button
-              type="submit"
               className="w-full mt-4"
               disabled={isSubmitting}
+              type="submit"
             >
               {isSubmitting ? "Submitting..." : "Complete Onboarding"}
             </Button>

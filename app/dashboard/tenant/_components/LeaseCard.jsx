@@ -1,8 +1,9 @@
 "use client";
 
+import { Calendar } from "lucide-react";
+
 import Card from "./Card";
 import InfoBox from "./InfoBox";
-import { Calendar } from "lucide-react";
 
 export default function LeaseCard() {
   return (
@@ -10,8 +11,8 @@ export default function LeaseCard() {
       <div className="flex items-center gap-3 mb-4">
         <div className="p-2 bg-purple-100 dark:bg-purple-700/20 rounded-lg">
           <Calendar
-            size={18}
             className="text-purple-600 dark:text-purple-300"
+            size={18}
           />
         </div>
         <div>

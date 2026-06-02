@@ -41,6 +41,7 @@ export async function setupUserTable() {
         col: col.name,
         coltype: col.type,
       });
+
       if (error) console.error(`❌ ${tableName}.${col.name}:`, error.message);
       else console.log(`✅ ${tableName}.${col.name} ok`);
     }

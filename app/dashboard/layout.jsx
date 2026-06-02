@@ -2,7 +2,6 @@
 
 import { useSearchParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { useEffect } from "react";
 
 export default function DashboardLayout({ children }) {
   const searchParams = useSearchParams();

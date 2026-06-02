@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import Button from "@/components/ui/Button";
 import {
   Select,
   SelectItem,
@@ -16,10 +15,12 @@ import {
   CardHeader,
   CardBody,
 } from "@heroui/react";
+import { getLocalTimeZone, today } from "@internationalized/date";
+
+import Button from "@/components/ui/Button";
 import { siteConfig } from "@/config/site";
 import { tenantPreferenceSchema } from "@/lib/zodSchemas";
 import { useTenantOnboardStore } from "@/store/tenantOnboardStore";
-import { getLocalTimeZone, today } from "@internationalized/date";
 
 export default function TenantPreference() {
   const router = useRouter();
@@ -65,10 +66,10 @@ export default function TenantPreference() {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
       className="w-full max-w-lg"
+      initial={{ opacity: 0, y: 20 }}
+      transition={{ duration: 0.5 }}
     >
       {/* Step tracker */}
       <div className="mb-4 flex justify-between items-center">
@@ -94,43 +95,45 @@ export default function TenantPreference() {
         </CardHeader>
 
         <CardBody>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+          <form className="space-y-5" onSubmit={handleSubmit(onSubmit)}>
             {/* Location */}
             <Input
               label="Preferred Location"
               placeholder="e.g., Lagos, Abuja"
               variant="bordered"
               {...register("location")}
-              isInvalid={!!errors.location}
               errorMessage={errors.location?.message}
+              isInvalid={!!errors.location}
             />
 
             {/* Budget */}
             <div className="grid grid-cols-2 gap-4">
               <NumberInput
+                errorMessage={errors.minBudget?.message}
+                isInvalid={!!errors.minBudget}
                 label="Min Budget (₦)"
                 placeholder="50000"
                 variant="bordered"
                 onChange={(val) =>
                   setValue("minBudget", Number(val), { shouldValidate: true })
                 }
-                isInvalid={!!errors.minBudget}
-                errorMessage={errors.minBudget?.message}
               />
               <NumberInput
+                errorMessage={errors.maxBudget?.message}
+                isInvalid={!!errors.maxBudget}
                 label="Max Budget (₦)"
                 placeholder="150000"
                 variant="bordered"
                 onChange={(val) =>
                   setValue("maxBudget", Number(val), { shouldValidate: true })
                 }
-                isInvalid={!!errors.maxBudget}
-                errorMessage={errors.maxBudget?.message}
               />
             </div>
 
             {/* Property Type */}
             <Select
+              errorMessage={errors.propertyType?.message}
+              isInvalid={!!errors.propertyType}
               label="Property Type"
               placeholder="Select property type"
               variant="bordered"
@@ -139,15 +142,13 @@ export default function TenantPreference() {
                   shouldValidate: true,
                 })
               }
-              isInvalid={!!errors.propertyType}
-              errorMessage={errors.propertyType?.message}
             >
               {siteConfig.propertyTypes.map((group) => (
                 <>
                   <SelectItem
                     key={`category-${group.category.toLowerCase()}`}
-                    className={`text-xs font-semibold ${group.color} opacity-80 mt-2`}
                     disabled
+                    className={`text-xs font-semibold ${group.color} opacity-80 mt-2`}
                   >
                     • {group.category}
                   </SelectItem>
@@ -160,17 +161,17 @@ export default function TenantPreference() {
 
             {/* Move-in Date */}
             <DatePicker
+              errorMessage={errors.moveInDate?.message}
+              isInvalid={!!errors.moveInDate}
               label="Move-in Date"
+              minValue={today(getLocalTimeZone())} // ✅ prevent past dates
               placeholder="Select move-in date"
               variant="bordered"
-              minValue={today(getLocalTimeZone())} // ✅ prevent past dates
               onChange={(date) =>
                 setValue("moveInDate", date?.toString() || "", {
                   shouldValidate: true,
                 })
               }
-              isInvalid={!!errors.moveInDate}
-              errorMessage={errors.moveInDate?.message}
             />
 
             {/* Agreement */}
@@ -194,10 +195,10 @@ export default function TenantPreference() {
             )}
 
             <Button
-              type="submit"
-              size="lg"
               className="w-full mt-4"
               disabled={loading}
+              size="lg"
+              type="submit"
             >
               {loading ? "Saving Preferences..." : "Finish Onboarding"}
             </Button>

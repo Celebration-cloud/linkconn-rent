@@ -3,7 +3,7 @@ import { ArrowLeft } from "lucide-react";
 export default function ChatHeader({ conversation, onBack }) {
   return (
     <div className="p-4 border-b border-zinc-200 dark:border-zinc-800 flex items-center gap-3">
-      <button onClick={onBack} className="md:hidden">
+      <button className="md:hidden" onClick={onBack}>
         <ArrowLeft />
       </button>
       <div className="w-10 h-10 rounded-full bg-zinc-400 text-white flex items-center justify-center">

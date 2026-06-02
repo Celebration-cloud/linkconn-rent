@@ -1,10 +1,10 @@
 "use client";
 
 export function PaymentsHeader({
-payment,
-dueDate,
-daysUntilDue,
-setShowPaymentModal,
+  payment,
+  dueDate,
+  daysUntilDue,
+  setShowPaymentModal,
 }) {
   return (
     <div className="mb-8 space-y-6">
@@ -70,8 +70,8 @@ setShowPaymentModal,
         {/* Pay Rent */}
         <div className="flex flex-col justify-center rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900">
           <button
-            onClick={() => setShowPaymentModal(true)}
             className="flex w-full items-center justify-center gap-2 rounded-xl bg-gray-900 px-4 py-3 font-semibold text-white hover:bg-gray-800 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-gray-200"
+            onClick={() => setShowPaymentModal(true)}
           >
             <svg
               className="h-5 w-5"
@@ -80,10 +80,10 @@ setShowPaymentModal,
               viewBox="0 0 24 24"
             >
               <path
+                d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth={2}
-                d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
               />
             </svg>
             Pay Rent

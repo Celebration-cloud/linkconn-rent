@@ -45,8 +45,8 @@ export default function PaymentMethods({ methods, onAddMethod }) {
         ))}
 
         <button
-          onClick={onAddMethod}
           className="flex items-center justify-center gap-2 rounded-xl border-2 border-dashed border-gray-300 px-4 py-3 text-gray-600 transition-colors hover:border-gray-400 hover:text-gray-900 dark:border-gray-700 dark:text-gray-400 dark:hover:border-gray-500 dark:hover:text-gray-200"
+          onClick={onAddMethod}
         >
           <svg
             className="h-5 w-5"
@@ -55,10 +55,10 @@ export default function PaymentMethods({ methods, onAddMethod }) {
             viewBox="0 0 24 24"
           >
             <path
+              d="M12 6v6m0 0v6m0-6h6m-6 0H6"
               strokeLinecap="round"
               strokeLinejoin="round"
               strokeWidth={2}
-              d="M12 6v6m0 0v6m0-6h6m-6 0H6"
             />
           </svg>
           Add Method

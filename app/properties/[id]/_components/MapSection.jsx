@@ -15,6 +15,7 @@ import "leaflet/dist/leaflet.css";
 import "leaflet-fullscreen";
 import "leaflet-fullscreen/dist/leaflet.fullscreen.css";
 import { Copy } from "lucide-react";
+
 import RouteInfoCard from "./RouteInfoCard";
 
 /* Marker fix for Next */
@@ -77,6 +78,7 @@ export default function MapSection({
 
     sync();
     const observer = new MutationObserver(sync);
+
     observer.observe(document.documentElement, {
       attributes: true,
       attributeFilter: ["class"],
@@ -96,7 +98,7 @@ export default function MapSection({
           lng: pos.coords.longitude,
         }),
       () => {},
-      { enableHighAccuracy: true }
+      { enableHighAccuracy: true },
     );
 
     return () => navigator.geolocation.clearWatch(watchId);
@@ -108,19 +110,21 @@ export default function MapSection({
 
     routeAbortRef.current?.abort();
     const controller = new AbortController();
+
     routeAbortRef.current = controller;
 
     const loadRoute = async () => {
       const coords = `${userLocation.lng},${userLocation.lat};${lng},${lat}`;
       const res = await fetch(
         `https://router.project-osrm.org/route/v1/driving/${coords}?overview=full&geometries=geojson&steps=true`,
-        { signal: controller.signal }
+        { signal: controller.signal },
       );
 
       if (!res.ok) return;
 
       const data = await res.json();
       const r = data?.routes?.[0];
+
       if (!r) return;
 
       setRoute(r.geometry.coordinates.map(([x, y]) => [y, x]));
@@ -128,8 +132,9 @@ export default function MapSection({
       setRouteDuration(Math.ceil(r.duration / 60));
 
       const steps = [];
+
       r.legs.forEach((leg) =>
-        leg.steps.forEach((step) => steps.push(step.maneuver.instruction))
+        leg.steps.forEach((step) => steps.push(step.maneuver.instruction)),
       );
       setRouteSteps(steps);
     };
@@ -142,7 +147,7 @@ export default function MapSection({
   const copyLink = async () => {
     if (!navigator.clipboard) return;
     await navigator.clipboard.writeText(
-      `${window.location.origin}?lat=${lat}&lng=${lng}`
+      `${window.location.origin}?lat=${lat}&lng=${lng}`,
     );
   };
 
@@ -151,28 +156,28 @@ export default function MapSection({
       <>
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/">OSM</a>'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           opacity={darkMode ? 0 : 1}
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         <TileLayer
           attribution='&copy; <a href="https://stadiamaps.com/">Stadia</a>'
-          url="https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png"
           opacity={darkMode ? 1 : 0}
+          url="https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png"
         />
       </>
     ),
-    [darkMode]
+    [darkMode],
   );
 
   return (
     <div className="flex flex-col gap-4">
       <div className="relative rounded-2xl overflow-hidden">
         <MapContainer
-          center={[lat, lng]}
-          zoom={14}
-          scrollWheelZoom
           fullscreenControl
+          scrollWheelZoom
+          center={[lat, lng]}
           className="h-80 w-full"
+          zoom={14}
         >
           {tileLayers}
           <MapPanes />
@@ -196,10 +201,10 @@ export default function MapSection({
           {route.length > 0 && (
             <FeatureGroup pane="routes">
               <Polyline
-                positions={route}
                 color={darkMode ? "#22d3ee" : "#2563EB"}
-                weight={4}
                 opacity={0.85}
+                positions={route}
+                weight={4}
               />
             </FeatureGroup>
           )}
@@ -209,9 +214,9 @@ export default function MapSection({
 
         <div className="absolute top-4 right-4 z-[1000]">
           <button
-            onClick={copyLink}
-            title="Copy location link"
             className="bg-white/90 dark:bg-default-800 p-2 rounded-full shadow-lg"
+            title="Copy location link"
+            onClick={copyLink}
           >
             <Copy size={18} />
           </button>
@@ -219,10 +224,10 @@ export default function MapSection({
       </div>
 
       <RouteInfoCard
-        userLocation={userLocation}
         routeDistance={routeDistance}
         routeDuration={routeDuration}
         routeSteps={routeSteps}
+        userLocation={userLocation}
         weather={weather}
       />
     </div>

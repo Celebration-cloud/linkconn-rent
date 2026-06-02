@@ -14,7 +14,7 @@ export default function RouteInfoCard({
       {userLocation ? (
         <>
           <div className="flex items-center gap-2 text-default-700 dark:text-default-200 mb-2">
-            <Navigation size={16} className="text-primary flex-shrink-0" />
+            <Navigation className="text-primary flex-shrink-0" size={16} />
             <span className="font-medium">Distance:</span>
             <span>
               {routeDistance ? `${routeDistance} km` : "Calculating..."}
@@ -29,9 +29,9 @@ export default function RouteInfoCard({
           {weather && (
             <div className="flex items-center gap-2 text-default-700 dark:text-default-200 mb-2">
               {weather.condition === "Sunny" ? (
-                <Sun size={16} className="text-yellow-500 flex-shrink-0" />
+                <Sun className="text-yellow-500 flex-shrink-0" size={16} />
               ) : (
-                <Cloud size={16} className="text-blue-400 flex-shrink-0" />
+                <Cloud className="text-blue-400 flex-shrink-0" size={16} />
               )}
               <span className="font-medium">Weather:</span>
               <span>

@@ -1,5 +1,5 @@
-import { siteConfig } from "@/config/site";
 import { NextResponse } from "next/server";
+
 import { MOCK } from "./mock";
 
 export async function GET(req) {
@@ -63,7 +63,7 @@ export async function GET(req) {
           p.city.toLowerCase().includes(q) ||
           p.state.toLowerCase().includes(q) ||
           (p.type && p.type.toLowerCase().includes(q)) ||
-          (p.category && p.category.toLowerCase().includes(q))
+          (p.category && p.category.toLowerCase().includes(q)),
       );
     }
 
@@ -74,7 +74,7 @@ export async function GET(req) {
     if (status) results = results.filter((p) => p.status === status);
     if (kitchen)
       results = results.filter(
-        (p) => p.kitchen_type?.toLowerCase() === kitchen
+        (p) => p.kitchen_type?.toLowerCase() === kitchen,
       );
     if (toilet)
       results = results.filter((p) => p.toilet_type?.toLowerCase() === toilet);
@@ -84,8 +84,8 @@ export async function GET(req) {
     if (amenities.length) {
       results = results.filter((p) =>
         amenities.every((a) =>
-          p.amenities.map((x) => x.toLowerCase()).includes(a)
-        )
+          p.amenities.map((x) => x.toLowerCase()).includes(a),
+        ),
       );
     }
     if (cities.length)
@@ -107,16 +107,18 @@ export async function GET(req) {
         p.floor_level >= minFloor &&
         p.floor_level <= maxFloor &&
         p.favorites >= minFavorites &&
-        p.favorites <= maxFavorites
+        p.favorites <= maxFavorites,
     );
 
     // Sorting
     if (sort) {
       const [key, order] = sort.split("_"); // e.g., price_asc
+
       results.sort((a, b) => {
         if (!a[key] || !b[key]) return 0;
         if (order === "asc") return a[key] - b[key];
         if (order === "desc") return b[key] - a[key];
+
         return 0;
       });
     }

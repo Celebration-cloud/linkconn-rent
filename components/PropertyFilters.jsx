@@ -4,8 +4,9 @@ import { useEffect, useMemo, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { Accordion, AccordionItem } from "@heroui/react";
 import { Select, SelectItem } from "@heroui/select";
-import Input from "@/components/ui/Input";
 import { Switch } from "@heroui/switch";
+
+import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import { siteConfig } from "@/config/site";
 import {
@@ -25,12 +26,13 @@ export default function PropertyFilters() {
       dispatch(setPage(1));
       dispatch(fetchProperties());
     }, 250);
+
     return () => clearTimeout(timeout);
   }, [localFilters, dispatch]);
 
   const typeOptions = useMemo(
     () => siteConfig.propertyTypes.flatMap((group) => group.items),
-    []
+    [],
   );
 
   const handleChange = (key, value) => {
@@ -65,6 +67,7 @@ export default function PropertyFilters() {
       toilet: "",
       amenities: [],
     };
+
     setLocalFilters(reset);
     dispatch(setFilters(reset));
   };
@@ -72,7 +75,6 @@ export default function PropertyFilters() {
   return (
     <div className="w-full space-y-4 styled-scrollbar overflow-y-auto max-h-[calc(100vh-8rem)]">
       <Accordion
-        variant="shadow"
         defaultExpandedKeys={[
           "general",
           "location",
@@ -85,12 +87,14 @@ export default function PropertyFilters() {
           title: "text-sm font-semibold",
           content: "space-y-3",
         }}
+        variant="shadow"
       >
         {/* General */}
         <AccordionItem key="general" title="General">
           {["purpose", "status", "category", "type", "kitchen", "toilet"].map(
             (key) => {
               let options = [];
+
               if (key === "purpose") options = ["", "rent", "sale", "lease"];
               if (key === "status")
                 options = ["", "available", "occupied", "pending"];
@@ -119,7 +123,7 @@ export default function PropertyFilters() {
                   </Select>
                 </div>
               );
-            }
+            },
           )}
         </AccordionItem>
 
@@ -147,7 +151,7 @@ export default function PropertyFilters() {
               onChange={(e) =>
                 handleChange(
                   "states",
-                  e.target.value.split(",").map((v) => v.trim())
+                  e.target.value.split(",").map((v) => v.trim()),
                 )
               }
             />
@@ -160,7 +164,7 @@ export default function PropertyFilters() {
               onChange={(e) =>
                 handleChange(
                   "cities",
-                  e.target.value.split(",").map((v) => v.trim())
+                  e.target.value.split(",").map((v) => v.trim()),
                 )
               }
             />
@@ -183,7 +187,7 @@ export default function PropertyFilters() {
                     onChange={(e) => handleChange(key, e.target.value)}
                   />
                 </div>
-              )
+              ),
             )}
           </div>
         </AccordionItem>
@@ -218,8 +222,8 @@ export default function PropertyFilters() {
             <label className="text-sm">Verified</label>
             <Switch
               isSelected={localFilters.verified}
-              onValueChange={(v) => handleChange("verified", v)}
               size="sm"
+              onValueChange={(v) => handleChange("verified", v)}
             />
           </div>
         </AccordionItem>
@@ -233,13 +237,13 @@ export default function PropertyFilters() {
                   Amenities (comma separated)
                 </label>
                 <Input
+                  className="w-full"
                   placeholder="Pool, Gym, Garden..."
                   value={localFilters[key].join(",")}
-                  className="w-full"
                   onChange={(e) =>
                     handleChange(
                       key,
-                      e.target.value.split(",").map((v) => v.trim())
+                      e.target.value.split(",").map((v) => v.trim()),
                     )
                   }
                 />
@@ -250,7 +254,7 @@ export default function PropertyFilters() {
       </Accordion>
 
       <div className="pt-2">
-        <Button variant="outline" onClick={resetFilters} className="w-full">
+        <Button className="w-full" variant="outline" onClick={resetFilters}>
           Reset Filters
         </Button>
       </div>

@@ -27,9 +27,11 @@ L.Icon.Default.mergeOptions({
 
 function FlyToLocation({ position }) {
   const map = useMap();
+
   useEffect(() => {
     if (position) map.flyTo(position, 15, { duration: 1.2 });
   }, [position, map]);
+
   return null;
 }
 
@@ -43,6 +45,7 @@ function getDistanceKm(lat1, lon1, lat2, lon2) {
       Math.cos((lat2 * Math.PI) / 180) *
       Math.sin(dLon / 2) ** 2;
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
   return Number((R * c).toFixed(2));
 }
 
@@ -56,13 +59,16 @@ export default function PropertyMap({ properties }) {
   useEffect(() => {
     const observer = new MutationObserver(() => {
       const htmlClass = document.documentElement.classList;
+
       setDarkMode(htmlClass.contains("dark"));
     });
+
     observer.observe(document.documentElement, {
       attributes: true,
       attributeFilter: ["class"],
     });
     setDarkMode(document.documentElement.classList.contains("dark"));
+
     return () => observer.disconnect();
   }, []);
 
@@ -71,7 +77,7 @@ export default function PropertyMap({ properties }) {
       navigator.geolocation.getCurrentPosition(
         (pos) => setUserLocation([pos.coords.latitude, pos.coords.longitude]),
         (err) => console.warn("Location access denied:", err.message),
-        { enableHighAccuracy: true }
+        { enableHighAccuracy: true },
       );
     }
   }, []);
@@ -82,8 +88,9 @@ export default function PropertyMap({ properties }) {
         userLocation[0],
         userLocation[1],
         selectedProperty.lat,
-        selectedProperty.lng
+        selectedProperty.lng,
       );
+
       setDistance(d);
     }
   }, [userLocation, selectedProperty]);
@@ -101,7 +108,7 @@ export default function PropertyMap({ properties }) {
     ? properties.filter(
         (p) =>
           getDistanceKm(userLocation[0], userLocation[1], p.lat, p.lng) <=
-          maxDistance
+          maxDistance,
       )
     : properties;
 
@@ -110,11 +117,11 @@ export default function PropertyMap({ properties }) {
       <>
         <div className="relative flex-1 w-full col-span-2 rounded-lg overflow-hidden border border-border z-0 min-h-[50vh] sm:min-h-[55vh] md:min-h-[60vh] lg:min-h-[65vh]">
           <MapContainer
-            center={defaultPosition}
-            zoom={13}
-            scrollWheelZoom
-            className="h-full w-full rounded-md opacity-0.95 z-0"
             fullscreenControl
+            scrollWheelZoom
+            center={defaultPosition}
+            className="h-full w-full rounded-md opacity-0.95 z-0"
+            zoom={13}
           >
             <TileLayer
               attribution='&copy; <a href="https://www.openstreetmap.org/">OSM</a>'
@@ -133,7 +140,7 @@ export default function PropertyMap({ properties }) {
                   userLocation[0],
                   userLocation[1],
                   p.lat,
-                  p.lng
+                  p.lng,
                 );
                 const midLat = (userLocation[0] + p.lat) / 2;
                 const midLng = (userLocation[1] + p.lng) / 2;
@@ -141,14 +148,13 @@ export default function PropertyMap({ properties }) {
                 return (
                   <Fragment key={p.id}>
                     <Polyline
-                      positions={[userLocation, [p.lat, p.lng]]}
                       color={faintColor}
-                      weight={2}
-                      opacity={0.5}
                       dashArray="4,8"
+                      opacity={0.5}
+                      positions={[userLocation, [p.lat, p.lng]]}
+                      weight={2}
                     />
                     <Marker
-                      position={[midLat, midLng]}
                       icon={L.divIcon({
                         className: "text-xs font-medium",
                         html: `<div style="
@@ -161,6 +167,7 @@ export default function PropertyMap({ properties }) {
                           box-shadow:0 1px 4px rgba(0,0,0,0.2);
                         ">${dist} km</div>`,
                       })}
+                      position={[midLat, midLng]}
                     />
                   </Fragment>
                 );
@@ -169,13 +176,13 @@ export default function PropertyMap({ properties }) {
             {userLocation && selectedProperty && (
               <>
                 <Polyline
+                  color={lineColor}
+                  opacity={0.9}
                   positions={[
                     userLocation,
                     [selectedProperty.lat, selectedProperty.lng],
                   ]}
-                  color={lineColor}
                   weight={4}
-                  opacity={0.9}
                 />
               </>
             )}
@@ -183,8 +190,8 @@ export default function PropertyMap({ properties }) {
             {nearbyProperties.map((p) => (
               <Marker
                 key={p.id}
-                position={[p.lat, p.lng]}
                 eventHandlers={{ click: () => setSelectedProperty(p) }}
+                position={[p.lat, p.lng]}
               >
                 <Popup>
                   <strong>{p.title}</strong>
@@ -192,24 +199,24 @@ export default function PropertyMap({ properties }) {
                   {p.address || `${p.city}, ${p.state}`}
                   <br />₦{Number(p.price).toLocaleString()}
                   <br />
-                  <Chip size="sm" color="primary" variant="flat">
+                  <Chip color="primary" size="sm" variant="flat">
                     {p.purpose}
                   </Chip>{" "}
-                  <Chip size="sm" color="secondary" variant="flat">
+                  <Chip color="secondary" size="sm" variant="flat">
                     {p.type}
                   </Chip>
                   {p.amenities?.length > 0 && (
-                <div className="flex flex-wrap gap-1 mt-2 text-xs">
-                  {selectedProperty.amenities.map((a) => (
-                    <span
-                      key={a}
-                      className="px-2 py-0.5 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-200 rounded-full"
-                    >
-                      {a}
-                    </span>
-                  ))}
-                </div>
-              )}
+                    <div className="flex flex-wrap gap-1 mt-2 text-xs">
+                      {selectedProperty.amenities.map((a) => (
+                        <span
+                          key={a}
+                          className="px-2 py-0.5 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-200 rounded-full"
+                        >
+                          {a}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </Popup>
               </Marker>
             ))}
@@ -284,7 +291,7 @@ export default function PropertyMap({ properties }) {
                     userLocation[0],
                     userLocation[1],
                     selectedProperty.lat,
-                    selectedProperty.lng
+                    selectedProperty.lng,
                   )}{" "}
                   km away
                 </p>
@@ -300,16 +307,16 @@ export default function PropertyMap({ properties }) {
 
           <div className="flex items-center gap-2">
             <Input
-              label="Max Distance"
-              type="number"
-              min={1}
-              value={maxDistance}
-              onChange={(e) => setMaxDistance(Number(e.target.value))}
-              size="sm"
               className="w-28"
               endContent={
                 <span className="text-xs text-muted-foreground">km</span>
               }
+              label="Max Distance"
+              min={1}
+              size="sm"
+              type="number"
+              value={maxDistance}
+              onChange={(e) => setMaxDistance(Number(e.target.value))}
             />
           </div>
         </div>
@@ -319,12 +326,12 @@ export default function PropertyMap({ properties }) {
             nearbyProperties.map((p) => (
               <div
                 key={p.id}
-                onClick={() => setSelectedProperty(p)}
                 className={`p-4 rounded-xl cursor-pointer transition-transform transform shadow-sm hover:shadow-md ${
                   selectedProperty?.id === p.id
                     ? "bg-primary/10 dark:bg-primary/20"
                     : "bg-white dark:bg-gray-800"
                 }`}
+                onClick={() => setSelectedProperty(p)}
               >
                 {/* Title & Address */}
                 <p className="font-semibold text-gray-900 dark:text-gray-100 line-clamp-2">
@@ -389,7 +396,7 @@ export default function PropertyMap({ properties }) {
                       userLocation[0],
                       userLocation[1],
                       p.lat,
-                      p.lng
+                      p.lng,
                     )}{" "}
                     km away
                   </p>

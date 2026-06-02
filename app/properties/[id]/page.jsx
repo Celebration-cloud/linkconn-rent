@@ -3,6 +3,7 @@
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+
 import PropertyGallery from "./_components/PropertyGallery";
 import SectionNav from "./_components/SectionNav";
 import OverviewSection from "./_components/OverviewSection";
@@ -17,42 +18,45 @@ import StickyBottomBar from "./_components/StickyBottomBar";
 export default function PropertyDetailPage() {
   const { id } = useParams();
   const [property, setProperty] = useState(null);
-    const [similar, setSimilar] = useState([]);
+  const [similar, setSimilar] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeSection, setActiveSection] = useState("Overview");
   const [isFavorite, setIsFavorite] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
 
-useEffect(() => {
-  async function fetchPropertyAndSimilar() {
-    try {
-      // Fetch the main property
-      const res = await fetch(`/api/properties/${id}`);
-      if (!res.ok) throw new Error("Failed to fetch property");
-      const data = await res.json();
-      console.log("property data:", data);
-      setProperty(data);
+  useEffect(() => {
+    async function fetchPropertyAndSimilar() {
+      try {
+        // Fetch the main property
+        const res = await fetch(`/api/properties/${id}`);
 
-      // Once property is fetched, fetch similar properties
-      if (data?.type) {
-        const similarRes = await fetch(
-          `/api/properties/similar?id=${data.type}`
-        );
-        if (!similarRes.ok)
-          throw new Error("Failed to fetch similar properties");
-        const similarData = await similarRes.json();
-        setSimilar(similarData);
+        if (!res.ok) throw new Error("Failed to fetch property");
+        const data = await res.json();
+
+        console.log("property data:", data);
+        setProperty(data);
+
+        // Once property is fetched, fetch similar properties
+        if (data?.type) {
+          const similarRes = await fetch(
+            `/api/properties/similar?id=${data.type}`,
+          );
+
+          if (!similarRes.ok)
+            throw new Error("Failed to fetch similar properties");
+          const similarData = await similarRes.json();
+
+          setSimilar(similarData);
+        }
+      } catch (err) {
+        console.error("Error fetching property or similar:", err);
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      console.error("Error fetching property or similar:", err);
-    } finally {
-      setLoading(false);
     }
-  }
 
-  if (id) fetchPropertyAndSimilar();
-}, [id]);
-
+    if (id) fetchPropertyAndSimilar();
+  }, [id]);
 
   if (loading)
     return (
@@ -130,14 +134,14 @@ useEffect(() => {
       <div className="absolute inset-0 -z-10 bg-blue-900/10 dark:bg-blue-900/20 blur-[180px]" />
 
       <motion.div
-        className="absolute -top-40 -right-40 w-[500px] h-[500px] rounded-full bg-yellow-800/10 blur-[120px]"
         animate={{ opacity: [0.2, 0.4, 0.2], scale: [1, 1.05, 1] }}
+        className="absolute -top-40 -right-40 w-[500px] h-[500px] rounded-full bg-yellow-800/10 blur-[120px]"
         transition={{ duration: 8, repeat: Infinity }}
       />
 
       <motion.div
-        className="absolute bottom-0 left-0 w-[500px] h-[500px] rounded-full bg-blue-800/10 blur-[150px]"
         animate={{ opacity: [0.2, 0.35, 0.2], scale: [1, 1.03, 1] }}
+        className="absolute bottom-0 left-0 w-[500px] h-[500px] rounded-full bg-blue-800/10 blur-[150px]"
         transition={{ duration: 10, repeat: Infinity }}
       />
 
@@ -157,9 +161,9 @@ useEffect(() => {
             <motion.div
               className="h-[2px] w-32 bg-yellow-700 rounded-full mt-6"
               initial={{ width: 0 }}
-              whileInView={{ width: "8rem" }}
-              viewport={{ once: true }}
               transition={{ duration: 0.8 }}
+              viewport={{ once: true }}
+              whileInView={{ width: "8rem" }}
             />
 
             <AmenitiesSection amenities={formattedProperty.amenities} />
@@ -170,11 +174,11 @@ useEffect(() => {
 
           {/* RIGHT COLUMN */}
           <motion.div
-            variants={fadeUp}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true }}
             className="hidden md:flex flex-col gap-8"
+            initial="hidden"
+            variants={fadeUp}
+            viewport={{ once: true }}
+            whileInView="show"
           >
             <AgentContactCard agent={formattedProperty.agent} />
             <ScheduleTourCard
@@ -194,8 +198,8 @@ useEffect(() => {
 
         <StickyBottomBar
           formattedPrice={formattedPrice}
-          propertyTitle={formattedProperty.title}
           isFavorite={isFavorite}
+          propertyTitle={formattedProperty.title}
           setIsFavorite={setIsFavorite}
         />
       </div>

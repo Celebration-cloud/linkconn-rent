@@ -19,7 +19,7 @@ export const LeaseDetails = ({ details }) => (
       />
     </Card>
 
-    <Card title="Management" full>
+    <Card full title="Management">
       <Item label="Company" value={details.landlord} />
       <Item label="Phone" value={details.landlordPhone} />
       <Item label="Email" value={details.landlordEmail} />

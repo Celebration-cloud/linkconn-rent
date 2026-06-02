@@ -27,8 +27,8 @@ export default function RejectedPage({ params }) {
         </p>
 
         <Link
-          href={`/reapply/${role}`}
           className="inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+          href={`/reapply/${role}`}
         >
           <LogIn className="w-4 h-4" />
           Reapply

@@ -1,24 +1,26 @@
 "use client";
 
-import  Navbar  from "@/components/layout/Navbar";
-import { AppFooter } from "@/components/layout/Footer";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
-import { initPuter } from "@/lib/puterClient";
 import { useEffect } from "react";
-import Script from "next/script";
+
+import { initPuter } from "@/lib/puterClient";
+import { AppFooter } from "@/components/layout/Footer";
+import Navbar from "@/components/layout/Navbar";
 
 export default function AppWrapper({ children }) {
   const pathname = usePathname();
+
   useEffect(() => {
     initPuter();
   }, []);
 
-  const hideFooterInDashboard = pathname.startsWith("/dashboard/tenant");
+  const hideFooterInDashboard =
+    pathname?.startsWith("/dashboard/tenant") || false;
   const hiddenLayoutRoutes = ["/auth", "/onboarding"];
-  const hideLayout = hiddenLayoutRoutes.some((route) =>
-    pathname.startsWith(route)
-  );
+  const hideLayout = pathname
+    ? hiddenLayoutRoutes.some((route) => pathname.startsWith(route))
+    : false;
 
   return (
     <div className="relative flex flex-col min-h-screen">
@@ -27,7 +29,7 @@ export default function AppWrapper({ children }) {
       <main
         className={clsx(
           "flex-grow",
-          !hideLayout && "container mx-auto max-w-7xl pt-10"
+          !hideLayout && "container mx-auto max-w-7xl pt-10",
         )}
       >
         {children}

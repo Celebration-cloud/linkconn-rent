@@ -25,8 +25,8 @@ export default function TopBar({ user, alerts }) {
         <div className="flex items-center gap-3">
           <div className="relative">
             <button
-              onClick={() => setShowAlerts(!showAlerts)}
               className="relative p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+              onClick={() => setShowAlerts(!showAlerts)}
             >
               <Bell className="text-gray-700 dark:text-gray-300" />
               {alerts?.length > 0 && (

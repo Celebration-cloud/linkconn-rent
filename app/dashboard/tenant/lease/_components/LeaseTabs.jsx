@@ -11,13 +11,13 @@ export const LeaseTabs = ({ value, onChange }) => {
         return (
           <button
             key={t}
-            onClick={() => onChange(t)}
             className="relative px-4 py-2 text-sm z-10"
+            onClick={() => onChange(t)}
           >
             {active && (
               <motion.div
-                layoutId="tab-indicator"
                 className="absolute inset-0 rounded-xl bg-white dark:bg-gray-900 shadow"
+                layoutId="tab-indicator"
                 transition={{ type: "spring", stiffness: 300, damping: 25 }}
               />
             )}

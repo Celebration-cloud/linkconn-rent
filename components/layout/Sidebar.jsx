@@ -23,10 +23,10 @@ export const AppSidebar = () => {
       <div className="flex flex-col h-full justify-between p-4">
         <div>
           <Button
+            className="mb-4"
             size="sm"
             variant="light"
             onPress={() => setCollapsed(!collapsed)}
-            className="mb-4"
           >
             {collapsed ? "→" : "←"}
           </Button>
@@ -35,8 +35,8 @@ export const AppSidebar = () => {
             {links.map(({ label, href, icon: Icon }) => (
               <Link
                 key={href}
-                href={href}
                 className="flex items-center gap-3 p-2 rounded-md text-default-700 hover:bg-default-100 transition"
+                href={href}
               >
                 <Icon size={18} />
                 {!collapsed && <span>{label}</span>}
@@ -47,8 +47,8 @@ export const AppSidebar = () => {
 
         <Button
           color="danger"
-          variant="light"
           startContent={<LogOut size={16} />}
+          variant="light"
         >
           {!collapsed && "Logout"}
         </Button>

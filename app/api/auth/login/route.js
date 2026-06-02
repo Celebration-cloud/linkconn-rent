@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+
 import { loginSchema } from "@/lib/zodSchemas";
 import { supabaseServer } from "@/lib/superbaseServer";
 
@@ -6,14 +7,16 @@ export async function POST(req) {
   try {
     const body = await req.json();
     const parsed = loginSchema.safeParse(body);
+
     if (!parsed.success) {
       return NextResponse.json(
         { error: parsed.error.message },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     const { email, password, role } = parsed.data;
+
     console.log("Login attempt for:", email, "as", role);
 
     // 1️⃣ Sign in via Supabase Auth
@@ -23,7 +26,7 @@ export async function POST(req) {
     if (sessionError || !sessionData.user) {
       return NextResponse.json(
         { error: "Invalid credentials" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -33,20 +36,20 @@ export async function POST(req) {
     const { data: baseUser, error: baseErr } = await supabaseServer
       .from("users")
       .select(
-        "id, auth_id, role, ref_id, onboarded, verification_status, profile_pic, verified"
+        "id, auth_id, role, ref_id, onboarded, verification_status, profile_pic, verified",
       )
       .eq("auth_id", authUserId)
       .maybeSingle();
 
     if (baseErr || !baseUser) {
-      return NextResponse.json({ error: "User not found: ", baseErr }, { status: 404 });
+      return NextResponse.json(
+        { error: "User not found: ", baseErr },
+        { status: 404 },
+      );
     }
 
     if (baseUser?.role !== role) {
-      return NextResponse.json(
-        { error: `Role mismatch` },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: `Role mismatch` }, { status: 403 });
     }
 
     // 3️⃣ Fetch role-specific info
@@ -72,7 +75,7 @@ export async function POST(req) {
           verificationStatus: baseUser.verification_status,
         },
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (err) {
     return NextResponse.json({ error: err.message }, { status: 500 });

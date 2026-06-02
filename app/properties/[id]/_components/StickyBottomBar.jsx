@@ -22,13 +22,13 @@ export default function StickyBottomBar({
         {/* Actions */}
         <div className="flex space-x-2">
           <button
-            onClick={() => setIsFavorite(!isFavorite)}
             className="p-3 rounded-full bg-blue-900 text-white hover:bg-blue-800 transition-colors"
+            onClick={() => setIsFavorite(!isFavorite)}
           >
             <Heart
-              size={20}
-              fill={isFavorite ? "#facc15" : "transparent"} // dark yellow highlight
               className={isFavorite ? "text-yellow-500" : ""}
+              fill={isFavorite ? "#facc15" : "transparent"} // dark yellow highlight
+              size={20}
             />
           </button>
 

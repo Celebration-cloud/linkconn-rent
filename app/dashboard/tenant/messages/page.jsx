@@ -1,28 +1,13 @@
-"use client"
+"use client";
 import { useState, useEffect, useRef } from "react";
-import {
-  Send,
-  X,
-  ArrowLeft,
-  Bell,
-  Menu,
-  User,
-  Home,
-  Wallet,
-  Document,
-  Wrench,
-  Logout,
-  Sun,
-  Moon,
-  MessageCircleMore,
-} from "lucide-react";
+import { Send, ArrowLeft, Sun, Moon, MessageCircleMore } from "lucide-react";
 
 // Theme Toggle Component
 const ThemeToggle = ({ darkMode, setDarkMode }) => (
   <button
-    onClick={() => setDarkMode(!darkMode)}
-    className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
     aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
+    className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+    onClick={() => setDarkMode(!darkMode)}
   >
     {darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
   </button>
@@ -75,6 +60,7 @@ const StatusBadge = ({ status }) => {
     },
   };
   const config = statusConfig[status] || statusConfig.pending;
+
   return (
     <span
       className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${config.bg} ${config.text}`}
@@ -90,28 +76,28 @@ const StatusBadge = ({ status }) => {
 // Loading Skeleton
 const Skeleton = () => (
   <div className="animate-pulse max-w-6xl">
-    <div className="mb-6 h-8 bg-gray-200 dark:bg-gray-700 rounded w-48"></div>
+    <div className="mb-6 h-8 bg-gray-200 dark:bg-gray-700 rounded w-48" />
     <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 h-[calc(100vh-10rem)]">
       <div className="flex">
         <div className="w-80 border-r border-gray-100 dark:border-gray-700 p-4">
-          <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-1/3 mb-4"></div>
+          <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-1/3 mb-4" />
           {[1, 2, 3].map((i) => (
             <div
               key={i}
               className="flex items-center gap-3 p-3 mb-2 bg-gray-100 dark:bg-gray-700 rounded-lg"
             >
-              <div className="w-10 h-10 bg-gray-200 dark:bg-gray-600 rounded-full"></div>
+              <div className="w-10 h-10 bg-gray-200 dark:bg-gray-600 rounded-full" />
               <div className="flex-1">
-                <div className="h-4 bg-gray-200 dark:bg-gray-600 rounded w-1/2 mb-2"></div>
-                <div className="h-3 bg-gray-200 dark:bg-gray-600 rounded w-2/3"></div>
+                <div className="h-4 bg-gray-200 dark:bg-gray-600 rounded w-1/2 mb-2" />
+                <div className="h-3 bg-gray-200 dark:bg-gray-600 rounded w-2/3" />
               </div>
             </div>
           ))}
         </div>
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
-            <div className="w-16 h-16 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto mb-4"></div>
-            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-48 mx-auto"></div>
+            <div className="w-16 h-16 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto mb-4" />
+            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-48 mx-auto" />
           </div>
         </div>
       </div>
@@ -122,6 +108,7 @@ const Skeleton = () => (
 // Mock API - simulates data fetch
 const fetchMessages = async () => {
   await new Promise((r) => setTimeout(r, 300));
+
   return {
     conversations: [
       {
@@ -277,6 +264,7 @@ const MessagesPage = () => {
       setLoading(true);
       try {
         const data = await fetchMessages();
+
         setConversations(data.conversations);
       } catch (error) {
         console.error("Failed to load messages:", error);
@@ -284,6 +272,7 @@ const MessagesPage = () => {
         setLoading(false);
       }
     };
+
     loadData();
   }, []);
 
@@ -319,12 +308,13 @@ const MessagesPage = () => {
           unreadCount: 0,
         };
       }
+
       return conv;
     });
 
     setConversations(updatedConversations);
     setSelectedConversation(
-      updatedConversations.find((c) => c.id === selectedConversation.id)
+      updatedConversations.find((c) => c.id === selectedConversation.id),
     );
     setNewMessage("");
   };
@@ -338,6 +328,7 @@ const MessagesPage = () => {
           messages: conv.messages.map((msg) => ({ ...msg, read: true })),
         };
       }
+
       return conv;
     });
 
@@ -374,11 +365,11 @@ const MessagesPage = () => {
             {conversations.map((conv) => (
               <div
                 key={conv.id}
+                className={`p-4 border-b border-gray-100 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors ${selectedConversation?.id === conv.id ? "bg-blue-50 dark:bg-blue-900/30" : ""}`}
                 onClick={() => {
                   setSelectedConversation(conv);
                   markAsRead(conv.id);
                 }}
-                className={`p-4 border-b border-gray-100 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors ${selectedConversation?.id === conv.id ? "bg-blue-50 dark:bg-blue-900/30" : ""}`}
               >
                 <div className="relative flex items-start gap-3">
                   <div className="w-10 h-10 bg-gradient-to-br from-gray-400 to-gray-500 dark:from-gray-600 dark:to-gray-700 rounded-full flex items-center justify-center text-white text-sm font-medium">
@@ -413,8 +404,8 @@ const MessagesPage = () => {
           <div className="flex-1 flex flex-col">
             <div className="p-4 border-b border-gray-100 dark:border-gray-700 flex items-center gap-3">
               <button
-                onClick={() => setSelectedConversation(null)}
                 className="md:hidden p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                onClick={() => setSelectedConversation(null)}
               >
                 <ArrowLeft className="w-5 h-5 text-gray-700 dark:text-gray-300" />
               </button>
@@ -472,19 +463,19 @@ const MessagesPage = () => {
             </div>
 
             <form
-              onSubmit={handleSendMessage}
               className="p-4 border-t border-gray-100 dark:border-gray-700 flex gap-3 bg-gray-50 dark:bg-gray-800"
+              onSubmit={handleSendMessage}
             >
               <input
+                className="flex-1 px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                placeholder="Type a message..."
                 type="text"
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
-                placeholder="Type a message..."
-                className="flex-1 px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               />
               <button
-                type="submit"
                 className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 text-white px-4 py-2.5 rounded-xl transition-colors"
+                type="submit"
               >
                 <Send className="w-5 h-5" />
               </button>

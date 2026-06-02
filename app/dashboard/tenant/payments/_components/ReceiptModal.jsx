@@ -40,6 +40,7 @@ Thank you for your payment.
     const url = URL.createObjectURL(blob);
 
     const a = document.createElement("a");
+
     a.href = url;
     a.download = `receipt-${payment.receiptId}.txt`;
     a.click();
@@ -59,8 +60,8 @@ Thank you for your payment.
             </div>
 
             <button
-              onClick={onClose}
               className="rounded-lg p-1 text-gray-400 hover:bg-white/10 hover:text-white"
+              onClick={onClose}
             >
               ✕
             </button>
@@ -72,9 +73,9 @@ Thank you for your payment.
           <div className="mb-6 space-y-3 rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-800">
             <Row label="Description" value={payment.description} />
             <Row
+              bold
               label="Amount"
               value={`$${payment.amount.toLocaleString()}`}
-              bold
             />
             <Row
               label="Date"
@@ -96,15 +97,15 @@ Thank you for your payment.
 
           {/* Actions */}
           <button
-            onClick={downloadReceipt}
             className="flex w-full items-center justify-center gap-2 rounded-xl bg-gray-900 py-3 font-semibold text-white hover:bg-gray-800 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-200"
+            onClick={downloadReceipt}
           >
             Download Receipt
           </button>
 
           <button
-            onClick={onClose}
             className="mt-3 w-full rounded-xl bg-gray-100 py-3 font-medium text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+            onClick={onClose}
           >
             Close
           </button>

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+
 import {
   tenantIdentitySchema,
   tenantEmploymentSchema,
@@ -17,26 +18,30 @@ export async function POST(req) {
     tenantPreferenceSchema.parse(preference);
 
     // Insert identity
-    const { error: idErr } = await supabaseServer.from("tenant_identity").insert({
-      user_id: identity.userId,
-      id_type: identity.idType,
-      id_upload: identity.idUpload,
-      address: identity.address,
-      confirmed: identity.confirm,
-    });
+    const { error: idErr } = await supabaseServer
+      .from("tenant_identity")
+      .insert({
+        user_id: identity.userId,
+        id_type: identity.idType,
+        id_upload: identity.idUpload,
+        address: identity.address,
+        confirmed: identity.confirm,
+      });
 
     if (idErr) throw idErr;
 
     // Insert employment
-    const { error: empErr } = await supabaseServer.from("tenant_employment").insert({
-      tenant_id: identity.userId,
-      employment_status: employment.employmentStatus,
-      company_name: employment.companyName,
-      monthly_income: employment.monthlyIncome,
-      occupation: employment.occupation,
-      payslip: employment.payslip,
-      confirmed: employment.confirm,
-    });
+    const { error: empErr } = await supabaseServer
+      .from("tenant_employment")
+      .insert({
+        tenant_id: identity.userId,
+        employment_status: employment.employmentStatus,
+        company_name: employment.companyName,
+        monthly_income: employment.monthlyIncome,
+        occupation: employment.occupation,
+        payslip: employment.payslip,
+        confirmed: employment.confirm,
+      });
 
     if (empErr) throw empErr;
 
@@ -60,6 +65,7 @@ export async function POST(req) {
     });
   } catch (err) {
     console.error(err);
+
     return NextResponse.json({ error: err.message }, { status: 400 });
   }
 }

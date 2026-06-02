@@ -70,14 +70,14 @@ export const MaintenanceModal = ({ request, onClose }) => {
           </div>
 
           <form
-            onSubmit={handleSubmit}
             className="p-4 border-t border-gray-200 dark:border-gray-800 flex gap-3"
+            onSubmit={handleSubmit}
           >
             <input
+              className="flex-1 rounded-xl bg-gray-100 px-4 py-2.5 outline-none dark:bg-white/5 dark:text-white"
               placeholder="Add a comment"
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
-              className="flex-1 rounded-xl bg-gray-100 px-4 py-2.5 outline-none dark:bg-white/5 dark:text-white"
             />
             <button className="rounded-xl bg-gray-900 text-white px-4 dark:bg-white dark:text-gray-900">
               <Send size={16} />
@@ -88,10 +88,10 @@ export const MaintenanceModal = ({ request, onClose }) => {
 
       {preview && (
         <div
-          onClick={() => setPreview(null)}
           className="fixed inset-0 bg-black/80 z-[60] flex items-center justify-center p-4"
+          onClick={() => setPreview(null)}
         >
-          <img src={preview} className="max-h-[90vh] rounded-2xl" />
+          <img className="max-h-[90vh] rounded-2xl" src={preview} />
         </div>
       )}
     </>

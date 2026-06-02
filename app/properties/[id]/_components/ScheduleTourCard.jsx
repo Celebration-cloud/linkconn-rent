@@ -18,17 +18,17 @@ export default function ScheduleTourCard({ selectedDate, setSelectedDate }) {
             Select Date
           </label>
           <DateRangePicker
+            className="text-gray-900 dark:text-gray-100"
             label="Tour date"
+            minValue={today(getLocalTimeZone())}
             value={selectedDate}
             onChange={setSelectedDate}
-            minValue={today(getLocalTimeZone())}
-            className="text-gray-900 dark:text-gray-100"
           />
         </div>
 
         {/* Schedule Button */}
         <button className="w-full bg-blue-900 hover:bg-blue-800 text-white font-medium py-3 px-6 rounded-lg transition flex items-center justify-center">
-          <Calendar size={18} className="mr-2" />
+          <Calendar className="mr-2" size={18} />
           Schedule Tour
         </button>
 

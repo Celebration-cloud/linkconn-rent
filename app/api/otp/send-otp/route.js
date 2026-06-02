@@ -24,12 +24,14 @@ export async function POST(req) {
     });
 
     const data = await res.json();
+
     return NextResponse.json({ success: true, pinId: data.pinId });
   } catch (err) {
     console.error("OTP send failed:", err);
+
     return NextResponse.json(
       { success: false, error: err.message },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

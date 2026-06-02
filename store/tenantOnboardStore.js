@@ -40,6 +40,6 @@ export const useTenantOnboardStore = create(
         preference: state.preference,
         step: state.step,
       }),
-    }
-  )
+    },
+  ),
 );

@@ -8,7 +8,6 @@ import {
   FileText,
   MessageSquare,
   Settings,
-  Menu,
   SquareChevronLeft,
 } from "lucide-react";
 import clsx from "clsx";
@@ -43,7 +42,7 @@ export default function TenantDashboardLayout({ children }) {
           "shadow-md dark:shadow-none",
           "transform transition-transform duration-300 ease-in-out",
           open ? "translate-x-0" : "-translate-x-full",
-          "md:translate-x-0"
+          "md:translate-x-0",
         )}
       >
         <div className="px-6 py-6 font-semibold text-xl border-b border-gray-200 dark:border-gray-800 text-gray-900 dark:text-gray-100">
@@ -58,14 +57,14 @@ export default function TenantDashboardLayout({ children }) {
             return (
               <Link
                 key={item.href}
-                href={item.href}
-                onClick={() => setOpen(false)}
                 className={clsx(
                   "flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium transition-colors",
                   active
                     ? "bg-blue-100 dark:bg-blue-500/15 text-blue-600 dark:text-blue-400"
-                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800",
                 )}
+                href={item.href}
+                onClick={() => setOpen(false)}
               >
                 <Icon size={18} />
                 {item.label}
@@ -91,8 +90,8 @@ export default function TenantDashboardLayout({ children }) {
             Dashboard
           </span>
           <button
-            onClick={() => setOpen(true)}
             className="text-gray-700 dark:text-gray-300"
+            onClick={() => setOpen(true)}
           >
             <SquareChevronLeft size={28} />
           </button>

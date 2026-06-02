@@ -31,17 +31,17 @@ export default function AgentContactCard({ agent }) {
       {/* Contact Info */}
       <div className="space-y-2 mb-5">
         <div className="flex items-center text-gray-700 dark:text-gray-300">
-          <Phone size={16} className="mr-2 text-blue-800 dark:text-blue-500" />
+          <Phone className="mr-2 text-blue-800 dark:text-blue-500" size={16} />
           <span className="text-sm">{agent.phone}</span>
         </div>
 
         <div className="flex items-center text-gray-700 dark:text-gray-300">
-          <Mail size={16} className="mr-2 text-blue-800 dark:text-blue-500" />
+          <Mail className="mr-2 text-blue-800 dark:text-blue-500" size={16} />
           <span className="text-sm">{agent.email}</span>
         </div>
 
         <div className="flex items-center text-gray-700 dark:text-gray-300">
-          <Clock size={16} className="mr-2 text-yellow-700" />
+          <Clock className="mr-2 text-yellow-700" size={16} />
           <span className="text-sm">Response time: {agent.responseTime}</span>
         </div>
       </div>
@@ -49,12 +49,12 @@ export default function AgentContactCard({ agent }) {
       {/* Actions */}
       <div className="flex space-x-3">
         <button className="flex-1 bg-blue-900 hover:bg-blue-800 text-white py-2 px-4 rounded-lg transition flex items-center justify-center">
-          <Phone size={16} className="mr-2" />
+          <Phone className="mr-2" size={16} />
           Call Agent
         </button>
 
         <button className="flex-1 bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/20 text-gray-900 dark:text-white py-2 px-4 rounded-lg transition flex items-center justify-center">
-          <Mail size={16} className="mr-2" />
+          <Mail className="mr-2" size={16} />
           Email Agent
         </button>
       </div>

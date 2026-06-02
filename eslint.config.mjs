@@ -42,6 +42,9 @@ export default defineConfig([globalIgnores([
     "!**/plopfile.js",
     "!**/react-shim.js",
     "!**/tsup.config.ts",
+]), globalIgnores([
+    ".history/**",
+    "proxy.js",
 ]), {
     extends: fixupConfigRules(compat.extends(
         "plugin:react/recommended",
@@ -83,7 +86,7 @@ export default defineConfig([globalIgnores([
         },
     },
 
-    files: ["**/*.ts", "**/*.tsx"],
+    files: ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx"],
 
     rules: {
         "no-console": "warn",
@@ -93,6 +96,11 @@ export default defineConfig([globalIgnores([
         "react-hooks/exhaustive-deps": "off",
         "jsx-a11y/click-events-have-key-events": "warn",
         "jsx-a11y/interactive-supports-focus": "warn",
+        "jsx-a11y/label-has-associated-control": "warn",
+        "jsx-a11y/no-static-element-interactions": "warn",
+        "jsx-a11y/alt-text": "warn",
+        "jsx-a11y/img-redundant-alt": "warn",
+        "react/no-unescaped-entities": "warn",
         "prettier/prettier": "warn",
         "no-unused-vars": "off",
         "unused-imports/no-unused-vars": "off",

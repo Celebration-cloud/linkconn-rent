@@ -31,8 +31,8 @@ export default function Button({
   return (
     <HeroButton
       className={clsx(sizeMap[size], "rounded-xl", className)}
-      variant={variant}
       disabled={loading || props.disabled}
+      variant={variant}
       {...props}
     >
       {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

@@ -3,8 +3,10 @@
 import { useState, useEffect, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { LayoutGrid, MapPin, SlidersHorizontal } from "lucide-react";
-import PropertyFilters from "@/components/PropertyFilters";
 import { Drawer, DrawerContent, DrawerHeader, DrawerBody } from "@heroui/react";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
+
+import PropertyFilters from "@/components/PropertyFilters";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { SearchBar } from "@/components/shared/searchbar";
 import {
@@ -12,7 +14,6 @@ import {
   setView,
   fetchProperties,
 } from "@/lib/redux/slices/propertiesSlice";
-import { useRouter, useSearchParams, usePathname } from "next/navigation";
 
 export default function PropertiesLayout({ children }) {
   const dispatch = useDispatch();
@@ -37,14 +38,15 @@ export default function PropertiesLayout({ children }) {
     initialized.current = true;
 
     const params = Object.fromEntries(searchParams.entries());
+
     dispatch(setFilters(params));
     dispatch(fetchProperties());
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, searchParams]);
 
   // Search handler
   const handleSearch = (value) => {
     const qs = new URLSearchParams(searchParams.toString());
+
     if (value) qs.set("q", value);
     else qs.delete("q");
 
@@ -72,8 +74,8 @@ export default function PropertiesLayout({ children }) {
             <div className="flex items-center gap-2 w-full sm:w-auto">
               {isMobile && (
                 <button
-                  onClick={() => setSidebarOpen(true)}
                   className="flex items-center gap-1 px-3 py-2 rounded-lg bg-muted hover:bg-muted/80 text-sm font-medium"
+                  onClick={() => setSidebarOpen(true)}
                 >
                   <SlidersHorizontal size={16} />
                   Filters
@@ -84,9 +86,9 @@ export default function PropertiesLayout({ children }) {
             <div className="flex flex-1 items-center gap-3 sm:gap-4 lg:gap-6 w-full sm:w-auto">
               <div className="flex-1 min-w-0">
                 <SearchBar
+                  placeholder="Search properties..."
                   value={filters.q || ""}
                   onChange={(e) => handleSearch(e.target.value)}
-                  placeholder="Search properties..."
                 />
               </div>
               <ViewToggle />
@@ -101,8 +103,8 @@ export default function PropertiesLayout({ children }) {
 
       <Drawer
         isOpen={sidebarOpen}
-        onOpenChange={setSidebarOpen}
         placement="left"
+        onOpenChange={setSidebarOpen}
       >
         <DrawerContent>
           <DrawerHeader className="flex justify-between items-center">
@@ -124,22 +126,22 @@ function ViewToggle() {
   return (
     <div className="flex items-center gap-2 mt-2 sm:mt-0">
       <button
-        onClick={() => dispatch(setView("grid"))}
         className={`p-2.5 rounded-lg transition-colors ${
           view === "grid"
             ? "bg-primary text-primary-foreground"
             : "bg-muted text-muted-foreground hover:bg-muted/80"
         }`}
+        onClick={() => dispatch(setView("grid"))}
       >
         <LayoutGrid size={18} />
       </button>
       <button
-        onClick={() => dispatch(setView("map"))}
         className={`p-2.5 rounded-lg transition-colors ${
           view === "map"
             ? "bg-primary text-primary-foreground"
             : "bg-muted text-muted-foreground hover:bg-muted/80"
         }`}
+        onClick={() => dispatch(setView("map"))}
       >
         <MapPin size={18} />
       </button>

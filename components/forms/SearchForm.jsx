@@ -1,5 +1,6 @@
 "use client";
 import { useForm } from "react-hook-form";
+
 import { AppInput, AppButton } from "../ui";
 
 export const SearchForm = ({ onSearch }) => {
@@ -12,8 +13,8 @@ export const SearchForm = ({ onSearch }) => {
 
   return (
     <form
-      onSubmit={handleSubmit(handleSearch)}
       className="flex gap-2 items-center"
+      onSubmit={handleSubmit(handleSearch)}
     >
       <AppInput
         placeholder="Search news, topics..."

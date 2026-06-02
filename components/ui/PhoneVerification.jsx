@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { CheckCircle2 } from "lucide-react";
+
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
-import { CheckCircle2 } from "lucide-react";
 
 export default function PhoneVerification({ phone, onVerified }) {
   const [otpSent, setOtpSent] = useState(false);
@@ -27,6 +28,7 @@ export default function PhoneVerification({ phone, onVerified }) {
       });
 
       const data = await res.json();
+
       if (data.success) {
         setOtpSent(true);
         setPinId(data.pinId);
@@ -40,8 +42,10 @@ export default function PhoneVerification({ phone, onVerified }) {
           setResendTimer((prev) => {
             if (prev <= 1) {
               clearInterval(intervalRef.current);
+
               return 0;
             }
+
             return prev - 1;
           });
         }, 1000);
@@ -68,6 +72,7 @@ export default function PhoneVerification({ phone, onVerified }) {
       });
 
       const data = await res.json();
+
       if (data.verified) {
         setOtpVerified(true);
         onVerified(true);
@@ -93,9 +98,9 @@ export default function PhoneVerification({ phone, onVerified }) {
     <div className="flex flex-col gap-2">
       <div className="flex gap-2">
         <Button
+          disabled={loading || otpVerified || resendTimer > 0}
           type="button"
           variant={otpVerified ? "success" : "outline"}
-          disabled={loading || otpVerified || resendTimer > 0}
           onClick={sendOtp}
         >
           {otpVerified ? (
@@ -119,7 +124,7 @@ export default function PhoneVerification({ phone, onVerified }) {
             value={otp}
             onChange={(e) => setOtp(e.target.value)}
           />
-          <Button type="button" onClick={verifyOtp} disabled={loading}>
+          <Button disabled={loading} type="button" onClick={verifyOtp}>
             {loading ? "Checking..." : "Verify"}
           </Button>
         </div>

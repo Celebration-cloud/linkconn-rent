@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { AlertTriangle, RotateCcw } from "lucide-react";
+
 import Button from "@/components/ui/Button";
 
 export default function Error({ error, reset }) {
@@ -15,10 +16,10 @@ export default function Error({ error, reset }) {
 
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.3 }}
       className="flex flex-col items-center justify-center h-screen text-center px-6"
+      initial={{ opacity: 0, scale: 0.95 }}
+      transition={{ duration: 0.3 }}
     >
       <div className="bg-red-500/10 dark:bg-red-500/20 p-6 rounded-full mb-4">
         <AlertTriangle className="w-12 h-12 text-red-500" />
@@ -30,7 +31,7 @@ export default function Error({ error, reset }) {
       </p>
 
       <div className="flex gap-3">
-        <Button onClick={() => reset()} className="flex items-center gap-2">
+        <Button className="flex items-center gap-2" onClick={() => reset()}>
           <RotateCcw size={16} />
           Retry
         </Button>

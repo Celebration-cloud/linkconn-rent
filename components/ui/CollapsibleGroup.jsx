@@ -19,18 +19,18 @@ export function CollapsibleGroup({ title, color, items, setValue }) {
       <AnimatePresence>
         {open && (
           <motion.div
-            initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
             className="pl-3 space-y-2"
+            exit={{ height: 0, opacity: 0 }}
+            initial={{ height: 0, opacity: 0 }}
           >
             {items.map((item) => (
               <div
                 key={item.key}
+                className="cursor-pointer text-sm text-foreground/80 hover:text-primary transition-colors"
                 onClick={() =>
                   setValue("propertyType", item.key, { shouldValidate: true })
                 }
-                className="cursor-pointer text-sm text-foreground/80 hover:text-primary transition-colors"
               >
                 {item.label}
               </div>

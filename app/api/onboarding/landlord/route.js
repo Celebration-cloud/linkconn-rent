@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+
 import {
   landlordIdentitySchema,
   landlordPropertySchema,
@@ -68,6 +69,7 @@ export async function POST(req) {
     });
   } catch (err) {
     console.error(err);
+
     return NextResponse.json({ error: err.message }, { status: 400 });
   }
 }

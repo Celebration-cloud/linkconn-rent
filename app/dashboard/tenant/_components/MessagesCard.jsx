@@ -1,6 +1,7 @@
 "use client";
 
 import { MessageSquare } from "lucide-react";
+
 import Card from "./Card";
 
 export default function MessagesCard() {
@@ -10,8 +11,8 @@ export default function MessagesCard() {
         <div className="flex items-center gap-3">
           <div className="p-2 bg-green-100 dark:bg-green-700/20 rounded-lg">
             <MessageSquare
-              size={18}
               className="text-green-600 dark:text-green-300"
+              size={18}
             />
           </div>
           <div>

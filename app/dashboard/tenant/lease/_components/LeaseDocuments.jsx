@@ -5,6 +5,7 @@ export const LeaseDocuments = ({ docs }) => {
     const blob = new Blob([doc.name], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
+
     a.href = url;
     a.download = `${doc.name}.txt`;
     a.click();
@@ -24,8 +25,8 @@ export const LeaseDocuments = ({ docs }) => {
             </p>
           </div>
           <button
-            onClick={() => download(d)}
             className="px-4 py-2 rounded-xl bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/20 transition"
+            onClick={() => download(d)}
           >
             <Download size={16} />
           </button>

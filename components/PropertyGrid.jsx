@@ -8,6 +8,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import PropertyCard from "./PropertyCard";
 import { SpinnerLoading } from "./shared/spinner-loading";
 import NoResults from "./NoResults";
+
 import { fetchProperties, setPage } from "@/lib/redux/slices/propertiesSlice";
 
 export default function PropertyGrid() {
@@ -18,7 +19,7 @@ export default function PropertyGrid() {
   const initialized = useRef(false);
 
   const { properties, loading, error, page, totalPages } = useSelector(
-    (state) => state.properties
+    (state) => state.properties,
   );
 
   // Sync URL params -> Redux state on first mount only
@@ -27,6 +28,7 @@ export default function PropertyGrid() {
     initialized.current = true;
 
     const params = Object.fromEntries(searchParams.entries());
+
     if (params.page) {
       dispatch(setPage(Number(params.page)));
     }
@@ -42,6 +44,7 @@ export default function PropertyGrid() {
   // Update URL when page changes (without retriggering fetch loop)
   useEffect(() => {
     const qs = new URLSearchParams(searchParams.toString());
+
     qs.set("page", page);
     router.replace(`?${qs.toString()}`, { scroll: false });
   }, [page, router]);
@@ -63,10 +66,10 @@ export default function PropertyGrid() {
       {totalPages > 1 && (
         <div className="flex justify-center">
           <Pagination
+            showControls
             page={page}
             total={totalPages}
             onChange={(newPage) => dispatch(setPage(newPage))}
-            showControls
           />
         </div>
       )}

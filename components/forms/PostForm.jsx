@@ -1,14 +1,15 @@
 "use client";
 import { useForm } from "react-hook-form";
-import { AppInput, AppTextarea, AppSelect, AppButton } from "../ui";
 import { Card } from "@heroui/react";
+
+import { AppInput, AppTextarea, AppSelect, AppButton } from "../ui";
 
 export const PostForm = ({ onSubmit, categories = [] }) => {
   const { register, handleSubmit } = useForm();
 
   return (
     <Card className="p-6 space-y-4">
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
         <AppInput
           label="Title"
           placeholder="Enter headline"
@@ -25,7 +26,7 @@ export const PostForm = ({ onSubmit, categories = [] }) => {
           options={categories.map((c) => ({ label: c.name, value: c.id }))}
           {...register("category")}
         />
-        <AppButton type="submit" color="primary">
+        <AppButton color="primary" type="submit">
           Publish
         </AppButton>
       </form>

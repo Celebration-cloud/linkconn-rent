@@ -18,12 +18,12 @@ export default function LocationSection({ property }) {
 
   return (
     <motion.section
-      id="Location"
-      variants={fadeUp}
-      initial="hidden"
-      whileInView="show"
-      viewport={{ once: true }}
       className="scroll-mt-24"
+      id="Location"
+      initial="hidden"
+      variants={fadeUp}
+      viewport={{ once: true }}
+      whileInView="show"
     >
       <h2 className="text-3xl font-bold mb-4 text-blue-900 dark:text-blue-400">
         Location
@@ -32,8 +32,8 @@ export default function LocationSection({ property }) {
       <div className="rounded-2xl bg-white/80 dark:bg-black/60 border border-gray-200 dark:border-white/10 p-6 backdrop-blur-xl">
         <div className="flex items-center mb-4 text-gray-700 dark:text-gray-300">
           <MapPin
-            size={20}
             className="mr-2 text-yellow-700 dark:text-yellow-600 shrink-0"
+            size={20}
           />
           <span className="truncate">
             {address || "N/A"}, {city || "N/A"}, {state || "N/A"}
@@ -43,11 +43,11 @@ export default function LocationSection({ property }) {
         <div className="rounded-xl overflow-hidden h-64 relative border border-gray-200 dark:border-white/10">
           <div className="inset-0">
             <MapSection
-              lat={lat}
-              lng={lng}
               address={address}
               city={city}
               country={country}
+              lat={lat}
+              lng={lng}
             />
           </div>
         </div>

@@ -35,6 +35,6 @@ export const useLandlordOnboardStore = create(
         payout: state.payout,
         step: state.step,
       }),
-    }
-  )
+    },
+  ),
 );

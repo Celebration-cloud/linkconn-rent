@@ -1,25 +1,14 @@
-"use client"
+"use client";
 
 import { useState, useEffect } from "react";
-import {
-  Document,
-  Download,
-  Calendar,
-  X,
-  ChevronLeft,
-  Sun,
-  Moon,
-  Home,
-  Building2,
-  FileText,
-} from "lucide-react";
+import { Download, Sun, Moon, Home } from "lucide-react";
 
 // Theme Toggle Component
 const ThemeToggle = ({ darkMode, setDarkMode }) => (
   <button
-    onClick={() => setDarkMode(!darkMode)}
-    className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
     aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
+    className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+    onClick={() => setDarkMode(!darkMode)}
   >
     {darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
   </button>
@@ -48,6 +37,7 @@ const StatusBadge = ({ status }) => {
     },
   };
   const config = statusConfig[status] || statusConfig.active;
+
   return (
     <span
       className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${config.bg} ${config.text}`}
@@ -63,13 +53,13 @@ const StatusBadge = ({ status }) => {
 // Loading Skeleton
 const Skeleton = () => (
   <div className="space-y-6 max-w-6xl mx-auto animate-pulse">
-    <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-48"></div>
+    <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-48" />
     <div className="flex gap-2 border-b border-gray-200 dark:border-gray-700 pb-4">
       {[1, 2, 3].map((i) => (
         <div
           key={i}
           className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-20"
-        ></div>
+        />
       ))}
     </div>
     <div className="grid gap-6 md:grid-cols-2">
@@ -78,11 +68,11 @@ const Skeleton = () => (
           key={i}
           className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700"
         >
-          <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-1/3 mb-4"></div>
+          <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-1/3 mb-4" />
           <div className="space-y-3">
-            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
-            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-2/3"></div>
-            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
+            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded" />
+            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-2/3" />
+            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2" />
           </div>
         </div>
       ))}
@@ -93,6 +83,7 @@ const Skeleton = () => (
 // Mock API - simulates data fetch
 const fetchLeaseData = async () => {
   await new Promise((r) => setTimeout(r, 300));
+
   return {
     details: {
       property: "Sunset Gardens",
@@ -195,6 +186,7 @@ const LeasePage = () => {
       setLoading(true);
       try {
         const data = await fetchLeaseData();
+
         setLeaseData(data);
       } catch (error) {
         console.error("Failed to load lease data:", error);
@@ -202,6 +194,7 @@ const LeasePage = () => {
         setLoading(false);
       }
     };
+
     loadData();
   }, []);
 
@@ -214,6 +207,7 @@ Size: ${doc.size}
     const blob = new Blob([content], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
+
     a.href = url;
     a.download = `${doc.name.toLowerCase().replace(/\s+/g, "-")}.txt`;
     a.click();
@@ -227,11 +221,11 @@ Size: ${doc.size}
   const today = new Date();
   const daysLeft = Math.ceil((endDate - today) / (1000 * 60 * 60 * 24));
   const totalDays = Math.ceil(
-    (endDate - new Date(details.startDate)) / (1000 * 60 * 60 * 24)
+    (endDate - new Date(details.startDate)) / (1000 * 60 * 60 * 24),
   );
   const progress = Math.max(
     0,
-    Math.min(100, ((totalDays - daysLeft) / totalDays) * 100)
+    Math.min(100, ((totalDays - daysLeft) / totalDays) * 100),
   );
 
   return (
@@ -251,12 +245,12 @@ Size: ${doc.size}
         {["details", "rules", "documents"].map((tab) => (
           <button
             key={tab}
-            onClick={() => setActiveTab(tab)}
             className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
               activeTab === tab
                 ? "border-gray-900 dark:border-white text-gray-900 dark:text-white"
                 : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
             }`}
+            onClick={() => setActiveTab(tab)}
           >
             {tab.charAt(0).toUpperCase() + tab.slice(1)}
           </button>
@@ -437,8 +431,8 @@ Size: ${doc.size}
                   </div>
                 </div>
                 <button
-                  onClick={() => downloadDocument(doc)}
                   className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
+                  onClick={() => downloadDocument(doc)}
                 >
                   <Download className="w-4 h-4" />
                   Download

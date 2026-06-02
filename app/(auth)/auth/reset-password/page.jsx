@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { Button, Input, Card, CardBody } from "@heroui/react";
 import { motion } from "framer-motion";
 import { useSearchParams, useRouter } from "next/navigation";
+
 import { supabase } from "@/lib/supabaseClient";
 import { showToast } from "@/components/ui/Toast";
 
@@ -22,6 +23,7 @@ export default function ResetPasswordPage() {
   const onSubmit = async ({ password }) => {
     if (!accessToken) {
       showToast({ title: "Invalid link", type: "error" });
+
       return;
     }
 
@@ -30,7 +32,7 @@ export default function ResetPasswordPage() {
         {
           password,
         },
-        { accessToken }
+        { accessToken },
       );
 
       if (error) throw error;
@@ -48,10 +50,10 @@ export default function ResetPasswordPage() {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 25 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
       className="w-full"
+      initial={{ opacity: 0, y: 25 }}
+      transition={{ duration: 0.5 }}
     >
       <div className="flex flex-col items-center mb-6 text-center">
         <h2 className="text-2xl font-semibold">Reset Password</h2>
@@ -63,22 +65,22 @@ export default function ResetPasswordPage() {
       <Card className="border-none shadow-lg bg-content1">
         <CardBody>
           <form
-            onSubmit={handleSubmit(onSubmit)}
             className="flex flex-col gap-4"
+            onSubmit={handleSubmit(onSubmit)}
           >
             <Input
               {...register("password", {
                 required: "Password is required",
                 minLength: 6,
               })}
+              errorMessage={errors.password?.message}
+              isInvalid={!!errors.password}
               label="New Password"
               type="password"
               variant="bordered"
-              isInvalid={!!errors.password}
-              errorMessage={errors.password?.message}
             />
 
-            <Button type="submit" color="primary" variant="shadow" size="lg">
+            <Button color="primary" size="lg" type="submit" variant="shadow">
               Update Password
             </Button>
           </form>

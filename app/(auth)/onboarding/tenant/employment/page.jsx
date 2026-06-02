@@ -4,11 +4,12 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion } from "framer-motion";
+import { Select, SelectItem, Card, CardHeader, CardBody } from "@heroui/react";
+import { useEffect } from "react";
+
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
-import { Select, SelectItem, Card, CardHeader, CardBody } from "@heroui/react";
 import { tenantEmploymentSchema } from "@/lib/zodSchemas";
-import { useEffect } from "react";
 import { useTenantOnboardStore } from "@/store/tenantOnboardStore";
 
 export default function TenantEmploymentPage() {
@@ -27,17 +28,18 @@ export default function TenantEmploymentPage() {
       confirm: false,
     },
   });
-    useEffect(() => {
-      if (!identity) {
-        router.replace("/onboarding/tenant/identity");
-      } else if (!employment) {
-        router.replace("/onboarding/tenant/employment");
-      } else if (!preference) {
-        router.replace("/onboarding/tenant/preference");
-      } else {
-        router.replace("/onboarding/tenant/success");
-      }
-    }, [identity, employment, preference, router]);
+
+  useEffect(() => {
+    if (!identity) {
+      router.replace("/onboarding/tenant/identity");
+    } else if (!employment) {
+      router.replace("/onboarding/tenant/employment");
+    } else if (!preference) {
+      router.replace("/onboarding/tenant/preference");
+    } else {
+      router.replace("/onboarding/tenant/success");
+    }
+  }, [identity, employment, preference, router]);
 
   useEffect(() => {
     setStep(2);
@@ -50,10 +52,10 @@ export default function TenantEmploymentPage() {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 25 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
       className="w-full max-w-lg"
+      initial={{ opacity: 0, y: 25 }}
+      transition={{ duration: 0.5 }}
     >
       {/* Step tracker */}
       <div className="mb-4 flex justify-between items-center">
@@ -79,14 +81,14 @@ export default function TenantEmploymentPage() {
         </CardHeader>
 
         <CardBody>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+          <form className="space-y-5" onSubmit={form.handleSubmit(onSubmit)}>
             {/* Employment Status */}
             <div>
               <label>Employment Status</label>
               <Select
                 {...form.register("employmentStatus")}
-                placeholder="Select your employment status"
                 className="mt-1"
+                placeholder="Select your employment status"
               >
                 <SelectItem key="Employed" value="Employed">
                   Employed
@@ -110,8 +112,8 @@ export default function TenantEmploymentPage() {
               <label>Company Name (if applicable)</label>
               <Input
                 {...form.register("companyName")}
-                placeholder="e.g. Zenith Bank PLC"
                 className="mt-1"
+                placeholder="e.g. Zenith Bank PLC"
               />
             </div>
 
@@ -120,8 +122,8 @@ export default function TenantEmploymentPage() {
               <label>Occupation</label>
               <Input
                 {...form.register("occupation")}
-                placeholder="e.g. Software Engineer"
                 className="mt-1"
+                placeholder="e.g. Software Engineer"
               />
               {form.formState.errors.occupation && (
                 <p className="text-red-500 text-sm mt-1">
@@ -135,8 +137,8 @@ export default function TenantEmploymentPage() {
               <label>Monthly Income (₦)</label>
               <Input
                 {...form.register("monthlyIncome")}
-                placeholder="e.g. ₦250,000"
                 className="mt-1"
+                placeholder="e.g. ₦250,000"
               />
               {form.formState.errors.monthlyIncome && (
                 <p className="text-red-500 text-sm mt-1">
@@ -149,9 +151,9 @@ export default function TenantEmploymentPage() {
             <div>
               <label>Upload Payslip / Proof of Income</label>
               <Input
-                type="file"
                 multiple
                 accept="application/pdf,image/*"
+                type="file"
                 {...form.register("payslip")}
                 className="mt-1"
               />
@@ -180,7 +182,7 @@ export default function TenantEmploymentPage() {
             )}
 
             {/* Submit */}
-            <Button type="submit" className="w-full mt-4">
+            <Button className="w-full mt-4" type="submit">
               Continue to Preference Setup
             </Button>
           </form>

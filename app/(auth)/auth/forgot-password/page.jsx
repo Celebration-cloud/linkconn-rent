@@ -6,8 +6,9 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { Mail } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
-import { forgotPassword } from "@/lib/redux/slices/userSlice";
 import { useEffect, useState } from "react";
+
+import { forgotPassword } from "@/lib/redux/slices/userSlice";
 
 export default function ForgotPasswordPage() {
   const dispatch = useDispatch();
@@ -38,10 +39,10 @@ export default function ForgotPasswordPage() {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 25 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
       className="w-full"
+      initial={{ opacity: 0, y: 25 }}
+      transition={{ duration: 0.5 }}
     >
       <div className="flex flex-col items-center mb-6 text-center">
         <Mail className="w-10 h-10 text-primary mb-3" />
@@ -53,27 +54,27 @@ export default function ForgotPasswordPage() {
       <Card className="border-none shadow-lg bg-content1">
         <CardBody>
           <form
-            onSubmit={handleSubmit(onSubmit)}
             className="flex flex-col gap-4"
+            onSubmit={handleSubmit(onSubmit)}
           >
             <Input
               {...register("email", { required: "Email is required" })}
+              errorMessage={errors.email?.message}
+              isDisabled={cooldown > 0}
+              isInvalid={!!errors.email}
               label="Email Address"
               placeholder="Enter your email"
               type="email"
               variant="bordered"
-              isInvalid={!!errors.email}
-              errorMessage={errors.email?.message}
-              isDisabled={cooldown > 0}
             />
 
             <Button
-              type="submit"
               color="primary"
-              variant="shadow"
-              size="lg"
-              isLoading={loading}
               isDisabled={cooldown > 0}
+              isLoading={loading}
+              size="lg"
+              type="submit"
+              variant="shadow"
             >
               {cooldown > 0 ? `Wait ${cooldown}s` : "Send Reset Link"}
             </Button>
@@ -82,7 +83,7 @@ export default function ForgotPasswordPage() {
       </Card>
 
       <div className="mt-6 text-center text-sm">
-        <Link href="/auth/login" className="text-primary font-medium">
+        <Link className="text-primary font-medium" href="/auth/login">
           Back to Login
         </Link>
       </div>

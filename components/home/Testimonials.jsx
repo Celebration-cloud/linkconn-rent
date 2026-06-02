@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, CardHeader, CardContent, CardBody } from "@heroui/react";
+import { Card, CardHeader, CardBody } from "@heroui/react";
 import Image from "next/image";
 
 const testimonials = [
@@ -35,11 +35,11 @@ export default function Testimonials() {
           >
             <CardHeader className="flex items-center gap-3">
               <Image
-                src={t.avatar}
                 alt={t.name}
-                width={48}
-                height={48}
                 className="rounded-full"
+                height={48}
+                src={t.avatar}
+                width={48}
               />
               <span className="font-medium">{t.name}</span>
             </CardHeader>
@@ -51,4 +51,4 @@ export default function Testimonials() {
       </div>
     </section>
   );
-};
+}

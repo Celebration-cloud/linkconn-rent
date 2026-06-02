@@ -4,19 +4,22 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion } from "framer-motion";
-import Input from "@/components/ui/Input";
-import Button from "@/components/ui/Button";
 import { Select, SelectItem, Card, CardHeader, CardBody } from "@heroui/react";
 import { useState, useEffect } from "react";
 import { CheckCircle2 } from "lucide-react";
+import { useSession } from "next-auth/react";
+
+import Input from "@/components/ui/Input";
+import Button from "@/components/ui/Button";
 import { tenantIdentitySchema } from "@/lib/zodSchemas";
 import { useTenantOnboardStore } from "@/store/tenantOnboardStore";
-import { useSession } from "next-auth/react";
+
 // import { initPuter, uploadFile } from "@/lib/puterClient";
 
 export default function TenantIdentityPage() {
   const router = useRouter();
-  const {data} = useSession();
+  const { data } = useSession();
+
   console.log("Session data:", data);
   const [otpVerified, setOtpVerified] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
@@ -39,6 +42,7 @@ export default function TenantIdentityPage() {
 
   const handleSendOtp = async () => {
     const phone = form.getValues("phone");
+
     if (!phone) return alert("Enter phone number first");
 
     const res = await fetch("/api/send-otp", {
@@ -48,6 +52,7 @@ export default function TenantIdentityPage() {
     });
 
     const data = await res.json();
+
     if (data.success) {
       setOtpSent(true);
       setPinId(data.pinId);
@@ -64,21 +69,22 @@ export default function TenantIdentityPage() {
     });
 
     const data = await res.json();
+
     if (data.verified) setOtpVerified(true);
     else alert("Invalid OTP");
   };
 
-    useEffect(() => {
-      if (!identity) {
-        router.replace("/onboarding/tenant");
-      } else if (!employment) {
-        router.replace("/onboarding/tenant/employment");
-      } else if (!preference) {
-        router.replace("/onboarding/tenant/preference");
-      } else {
-        router.replace("/onboarding/tenant/success");
-      }
-    }, [identity, employment, preference, router]);
+  useEffect(() => {
+    if (!identity) {
+      router.replace("/onboarding/tenant");
+    } else if (!employment) {
+      router.replace("/onboarding/tenant/employment");
+    } else if (!preference) {
+      router.replace("/onboarding/tenant/preference");
+    } else {
+      router.replace("/onboarding/tenant/success");
+    }
+  }, [identity, employment, preference, router]);
 
   // Restore step on mount
   useEffect(() => {
@@ -90,59 +96,60 @@ export default function TenantIdentityPage() {
     setTimeout(() => setOtpVerified(true), 1000);
   };
 
-const onSubmit = async (values) => {
-  if (!otpVerified) {
-    alert("Please verify your phone number via OTP first.");
-    return;
-  }
+  const onSubmit = async (values) => {
+    if (!otpVerified) {
+      alert("Please verify your phone number via OTP first.");
 
-  try {
-    // await initPuter();
+      return;
+    }
 
-    // const files = values?.idUpload || [];
-    // const uploadedFiles = [];
+    try {
+      // await initPuter();
 
-    // if (files.length > 0) {
-    //   for (const file of files) {
-    //     if (!file?.name) continue;
+      // const files = values?.idUpload || [];
+      // const uploadedFiles = [];
 
-    //     const userId = data?.user?.id || "unknown_user";
-    //     const safeName = file.name.replace(/[^\w.-]/g, "_"); // sanitize filename
-    //     const path = `tenants/${userId}/ids/${safeName}`;
+      // if (files.length > 0) {
+      //   for (const file of files) {
+      //     if (!file?.name) continue;
 
-    //     console.log("⬆️ Uploading:", path);
+      //     const userId = data?.user?.id || "unknown_user";
+      //     const safeName = file.name.replace(/[^\w.-]/g, "_"); // sanitize filename
+      //     const path = `tenants/${userId}/ids/${safeName}`;
 
-    //     try {
-    //       const { url } = await uploadFile({ path, file });
-    //       if (url) uploadedFiles.push({ name: file.name, url });
-    //     } catch (err) {
-    //       console.error("❌ Upload failed:", err.message || err);
-    //     }
-    //   }
+      //     console.log("⬆️ Uploading:", path);
 
-    // } else {
-    //   console.warn("No ID files selected for upload.");
-    // }
+      //     try {
+      //       const { url } = await uploadFile({ path, file });
+      //       if (url) uploadedFiles.push({ name: file.name, url });
+      //     } catch (err) {
+      //       console.error("❌ Upload failed:", err.message || err);
+      //     }
+      //   }
 
-    // console.log("✅ Uploaded ID files:", uploadedFiles);
+      // } else {
+      //   console.warn("No ID files selected for upload.");
+      // }
 
-    setIdentity({
-      ...values,
-    });
+      // console.log("✅ Uploaded ID files:", uploadedFiles);
 
-    router.push("/onboarding/tenant/employment");
-  } catch (err) {
-    console.error("❌ Submission failed:", err.message || err);
-    alert("Something went wrong during upload. Try again.");
-  }
-};
+      setIdentity({
+        ...values,
+      });
+
+      router.push("/onboarding/tenant/employment");
+    } catch (err) {
+      console.error("❌ Submission failed:", err.message || err);
+      alert("Something went wrong during upload. Try again.");
+    }
+  };
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 25 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
       className="w-full max-w-lg"
+      initial={{ opacity: 0, y: 25 }}
+      transition={{ duration: 0.5 }}
     >
       {/* Step tracker */}
       <div className="mb-4 flex justify-between items-center">
@@ -168,14 +175,14 @@ const onSubmit = async (values) => {
         </CardHeader>
 
         <CardBody>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+          <form className="space-y-5" onSubmit={form.handleSubmit(onSubmit)}>
             {/* Full Name */}
             <div>
               <label>Full Name</label>
               <Input
                 {...form.register("fullName")}
-                placeholder="e.g. John Doe"
                 className="mt-1"
+                placeholder="e.g. John Doe"
               />
               {form.formState.errors.fullName && (
                 <p className="text-red-500 text-sm mt-1">
@@ -216,8 +223,8 @@ const onSubmit = async (values) => {
               <label>Address</label>
               <Input
                 {...form.register("address")}
-                placeholder="e.g. 14 Opebi Road, Ikeja, Lagos"
                 className="mt-1"
+                placeholder="e.g. 14 Opebi Road, Ikeja, Lagos"
               />
               {form.formState.errors.address && (
                 <p className="text-red-500 text-sm mt-1">
@@ -231,8 +238,8 @@ const onSubmit = async (values) => {
               <label>Identification Type</label>
               <Select
                 {...form.register("idType")}
-                placeholder="Select ID type"
                 className="mt-1"
+                placeholder="Select ID type"
               >
                 <SelectItem key="NIN" value="NIN">
                   NIN
@@ -255,9 +262,9 @@ const onSubmit = async (values) => {
             <div>
               <label>Upload ID Document</label>
               <Input
-                type="file"
                 multiple
                 accept="image/*,application/pdf"
+                type="file"
                 {...form.register("idUpload")}
                 className="mt-1"
               />
@@ -285,7 +292,7 @@ const onSubmit = async (values) => {
               </p>
             )}
 
-            <Button type="submit" className="w-full mt-4">
+            <Button className="w-full mt-4" type="submit">
               Continue to Employment Info
             </Button>
           </form>

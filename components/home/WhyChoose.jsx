@@ -27,7 +27,7 @@ export default function WhyChoose() {
       {reasons.map((item, i) => (
         <Card key={i} className="text-center p-6 hover:bg-content1 transition">
           <CardBody>
-            <item.icon size={36} className="mx-auto mb-4 text-primary" />
+            <item.icon className="mx-auto mb-4 text-primary" size={36} />
             <h4 className="text-xl font-semibold mb-2">{item.title}</h4>
             <p className="text-default-600">{item.desc}</p>
           </CardBody>

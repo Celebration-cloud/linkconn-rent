@@ -12,8 +12,8 @@ export default function ConversationList({
       {conversations.map((conv) => (
         <ConversationItem
           key={conv.id}
-          conversation={conv}
           active={selected?.id === conv.id}
+          conversation={conv}
           onClick={() => onSelect(conv)}
         />
       ))}

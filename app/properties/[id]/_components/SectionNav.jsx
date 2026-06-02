@@ -8,10 +8,13 @@ export default function SectionNav({ sections }) {
   useEffect(() => {
     const handleScroll = () => {
       const scrollPos = window.scrollY + 120;
+
       sections.forEach((section) => {
         const el = document.getElementById(section);
+
         if (el) {
           const { offsetTop, offsetHeight } = el;
+
           if (scrollPos >= offsetTop && scrollPos < offsetTop + offsetHeight) {
             setActiveSection(section);
           }
@@ -20,11 +23,13 @@ export default function SectionNav({ sections }) {
     };
 
     window.addEventListener("scroll", handleScroll);
+
     return () => window.removeEventListener("scroll", handleScroll);
   }, [sections]);
 
   const scrollTo = (section) => {
     const el = document.getElementById(section);
+
     if (el) {
       el.scrollIntoView({ behavior: "smooth", block: "start" });
       setActiveSection(section);
@@ -37,12 +42,12 @@ export default function SectionNav({ sections }) {
         {sections.map((section) => (
           <button
             key={section}
-            onClick={() => scrollTo(section)}
             className={`whitespace-nowrap pb-2 px-1 border-b-2 transition-colors duration-200 ${
               activeSection === section
                 ? "border-yellow-700 text-blue-900 dark:text-yellow-600"
                 : "border-transparent text-gray-600 dark:text-gray-400 hover:text-blue-900 dark:hover:text-gray-100"
             }`}
+            onClick={() => scrollTo(section)}
           >
             {section}
           </button>

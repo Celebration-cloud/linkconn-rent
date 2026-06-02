@@ -2,10 +2,9 @@
 
 import { motion } from "framer-motion";
 import Image from "next/image";
-import Link from "next/link";
+
 import { siteConfig } from "@/config/site";
 import { ThemeSwitch } from "@/components/theme-switch";
-import { ArrowLeft } from "lucide-react";
 import BackButton from "@/components/ui/BackButton";
 
 export default function OnboardingLayout({ children }) {
@@ -16,18 +15,18 @@ export default function OnboardingLayout({ children }) {
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-black/30" />
 
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
           className="relative z-10 flex flex-col items-center text-center px-10"
+          initial={{ opacity: 0, y: 30 }}
+          transition={{ duration: 0.8 }}
         >
           <Image
-            src={siteConfig.logo}
-            alt="LinkConn Rent Logo"
-            width={120}
-            height={120}
-            className="mb-6 drop-shadow-lg"
             priority
+            alt="LinkConn Rent Logo"
+            className="mb-6 drop-shadow-lg"
+            height={120}
+            src={siteConfig.logo}
+            width={120}
           />
           <h1 className="text-3xl font-bold mb-3">Getting Started</h1>
           <p className="text-white/90 max-w-sm leading-relaxed">
@@ -41,7 +40,7 @@ export default function OnboardingLayout({ children }) {
       <div className="flex-1 flex flex-col items-center justify-center bg-content1 relative px-6 sm:px-8 py-10">
         {/* Top Controls */}
         <div className="absolute top-4 left-4 flex items-center gap-2">
-         <BackButton />
+          <BackButton />
         </div>
 
         <div className="absolute top-4 right-4">
@@ -50,10 +49,10 @@ export default function OnboardingLayout({ children }) {
 
         {/* Main content */}
         <motion.div
-          initial={{ opacity: 0, y: 25 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
           className="w-full max-w-2xl bg-card rounded-2xl p-6 sm:p-8"
+          initial={{ opacity: 0, y: 25 }}
+          transition={{ duration: 0.5 }}
         >
           {children}
         </motion.div>

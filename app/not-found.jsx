@@ -3,17 +3,19 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { SearchX, Home } from "lucide-react";
-import Button from "@/components/ui/Button";
 import { useSession } from "next-auth/react";
 
+import Button from "@/components/ui/Button";
+
 export default function NotFound() {
-      const { data: session, status } = useSession();
+  const { data: session, status } = useSession();
+
   return (
     <motion.div
-      initial={{ opacity: 0, y: 25 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
       className="flex flex-col items-center justify-center h-screen text-center px-6"
+      initial={{ opacity: 0, y: 25 }}
+      transition={{ duration: 0.4 }}
     >
       <div className="bg-blue-500/10 dark:bg-blue-500/20 p-6 rounded-full mb-4">
         <SearchX className="w-14 h-14 text-blue-500" />
@@ -33,7 +35,7 @@ export default function NotFound() {
           </Button>
         </Link>
         <Link href="/">
-          <Button variant="outline" className="flex items-center gap-2">
+          <Button className="flex items-center gap-2" variant="outline">
             Back Home
           </Button>
         </Link>

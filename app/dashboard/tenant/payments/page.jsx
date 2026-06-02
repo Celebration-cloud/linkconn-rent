@@ -1,15 +1,6 @@
 "use client";
-import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import {
-  Download,
-  Wallet,
-  Check,
-  X,
-  CreditCard,
-  Banknote,
-  Plus,
-} from "lucide-react";
+import { useState } from "react";
+import { Download, Wallet, Check, X, Plus } from "lucide-react";
 
 // Status Badge Component
 const StatusBadge = ({ status }) => {
@@ -58,6 +49,7 @@ const StatusBadge = ({ status }) => {
     },
   };
   const config = statusConfig[status] || statusConfig.pending;
+
   return (
     <span
       className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${config.bg} ${config.text}`}
@@ -106,6 +98,7 @@ For questions, contact property management.`;
     const blob = new Blob([receiptContent], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
+
     a.href = url;
     a.download = `receipt-${payment.receiptId}.txt`;
     a.click();
@@ -126,10 +119,10 @@ For questions, contact property management.`;
                   viewBox="0 0 24 24"
                 >
                   <path
+                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth={2}
-                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                   />
                 </svg>
               </div>
@@ -139,8 +132,8 @@ For questions, contact property management.`;
               </div>
             </div>
             <button
-              onClick={onClose}
               className="p-1 hover:bg-white/10 rounded-lg transition-colors"
+              onClick={onClose}
             >
               <X size={20} />
             </button>
@@ -192,15 +185,15 @@ For questions, contact property management.`;
             </div>
           </div>
           <button
-            onClick={downloadReceipt}
             className="w-full bg-gray-900 hover:bg-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 text-white font-semibold py-3 px-4 rounded-xl transition-colors flex items-center justify-center gap-2"
+            onClick={downloadReceipt}
           >
             <Download size={18} />
             Download Receipt
           </button>
           <button
-            onClick={onClose}
             className="w-full mt-3 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 font-medium py-3 px-4 rounded-xl transition-colors"
+            onClick={onClose}
           >
             Close
           </button>
@@ -265,8 +258,8 @@ const PaymentHistoryTable = ({ history, onViewReceipt }) => {
                 </td>
                 <td className="px-6 py-4">
                   <button
-                    onClick={() => onViewReceipt(payment)}
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
+                    onClick={() => onViewReceipt(payment)}
                   >
                     <Download size={14} />
                     Receipt
@@ -358,9 +351,9 @@ const PaymentsPage = ({
   const [selectedPaymentMethod, setSelectedPaymentMethod] =
     useState("credit-card");
 
-//   useEffect(() => {
-//     setLocalHistory(history);
-//   }, [history]);
+  //   useEffect(() => {
+  //     setLocalHistory(history);
+  //   }, [history]);
 
   const handlePayment = () => {
     setProcessing(true);
@@ -453,8 +446,8 @@ const PaymentsPage = ({
 
         <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col justify-center">
           <button
-            onClick={() => setShowPaymentModal(true)}
             className="w-full bg-gray-900 hover:bg-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 text-white font-semibold py-3 px-4 rounded-xl transition-colors flex items-center justify-center gap-2 shadow-lg"
+            onClick={() => setShowPaymentModal(true)}
           >
             <Wallet size={18} />
             Pay Rent
@@ -471,12 +464,12 @@ const PaymentsPage = ({
         </h3>
         <div className="flex flex-wrap gap-3">
           <div
-            onClick={() => setSelectedPaymentMethod("credit-card")}
             className={`flex items-center gap-3 px-4 py-3 rounded-xl border cursor-pointer transition-all ${
               selectedPaymentMethod === "credit-card"
                 ? "border-blue-500 bg-blue-50 dark:bg-blue-900/30"
                 : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 bg-gray-50 dark:bg-gray-900/50"
             }`}
+            onClick={() => setSelectedPaymentMethod("credit-card")}
           >
             <div className="w-10 h-6 bg-blue-600 rounded flex items-center justify-center">
               <span className="text-white text-xs font-bold">VISA</span>
@@ -500,12 +493,12 @@ const PaymentsPage = ({
             </span>
           </div>
           <div
-            onClick={() => setSelectedPaymentMethod("bank-transfer")}
             className={`flex items-center gap-3 px-4 py-3 rounded-xl border cursor-pointer transition-all ${
               selectedPaymentMethod === "bank-transfer"
                 ? "border-blue-500 bg-blue-50 dark:bg-blue-900/30"
                 : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 bg-gray-50 dark:bg-gray-900/50"
             }`}
+            onClick={() => setSelectedPaymentMethod("bank-transfer")}
           >
             <div className="w-10 h-6 bg-gray-800 rounded flex items-center justify-center">
               <span className="text-white text-xs font-bold">BANK</span>
@@ -556,10 +549,10 @@ const PaymentsPage = ({
                   Make Payment
                 </h3>
                 <button
-                  onClick={() => setShowPaymentModal(false)}
                   className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                  onClick={() => setShowPaymentModal(false)}
                 >
-                  <X size={22} className="text-gray-500 dark:text-gray-400" />
+                  <X className="text-gray-500 dark:text-gray-400" size={22} />
                 </button>
               </div>
             </div>
@@ -568,8 +561,8 @@ const PaymentsPage = ({
               <div className="p-8 text-center">
                 <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Check
-                    size={28}
                     className="text-green-500 dark:text-green-400"
+                    size={28}
                   />
                 </div>
                 <h4 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
@@ -619,13 +612,13 @@ const PaymentsPage = ({
                         }`}
                       >
                         <input
-                          type="radio"
-                          name="method"
                           checked={selectedPaymentMethod === "credit-card"}
+                          className="text-blue-600"
+                          name="method"
+                          type="radio"
                           onChange={() =>
                             setSelectedPaymentMethod("credit-card")
                           }
-                          className="text-blue-600"
                         />
                         <div className="w-10 h-6 bg-blue-600 rounded flex items-center justify-center">
                           <span className="text-white text-xs font-bold">
@@ -649,13 +642,13 @@ const PaymentsPage = ({
                         }`}
                       >
                         <input
-                          type="radio"
-                          name="method"
                           checked={selectedPaymentMethod === "bank-transfer"}
+                          className="text-blue-600"
+                          name="method"
+                          type="radio"
                           onChange={() =>
                             setSelectedPaymentMethod("bank-transfer")
                           }
-                          className="text-blue-600"
                         />
                         <div className="w-10 h-6 bg-gray-800 rounded flex items-center justify-center">
                           <span className="text-white text-xs font-bold">
@@ -677,9 +670,9 @@ const PaymentsPage = ({
 
                 <div className="p-6 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50">
                   <button
-                    onClick={handlePayment}
-                    disabled={processing}
                     className="w-full bg-gray-900 hover:bg-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 disabled:bg-gray-400 disabled:dark:bg-gray-600 text-white font-semibold py-3 px-4 rounded-xl transition-colors flex items-center justify-center gap-2"
+                    disabled={processing}
+                    onClick={handlePayment}
                   >
                     {processing ? (
                       <>
@@ -698,8 +691,8 @@ const PaymentsPage = ({
                           />
                           <path
                             className="opacity-75"
-                            fill="currentColor"
                             d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                            fill="currentColor"
                           />
                         </svg>
                         Processing...

@@ -2,6 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+
 import { LeaseDetails } from "./LeaseDetails";
 import { LeaseDocuments } from "./LeaseDocuments";
 import { LeaseTabs } from "./LeaseTabs";
@@ -54,9 +55,9 @@ export default function LeaseClient({ data }) {
 
 const Motion = ({ children }) => (
   <motion.div
-    initial={{ opacity: 0, y: 12 }}
     animate={{ opacity: 1, y: 0 }}
     exit={{ opacity: 0, y: -8 }}
+    initial={{ opacity: 0, y: 12 }}
     transition={{ duration: 0.2, ease: "easeOut" }}
   >
     {children}

@@ -1,7 +1,8 @@
 "use client";
 import { useForm } from "react-hook-form";
-import { AppInput, AppButton } from "../ui";
 import { Card } from "@heroui/react";
+
+import { AppInput, AppButton } from "../ui";
 
 export const AuthForm = ({ type = "login", onSubmit }) => {
   const {
@@ -14,7 +15,7 @@ export const AuthForm = ({ type = "login", onSubmit }) => {
 
   return (
     <Card className="max-w-md w-full p-6 mx-auto">
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
         {!isLogin && (
           <AppInput
             label="Full Name"
@@ -25,19 +26,19 @@ export const AuthForm = ({ type = "login", onSubmit }) => {
 
         <AppInput
           label="Email"
-          type="email"
           placeholder="you@example.com"
+          type="email"
           {...register("email", { required: true })}
         />
 
         <AppInput
           label="Password"
-          type="password"
           placeholder="••••••••"
+          type="password"
           {...register("password", { required: true })}
         />
 
-        <AppButton type="submit" color="primary" fullWidth>
+        <AppButton fullWidth color="primary" type="submit">
           {isLogin ? "Login" : "Sign Up"}
         </AppButton>
       </form>

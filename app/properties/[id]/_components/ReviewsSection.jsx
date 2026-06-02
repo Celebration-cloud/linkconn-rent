@@ -15,12 +15,12 @@ const fadeUp = {
 export default function ReviewsSection({ rating }) {
   return (
     <motion.section
-      id="Reviews"
-      variants={fadeUp}
-      initial="hidden"
-      whileInView="show"
-      viewport={{ once: true }}
       className="scroll-mt-24"
+      id="Reviews"
+      initial="hidden"
+      variants={fadeUp}
+      viewport={{ once: true }}
+      whileInView="show"
     >
       <h2 className="text-3xl font-bold mb-4 text-blue-900 dark:text-blue-400">
         Reviews

@@ -73,6 +73,7 @@ export function PropertiesUIProvider({ children }) {
       if (!res.ok) throw new Error("Failed to fetch properties");
 
       const data = await res.json();
+
       console.log("Fetched properties:", data);
 
       setProperties(data.data || []);
@@ -127,7 +128,7 @@ export function PropertiesUIProvider({ children }) {
       totalPages,
       hasNext,
       hasPrev,
-    ]
+    ],
   );
 
   return (

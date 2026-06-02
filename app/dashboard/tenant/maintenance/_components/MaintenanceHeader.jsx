@@ -12,8 +12,8 @@ export const MaintenanceHeader = ({ onNew }) => (
       </p>
     </div>
     <button
-      onClick={onNew}
       className="inline-flex items-center gap-2 rounded-xl bg-gray-900 text-white px-4 py-2.5 dark:bg-white dark:text-gray-900"
+      onClick={onNew}
     >
       <Plus size={18} /> New Request
     </button>

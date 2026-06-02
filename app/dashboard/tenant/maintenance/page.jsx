@@ -1,22 +1,7 @@
-"use client"
+"use client";
 
 import { useState, useEffect, useRef } from "react";
-import {
-  Menu,
-  Bell,
-  User,
-  Wrench,
-  Plus,
-  Image,
-  MessageSquare,
-  CheckCircle,
-  Clock,
-  X,
-  Send,
-  Sun,
-  Moon,
-  AlertTriangle,
-} from "lucide-react";
+import { Wrench, Plus, Image, X, Send } from "lucide-react";
 
 // Status Badge Component with dark mode support
 const StatusBadge = ({ status }) => {
@@ -65,6 +50,7 @@ const StatusBadge = ({ status }) => {
     },
   };
   const config = statusConfig[status] || statusConfig.pending;
+
   return (
     <span
       className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${config.bg} ${config.text}`}
@@ -77,11 +63,10 @@ const StatusBadge = ({ status }) => {
   );
 };
 
-
-
 // Mock API functions
 const fetchMaintenanceRequests = async () => {
   await new Promise((r) => setTimeout(r, 300));
+
   return [
     {
       id: 1,
@@ -192,12 +177,12 @@ export default function MaintenancePage() {
   });
   const messagesEndRef = useRef(null);
 
-
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
       try {
         const data = await fetchMaintenanceRequests();
+
         setRequests(data);
       } catch (error) {
         console.error("Failed to load maintenance requests:", error);
@@ -205,6 +190,7 @@ export default function MaintenancePage() {
         setLoading(false);
       }
     };
+
     loadData();
   }, []);
 
@@ -258,12 +244,13 @@ export default function MaintenancePage() {
           ],
         };
       }
+
       return req;
     });
 
     setRequests(updatedRequests);
     setSelectedRequest(
-      updatedRequests.find((r) => r.id === selectedRequest.id)
+      updatedRequests.find((r) => r.id === selectedRequest.id),
     );
     setNewComment("");
   };
@@ -271,6 +258,7 @@ export default function MaintenancePage() {
   const handlePhotoUpload = (e) => {
     const files = Array.from(e.target.files);
     const photoUrls = files.map((file) => URL.createObjectURL(file));
+
     setFormData({ ...formData, photos: [...formData.photos, ...photoUrls] });
   };
 
@@ -291,18 +279,18 @@ export default function MaintenancePage() {
   if (loading) {
     return (
       <div className="space-y-6 max-w-6xl mx-auto animate-pulse">
-        <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-48"></div>
+        <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-48" />
         <div className="grid gap-4 md:grid-cols-2">
           {[1, 2, 3, 4].map((i) => (
             <div
               key={i}
               className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700"
             >
-              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/3 mb-4"></div>
-              <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-1/2 mb-4"></div>
+              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/3 mb-4" />
+              <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-1/2 mb-4" />
               <div className="space-y-2">
-                <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded"></div>
-                <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-2/3"></div>
+                <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded" />
+                <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-2/3" />
               </div>
             </div>
           ))}
@@ -324,8 +312,8 @@ export default function MaintenancePage() {
         </div>
         <div className="flex items-center gap-3">
           <button
-            onClick={() => setShowNewForm(true)}
             className="bg-gray-900 hover:bg-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 text-white font-semibold py-2.5 px-4 rounded-xl transition-colors flex items-center gap-2"
+            onClick={() => setShowNewForm(true)}
           >
             <Plus className="w-4 h-4" /> New Request
           </button>
@@ -336,12 +324,12 @@ export default function MaintenancePage() {
         {["all", "open", "in_progress", "resolved"].map((status) => (
           <button
             key={status}
-            onClick={() => setFilter(status)}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
               filter === status
                 ? "bg-gray-900 text-white dark:bg-gray-700 dark:text-white"
                 : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700"
             }`}
+            onClick={() => setFilter(status)}
           >
             {status === "all"
               ? "All"
@@ -356,8 +344,8 @@ export default function MaintenancePage() {
         {filteredRequests.map((request) => (
           <div
             key={request.id}
-            onClick={() => setSelectedRequest(request)}
             className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 cursor-pointer hover:shadow-md transition-shadow"
+            onClick={() => setSelectedRequest(request)}
           >
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="flex-1">
@@ -399,8 +387,8 @@ export default function MaintenancePage() {
               No maintenance requests found
             </p>
             <button
-              onClick={() => setShowNewForm(true)}
               className="mt-4 bg-gray-900 hover:bg-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+              onClick={() => setShowNewForm(true)}
             >
               Create Your First Request
             </button>
@@ -417,26 +405,26 @@ export default function MaintenancePage() {
                 New Maintenance Request
               </h3>
               <button
-                onClick={() => setShowNewForm(false)}
                 className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                onClick={() => setShowNewForm(false)}
               >
                 <X className="w-6 h-6 text-gray-500 dark:text-gray-400" />
               </button>
             </div>
-            <form onSubmit={handleSubmitRequest} className="p-6 space-y-4">
+            <form className="p-6 space-y-4" onSubmit={handleSubmitRequest}>
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Title *
                 </label>
                 <input
-                  type="text"
                   required
+                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  placeholder="Brief description of the issue"
+                  type="text"
                   value={formData.title}
                   onChange={(e) =>
                     setFormData({ ...formData, title: e.target.value })
                   }
-                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  placeholder="Brief description of the issue"
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -445,11 +433,11 @@ export default function MaintenancePage() {
                     Category
                   </label>
                   <select
+                    className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     value={formData.category}
                     onChange={(e) =>
                       setFormData({ ...formData, category: e.target.value })
                     }
-                    className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   >
                     <option>General</option>
                     <option>Plumbing</option>
@@ -464,11 +452,11 @@ export default function MaintenancePage() {
                     Priority
                   </label>
                   <select
+                    className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     value={formData.priority}
                     onChange={(e) =>
                       setFormData({ ...formData, priority: e.target.value })
                     }
-                    className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   >
                     <option value="low">Low</option>
                     <option value="medium">Medium</option>
@@ -481,13 +469,13 @@ export default function MaintenancePage() {
                   Description
                 </label>
                 <textarea
+                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  placeholder="Provide details about the issue..."
+                  rows={4}
                   value={formData.description}
                   onChange={(e) =>
                     setFormData({ ...formData, description: e.target.value })
                   }
-                  rows={4}
-                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  placeholder="Provide details about the issue..."
                 />
               </div>
               <div>
@@ -501,14 +489,14 @@ export default function MaintenancePage() {
                       className="w-20 h-20 rounded-xl overflow-hidden relative"
                     >
                       <img
-                        src={photo}
                         alt={`Issue photo ${i + 1}`}
                         className="w-full h-full object-cover"
+                        src={photo}
                       />
                       <button
+                        className="absolute top-1 right-1 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-xs"
                         type="button"
                         onClick={() => removePhoto(i)}
-                        className="absolute top-1 right-1 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-xs"
                       >
                         ×
                       </button>
@@ -520,11 +508,11 @@ export default function MaintenancePage() {
                       Add
                     </span>
                     <input
-                      type="file"
-                      accept="image/*"
                       multiple
-                      onChange={handlePhotoUpload}
+                      accept="image/*"
                       className="hidden"
+                      type="file"
+                      onChange={handlePhotoUpload}
                     />
                   </label>
                 </div>
@@ -535,15 +523,15 @@ export default function MaintenancePage() {
               </div>
               <div className="pt-4 flex gap-3">
                 <button
+                  className="flex-1 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-medium py-3 rounded-xl transition-colors"
                   type="button"
                   onClick={() => setShowNewForm(false)}
-                  className="flex-1 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-medium py-3 rounded-xl transition-colors"
                 >
                   Cancel
                 </button>
                 <button
-                  type="submit"
                   className="flex-1 bg-gray-900 hover:bg-gray-800 dark:bg-blue-600 dark:hover:bg-blue-700 text-white font-semibold py-3 rounded-xl transition-colors"
+                  type="submit"
                 >
                   Submit Request
                 </button>
@@ -570,8 +558,8 @@ export default function MaintenancePage() {
               <div className="flex items-center gap-3">
                 <StatusBadge status={selectedRequest.status} />
                 <button
-                  onClick={() => setSelectedRequest(null)}
                   className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                  onClick={() => setSelectedRequest(null)}
                 >
                   <X className="w-6 h-6 text-gray-500 dark:text-gray-400" />
                 </button>
@@ -596,9 +584,9 @@ export default function MaintenancePage() {
                     {selectedRequest.photos.map((photo, i) => (
                       <img
                         key={i}
-                        src={photo}
                         alt={`Issue ${i + 1}`}
                         className="w-24 h-24 rounded-xl object-cover border border-gray-100 dark:border-gray-700"
+                        src={photo}
                       />
                     ))}
                   </div>
@@ -655,24 +643,24 @@ export default function MaintenancePage() {
             </div>
 
             <form
-              onSubmit={handleAddComment}
               className="p-4 border-t border-gray-100 dark:border-gray-700 flex gap-3 bg-gray-50 dark:bg-gray-800"
+              onSubmit={handleAddComment}
             >
               <input
+                className="flex-1 px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                placeholder="Add a comment..."
                 type="text"
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
-                placeholder="Add a comment..."
-                className="flex-1 px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               />
               <button
-                type="submit"
-                disabled={!newComment.trim()}
                 className={`px-4 py-2.5 rounded-xl transition-colors ${
                   newComment.trim()
                     ? "bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 text-white"
                     : "bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-500 cursor-not-allowed"
                 }`}
+                disabled={!newComment.trim()}
+                type="submit"
               >
                 <Send className="w-5 h-5" />
               </button>

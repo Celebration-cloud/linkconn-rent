@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+
 import { supabaseServer } from "@/lib/superbaseServer";
 import { signupSchema } from "@/lib/zodSchemas";
 
@@ -32,7 +33,7 @@ export async function POST(req) {
     if (existingUser) {
       return NextResponse.json(
         { error: "User already exists" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -43,6 +44,7 @@ export async function POST(req) {
         password: parsed.password,
         email_confirm: true,
       });
+
     if (authError) throw new Error(authError.message);
 
     // 3️⃣ Insert into public users table first (metadata)
@@ -60,13 +62,11 @@ export async function POST(req) {
       ])
       .select()
       .single();
+
     if (userError) throw new Error(userError.message);
 
     // 4️⃣ Insert role-specific data and link user_id
-    const table =
-      parsed.role === "landlord"
-        ? "landlords"
-          : "tenants";
+    const table = parsed.role === "landlord" ? "landlords" : "tenants";
 
     const rolePayload = {
       user_id: userData.id, // Link role row to user
@@ -85,6 +85,7 @@ export async function POST(req) {
       .insert([rolePayload])
       .select()
       .single();
+
     if (roleError) throw new Error(roleError.message);
 
     // 5️⃣ Update users.ref_id to point to role row
@@ -92,6 +93,7 @@ export async function POST(req) {
       .from("users")
       .update({ ref_id: roleData.id })
       .eq("id", userData.id);
+
     if (refError) throw new Error(refError.message);
 
     return NextResponse.json(
@@ -100,10 +102,11 @@ export async function POST(req) {
         user: userData,
         roleData,
       },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (err) {
     console.error("Signup Error:", err.message);
+
     return NextResponse.json({ error: err.message }, { status: 400 });
   }
 }

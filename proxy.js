@@ -18,9 +18,10 @@ export async function proxy(req) {
   if (PUBLIC_PATHS.some((p) => pathname.startsWith(p))) {
     if (token && ["/auth/login", "/auth/signup"].includes(pathname)) {
       return NextResponse.redirect(
-        new URL(`/dashboard/${token.role}`, req.url)
+        new URL(`/dashboard/${token.role}`, req.url),
       );
     }
+
     return NextResponse.next();
   }
 

@@ -1,16 +1,22 @@
 "use client";
 
 import { useSelector } from "react-redux";
+import dynamic from "next/dynamic";
+
 import { usePropertiesUI } from "@/hooks/usePropertiesUI";
 import PropertyGrid from "@/components/PropertyGrid";
-import PropertyMap from "@/components/PropertyMap";
+const PropertyMap = dynamic(() => import("@/components/PropertyMap"), {
+  ssr: false,
+});
+
 import NoResults from "@/components/NoResults";
 import { SpinnerLoading } from "@/components/shared/spinner-loading";
 
 export default function PropertiesPage() {
   const { loading, error } = usePropertiesUI();
   const { properties, view } = useSelector((state) => state.properties);
-  console.log("properties on page:", properties)
+
+  console.log("properties on page:", properties);
 
   if (loading) return <SpinnerLoading message="Loading properties..." />;
 
@@ -24,5 +30,9 @@ export default function PropertiesPage() {
 
   if (!properties?.length) return <NoResults />;
 
-  return view === "map" ? <PropertyMap properties={properties} /> : <PropertyGrid />;
+  return view === "map" ? (
+    <PropertyMap properties={properties} />
+  ) : (
+    <PropertyGrid />
+  );
 }

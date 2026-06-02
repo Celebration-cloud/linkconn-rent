@@ -1,12 +1,12 @@
 "use client";
 
 export default function PaymentModal({
-payment,
-dueDate,
-processing,
-paymentSuccess,
-onClose,
-onPay,
+  payment,
+  dueDate,
+  processing,
+  paymentSuccess,
+  onClose,
+  onPay,
 }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
@@ -18,8 +18,8 @@ onPay,
               Make Payment
             </h3>
             <button
-              onClick={onClose}
               className="rounded-lg p-1 text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
+              onClick={onClose}
             >
               ✕
             </button>
@@ -72,7 +72,7 @@ onPay,
 
                 <div className="space-y-2">
                   <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-blue-500 bg-blue-50 p-3 dark:bg-blue-900/20">
-                    <input type="radio" name="method" defaultChecked />
+                    <input defaultChecked name="method" type="radio" />
                     <div className="flex h-6 w-10 items-center justify-center rounded bg-blue-600">
                       <span className="text-xs font-bold text-white">VISA</span>
                     </div>
@@ -87,7 +87,7 @@ onPay,
                   </label>
 
                   <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-gray-200 p-3 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800">
-                    <input type="radio" name="method" />
+                    <input name="method" type="radio" />
                     <div className="flex h-6 w-10 items-center justify-center rounded bg-gray-800">
                       <span className="text-xs font-bold text-white">BANK</span>
                     </div>
@@ -107,9 +107,9 @@ onPay,
             {/* Footer */}
             <div className="border-t border-gray-200 bg-gray-50 p-6 dark:border-gray-800 dark:bg-gray-900">
               <button
-                onClick={onPay}
-                disabled={processing}
                 className="flex w-full items-center justify-center gap-2 rounded-xl bg-gray-900 px-4 py-3 font-semibold text-white hover:bg-gray-800 disabled:opacity-60 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-gray-200"
+                disabled={processing}
+                onClick={onPay}
               >
                 {processing
                   ? "Processing..."

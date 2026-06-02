@@ -34,13 +34,13 @@ export default function PropertyGallery({ property }) {
       <div className="relative group rounded-3xl overflow-hidden shadow-[0_8px_40px_rgba(0,0,0,0.15)] dark:shadow-[0_8px_40px_rgba(0,0,0,0.4)]">
         <ImageGallery
           ref={galleryRef}
-          items={galleryItems}
-          showPlayButton={false}
-          showFullscreenButton={true}
-          showBullets={property.images.length > 1}
-          thumbnailPosition="bottom"
-          lazyLoad={true}
           additionalClass="rounded-3xl bg-white dark:bg-black"
+          items={galleryItems}
+          lazyLoad={true}
+          showBullets={property.images.length > 1}
+          showFullscreenButton={true}
+          showPlayButton={false}
+          thumbnailPosition="bottom"
         />
 
         {/* Floating Badges */}
@@ -49,8 +49,8 @@ export default function PropertyGallery({ property }) {
             {property.images.length} photos
           </span>
           <button
-            onClick={openFullscreen}
             className="px-3 py-1 rounded-full bg-blue-900 text-white text-xs font-semibold shadow-lg"
+            onClick={openFullscreen}
           >
             HD View
           </button>

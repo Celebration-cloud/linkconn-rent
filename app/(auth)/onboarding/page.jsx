@@ -20,8 +20,8 @@ export default function OnboardingPage() {
   return (
     <div className="flex items-center justify-center min-h-[70vh]">
       <Spinner
-        label="Preparing your onboarding experience..."
         color="primary"
+        label="Preparing your onboarding experience..."
       />
     </div>
   );

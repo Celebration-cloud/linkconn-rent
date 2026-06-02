@@ -22,7 +22,7 @@ export default function RentStatusCard() {
 
       <div className="mt-4 space-y-2 text-sm">
         <Row label="Due date" value="Feb 1, 2026" />
-        <Row label="Days left" value="5 days" highlight />
+        <Row highlight label="Days left" value="5 days" />
       </div>
 
       <button className="mt-4 w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white font-medium py-2.5 rounded-xl transition-colors">

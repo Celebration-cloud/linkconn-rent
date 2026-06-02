@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { siteConfig } from "@/config/site";
 import { motion } from "framer-motion";
-import { ThemeSwitch } from "@/components/theme-switch";
 import { ArrowLeft } from "lucide-react";
+
+import { siteConfig } from "@/config/site";
+import { ThemeSwitch } from "@/components/theme-switch";
 
 export default function AuthLayout({ children }) {
   return (
@@ -17,18 +18,18 @@ export default function AuthLayout({ children }) {
 
         {/* Branding content */}
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
           className="relative z-10 flex flex-col items-center text-center px-10"
+          initial={{ opacity: 0, y: 30 }}
+          transition={{ duration: 0.8 }}
         >
           <Image
-            src={siteConfig.logo}
-            alt="LinkConn Rent Logo"
-            width={120}
-            height={120}
-            className="mb-6 drop-shadow-lg"
             priority
+            alt="LinkConn Rent Logo"
+            className="mb-6 drop-shadow-lg"
+            height={120}
+            src={siteConfig.logo}
+            width={120}
           />
           <h1 className="text-3xl font-bold mb-3">Welcome to LinkConn Rent</h1>
           <p className="text-white/90 max-w-sm leading-relaxed">
@@ -47,9 +48,9 @@ export default function AuthLayout({ children }) {
         <div className="absolute top-4 left-4 flex items-center gap-2">
           {/* Back to Home */}
           <Link
-            href="/"
-            className="p-2 rounded-full hover:bg-foreground/10 transition flex items-center gap-1 text-sm font-medium"
             aria-label="Back to Home"
+            className="p-2 rounded-full hover:bg-foreground/10 transition flex items-center gap-1 text-sm font-medium"
+            href="/"
           >
             <motion.div whileHover={{ x: -2 }} whileTap={{ scale: 0.9 }}>
               <ArrowLeft className="w-5 h-5" />
@@ -65,10 +66,10 @@ export default function AuthLayout({ children }) {
 
         {/* Page Content */}
         <motion.div
-          initial={{ opacity: 0, y: 25 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
           className="w-full max-w-md bg-card rounded-2xl shadow-xl p-6 sm:p-8"
+          initial={{ opacity: 0, y: 25 }}
+          transition={{ duration: 0.5 }}
         >
           {children}
         </motion.div>
@@ -77,8 +78,8 @@ export default function AuthLayout({ children }) {
         <footer className="text-center text-xs text-muted-foreground mt-6">
           © {new Date().getFullYear()}{" "}
           <Link
-            href={siteConfig.url || "/"}
             className="text-primary hover:underline"
+            href={siteConfig.url || "/"}
           >
             {siteConfig.name || "LinkConn Rent"}
           </Link>{" "}

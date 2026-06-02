@@ -36,9 +36,9 @@ export default function Featured() {
           className="shadow-lg hover:scale-[1.02] transition-all"
         >
           <Image
-            src={property.image}
             alt={property.name}
             className="w-full h-56 object-cover rounded-t-lg"
+            src={property.image}
           />
           <CardBody>
             <h3 className="text-xl font-semibold mb-2">{property.name}</h3>
@@ -47,7 +47,7 @@ export default function Featured() {
               {property.location}
             </p>
             <p className="font-bold mb-4">{property.price}</p>
-            <Button color="primary" fullWidth>
+            <Button fullWidth color="primary">
               View Details
             </Button>
           </CardBody>

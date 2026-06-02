@@ -20,7 +20,6 @@ import {
   DropdownMenu,
   DropdownItem,
 } from "@heroui/dropdown";
-import { ThemeSwitch } from "@/components/theme-switch";
 import { usePathname, useRouter } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import NextLink from "next/link";
@@ -32,16 +31,18 @@ import {
   Building2,
   User,
   LogIn,
-  Heart,
   LogOut,
   Menu,
 } from "lucide-react";
-import { siteConfig } from "@/config/site";
 import { Avatar } from "@heroui/avatar";
+
+import { siteConfig } from "@/config/site";
+import { ThemeSwitch } from "@/components/theme-switch";
 
 export default function Navbar() {
   const { data: session } = useSession();
   const user = session?.user;
+
   console.log("Navbar session user:", user);
   const pathname = usePathname();
   const router = useRouter();
@@ -65,7 +66,6 @@ export default function Navbar() {
   const searchInput = (
     <Input
       aria-label="Search"
-      placeholder="Search properties..."
       classNames={{
         inputWrapper: "bg-default-100",
         input: "text-sm",
@@ -75,6 +75,7 @@ export default function Navbar() {
           K
         </Kbd>
       }
+      placeholder="Search properties..."
       startContent={
         <Search className="text-base text-default-400 pointer-events-none" />
       }
@@ -88,18 +89,18 @@ export default function Navbar() {
 
   return (
     <HeroUINavbar
+      className="shadow-sm backdrop-blur-md transition-all"
       maxWidth="xl"
       position="sticky"
-      className="shadow-sm backdrop-blur-md transition-all"
     >
       {/* Left section */}
       <NavbarContent justify="start">
         <NavbarBrand className="gap-2 cursor-pointer">
           <NextLink
-            href="/"
             className="flex items-center gap-1 hover:scale-105 transition-transform"
+            href="/"
           >
-            <Image src={siteConfig.logo} alt="Logo" width={30} height={30} />
+            <Image alt="Logo" height={30} src={siteConfig.logo} width={30} />
             <p className="font-bold text-lg">LinkConn Rent</p>
           </NextLink>
         </NavbarBrand>
@@ -108,13 +109,13 @@ export default function Navbar() {
           {navItems.map((item) => (
             <NavbarItem key={item.href}>
               <NextLink
-                href={item.href}
                 className={clsx(
                   "flex items-center gap-1 text-sm transition-colors",
                   pathname === item.href
                     ? "text-primary font-semibold"
-                    : "text-foreground hover:text-primary"
+                    : "text-foreground hover:text-primary",
                 )}
+                href={item.href}
               >
                 {item.icon}
                 {item.label}
@@ -126,8 +127,8 @@ export default function Navbar() {
 
       {/* Right section */}
       <NavbarContent
-        justify="end"
         className="hidden sm:flex items-center gap-4"
+        justify="end"
       >
         <NavbarItem className="hidden lg:flex w-60">{searchInput}</NavbarItem>
         <ThemeSwitch />
@@ -135,11 +136,11 @@ export default function Navbar() {
           <Dropdown placement="bottom-end">
             <DropdownTrigger>
               <Avatar
-                src={user?.image}
                 alt="User Avatar"
-                size="sm"
                 className="cursor-pointer border border-default-200"
                 name={user?.name || "User"}
+                size="sm"
+                src={user?.image}
               />
             </DropdownTrigger>
             <DropdownMenu aria-label="User menu" variant="flat">
@@ -166,12 +167,12 @@ export default function Navbar() {
               as={NextLink}
               href="/auth/login"
               size="sm"
-              variant="flat"
               startContent={<LogIn size={16} />}
+              variant="flat"
             >
               Login
             </Button>
-            <Button as={NextLink} href="/auth/signup" size="sm" color="primary">
+            <Button as={NextLink} color="primary" href="/auth/signup" size="sm">
               Get Started
             </Button>
           </>
@@ -197,13 +198,13 @@ export default function Navbar() {
         {navItems.map((item) => (
           <NavbarMenuItem key={item.href}>
             <Link
-              href={item.href}
               className={clsx(
                 "flex items-center gap-2 text-base",
                 pathname === item.href
                   ? "text-primary font-semibold"
-                  : "text-foreground hover:text-primary"
+                  : "text-foreground hover:text-primary",
               )}
+              href={item.href}
             >
               {item.icon}
               {item.label}
@@ -213,9 +214,9 @@ export default function Navbar() {
         {user ? (
           <NavbarMenuItem>
             <Link
-              onClick={handleLogout}
-              color="danger"
               className="flex items-center gap-2 cursor-pointer"
+              color="danger"
+              onClick={handleLogout}
             >
               <LogOut size={16} /> Logout
             </Link>
@@ -223,9 +224,9 @@ export default function Navbar() {
         ) : (
           <NavbarMenuItem>
             <Link
-              href="/auth/login"
-              color="primary"
               className="flex items-center gap-2"
+              color="primary"
+              href="/auth/login"
             >
               <LogIn size={16} /> Login / Sign Up
             </Link>

@@ -27,12 +27,12 @@ export default function Input({
         )}
 
         <HeroInput
-          type={type}
           className={clsx(
             Icon ? "pl-10" : "pl-3",
             error ? "border-red-500" : "",
-            "rounded-xl"
+            "rounded-xl",
           )}
+          type={type}
           {...props}
         />
       </div>

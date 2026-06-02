@@ -15,6 +15,7 @@ export async function POST(req) {
     });
 
     const data = await res.json();
+
     if (data.verified === true) {
       return NextResponse.json({ verified: true });
     }
@@ -22,9 +23,10 @@ export async function POST(req) {
     return NextResponse.json({ verified: false, error: "Invalid code" });
   } catch (err) {
     console.error("OTP verify failed:", err);
+
     return NextResponse.json(
       { verified: false, error: err.message },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
