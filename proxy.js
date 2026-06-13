@@ -1,73 +1,141 @@
 import { NextResponse } from "next/server";
-import { getToken } from "next-auth/jwt";
 
-const PUBLIC_PATHS = [
+import { auth } from "@/lib/auth/server";
+import { sql } from "@/lib/db";
+
+const FULLY_VERIFIED_REDIRECT = ["/auth/login", "/auth/signup"];
+const TENANT_ONBOARDING_PATHS = [
+  "/onboarding",
+  "/onboarding/tenant",
+  "/onboarding/tenant/employment",
+  "/onboarding/tenant/preference",
+  "/onboarding/tenant/success",
+];
+const LANDLORD_ONBOARDING_PATHS = [
+  "/onboarding",
+  "/onboarding/landlord",
+  "/onboarding/landlord/property",
+  "/onboarding/landlord/payout",
+  "/onboarding/landlord/success",
+];
+
+const EMAIL_UNVERIFIED_ALLOWED = [
   "/",
-  "/auth/login",
-  "/auth/signup",
   "/rentals",
   "/about",
   "/contact",
+  "/properties",
+  "/auth/verify-email",
+  "/auth/forgot-password",
+  "/auth/reset-password",
+];
+
+const PROFILE_UNVERIFIED_ALLOWED = [
+  "/",
+  "/rentals",
+  "/about",
+  "/contact",
+  "/properties",
+  "/onboarding",
+  "/onboarding/tenant",
+  "/onboarding/tenant/employment",
+  "/onboarding/tenant/preference",
+  "/onboarding/tenant/success",
+  "/onboarding/landlord",
+  "/onboarding/landlord/property",
+  "/onboarding/landlord/payout",
+  "/onboarding/landlord/success",
+  "/auth/verify-email",
+  "/auth/forgot-password",
+  "/auth/reset-password",
 ];
 
 export async function proxy(req) {
   const { pathname } = req.nextUrl;
-  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
 
-  // Public routes
-  if (PUBLIC_PATHS.some((p) => pathname.startsWith(p))) {
-    if (token && ["/auth/login", "/auth/signup"].includes(pathname)) {
-      return NextResponse.redirect(
-        new URL(`/dashboard/${token.role}`, req.url),
-      );
+  const session = await auth.getSession({ headers: req.headers });
+  const hasSession = session && session.user;
+
+  if (!hasSession) {
+    return NextResponse.next();
+  }
+
+  const userId = session.user.id;
+  let profileVerified = false;
+  let userRole = "tenant";
+
+  try {
+    const profiles = await sql`
+      SELECT verified, role FROM profiles WHERE id = ${userId} LIMIT 1
+    `;
+    if (profiles.length > 0) {
+      profileVerified = profiles[0].verified;
+      userRole = profiles[0].role || "tenant";
+    }
+  } catch (err) {
+    console.error("Proxy DB fetch error:", err);
+  }
+
+  const emailVerified = !!session.user.emailVerified;
+  const profileComplete = profileVerified;
+
+  if (!emailVerified) {
+    const isAllowed = EMAIL_UNVERIFIED_ALLOWED.some(
+      (p) => pathname === p || pathname.startsWith(p + "/"),
+    );
+
+    if (!isAllowed) {
+      return NextResponse.redirect(new URL("/auth/verify-email", req.url));
     }
 
     return NextResponse.next();
   }
 
-  // Protected routes
-  if (
-    pathname.startsWith("/dashboard") ||
-    pathname.startsWith("/onboarding") ||
-    pathname.startsWith("/pending") ||
-    pathname.startsWith("/rejected")
-  ) {
-    if (!token) {
-      return NextResponse.redirect(new URL("/auth/login", req.url));
+  if (!profileComplete) {
+    const allowedOnboardingPaths =
+      userRole === "landlord"
+        ? LANDLORD_ONBOARDING_PATHS
+        : TENANT_ONBOARDING_PATHS;
+
+    const isAllowedOnboardingPath = allowedOnboardingPaths.some(
+      (p) => pathname === p || pathname.startsWith(p + "/"),
+    );
+
+    if (pathname.startsWith("/onboarding") && !isAllowedOnboardingPath) {
+      return NextResponse.redirect(
+        new URL(`/onboarding/${userRole}`, req.url),
+      );
     }
 
-    const { role, onboarded, verification_status } = token;
+    const isAllowed = PROFILE_UNVERIFIED_ALLOWED.some(
+      (p) => pathname === p || pathname.startsWith(p + "/"),
+    );
 
-    // 1. Onboarding check first
-    if (!onboarded && !pathname.startsWith(`/onboarding/${role}`)) {
-      return NextResponse.redirect(new URL(`/onboarding/${role}`, req.url));
+    if (!isAllowed) {
+      return NextResponse.redirect(new URL("/onboarding", req.url));
     }
 
-    // 2. If onboarded but verification is pending or rejected
-    if (
-      onboarded &&
-      verification_status === "pending" &&
-      !pathname.startsWith(`/pending/${role}`)
-    ) {
-      return NextResponse.redirect(new URL(`/pending/${role}`, req.url));
+    for (const path of FULLY_VERIFIED_REDIRECT) {
+      if (pathname === path || pathname.startsWith(path + "/")) {
+        return NextResponse.redirect(new URL("/onboarding", req.url));
+      }
     }
 
-    if (
-      onboarded &&
-      verification_status === "rejected" &&
-      !pathname.startsWith(`/rejected/${role}`)
-    ) {
-      return NextResponse.redirect(new URL(`/rejected/${role}`, req.url));
-    }
+    return NextResponse.next();
+  }
 
-    // 3. If verified, redirect to dashboard
-    if (
-      onboarded &&
-      verification_status === "approved" &&
-      pathname.startsWith(`/onboarding/${role}`)
-    ) {
-      return NextResponse.redirect(new URL(`/dashboard/${role}`, req.url));
+  if (pathname.startsWith("/onboarding")) {
+    return NextResponse.redirect(new URL("/dashboard", req.url));
+  }
+
+  for (const path of FULLY_VERIFIED_REDIRECT) {
+    if (pathname === path || pathname.startsWith(path + "/")) {
+      return NextResponse.redirect(new URL("/dashboard", req.url));
     }
+  }
+
+  if (pathname.startsWith("/dashboard")) {
+    return NextResponse.next();
   }
 
   return NextResponse.next();
@@ -76,10 +144,12 @@ export async function proxy(req) {
 export const config = {
   matcher: [
     "/dashboard/:path*",
+    "/auth/:path*",
     "/onboarding/:path*",
-    "/pending/:path*",
-    "/rejected/:path*",
-    "/auth/login",
-    "/auth/signup",
+    "/",
+    "/rentals",
+    "/about",
+    "/contact",
+    "/properties",
   ],
 };

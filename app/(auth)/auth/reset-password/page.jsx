@@ -5,15 +5,15 @@ import { Button, Input, Card, CardBody } from "@heroui/react";
 import { motion } from "framer-motion";
 import { useSearchParams, useRouter } from "next/navigation";
 
-import { supabase } from "@/lib/supabaseClient";
+import { authClient } from "@/lib/auth/client";
 import { showToast } from "@/components/ui/Toast";
 
 export default function ResetPasswordPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const accessToken = searchParams.get("access_token"); // Supabase recovery token
+  const token = searchParams.get("token"); // Neon Auth token
 
-  console.log("Access Token:", accessToken); // Debugging line
+  console.log("Reset Token:", token); // Debugging line
   const {
     register,
     handleSubmit,
@@ -21,19 +21,17 @@ export default function ResetPasswordPage() {
   } = useForm();
 
   const onSubmit = async ({ password }) => {
-    if (!accessToken) {
-      showToast({ title: "Invalid link", type: "error" });
+    if (!token) {
+      showToast({ title: "Invalid or missing token", type: "error" });
 
       return;
     }
 
     try {
-      const { error } = await supabase.auth.updateUser(
-        {
-          password,
-        },
-        { accessToken },
-      );
+      const { error } = await authClient.resetPassword({
+        newPassword: password,
+        token,
+      });
 
       if (error) throw error;
 

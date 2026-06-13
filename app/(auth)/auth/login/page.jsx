@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDispatch, useSelector } from "react-redux";
@@ -25,7 +24,6 @@ export default function LoginPage() {
   const dispatch = useDispatch();
   const { loading } = useSelector((state) => state.user);
   const router = useRouter();
-  const [role, setRole] = useState("tenant");
 
   const {
     control,
@@ -43,14 +41,14 @@ export default function LoginPage() {
 
   const onSubmit = (data) => {
     dispatch(loginUser(data)).then((res) => {
-      if (!res.error && res.payload?.user) {
-        const userData = res.payload;
-
-        router.push(
-          userData.user.onboarded
-            ? `/dashboard/${userData.user.role}`
-            : `/onboarding/${userData.user.role}`,
-        );
+      if (!res.error) {
+        if (res.payload?.needsVerification) {
+          router.push(
+            `/auth/verify-email?email=${encodeURIComponent(data.email)}`,
+          );
+        } else if (res.payload?.user) {
+          router.push("/dashboard");
+        }
       }
     });
   };
@@ -112,7 +110,6 @@ export default function LoginPage() {
                   onSelectionChange={(keys) => {
                     const selected = Array.from(keys)[0];
 
-                    setRole(selected);
                     field.onChange(selected);
                   }}
                 >

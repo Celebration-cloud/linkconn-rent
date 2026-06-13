@@ -5,17 +5,19 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion } from "framer-motion";
 import { Select, SelectItem, Card, CardHeader, CardBody } from "@heroui/react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import { tenantEmploymentSchema } from "@/lib/zodSchemas";
 import { useTenantOnboardStore } from "@/store/tenantOnboardStore";
+import { uploadFile } from "@/lib/puterClient";
 
 export default function TenantEmploymentPage() {
   const router = useRouter();
   const { identity, employment, setEmployment, step, setStep, preference } =
     useTenantOnboardStore();
+  const [isUploading, setIsUploading] = useState(false);
 
   const form = useForm({
     resolver: zodResolver(tenantEmploymentSchema),
@@ -31,13 +33,9 @@ export default function TenantEmploymentPage() {
 
   useEffect(() => {
     if (!identity) {
-      router.replace("/onboarding/tenant/identity");
-    } else if (!employment) {
-      router.replace("/onboarding/tenant/employment");
-    } else if (!preference) {
+      router.replace("/onboarding/tenant");
+    } else if (preference && !employment) {
       router.replace("/onboarding/tenant/preference");
-    } else {
-      router.replace("/onboarding/tenant/success");
     }
   }, [identity, employment, preference, router]);
 
@@ -46,7 +44,28 @@ export default function TenantEmploymentPage() {
   }, [setStep]);
 
   const onSubmit = async (values) => {
-    setEmployment(values);
+    setIsUploading(true);
+    let uploadedUrl = null;
+
+    if (values.payslip?.[0]) {
+      const file = values.payslip[0];
+      const path = `tenants/payslip_${Date.now()}_${file.name}`;
+      try {
+        const { url } = await uploadFile({ path, file });
+        uploadedUrl = url;
+      } catch (err) {
+        console.error("Payslip upload failed:", err);
+        alert("Failed to upload payslip. Please try again.");
+        setIsUploading(false);
+        return;
+      }
+    }
+
+    setEmployment({
+      ...values,
+      payslip: uploadedUrl,
+    });
+    setIsUploading(false);
     router.push("/onboarding/tenant/preference");
   };
 
@@ -182,8 +201,8 @@ export default function TenantEmploymentPage() {
             )}
 
             {/* Submit */}
-            <Button className="w-full mt-4" type="submit">
-              Continue to Preference Setup
+            <Button className="w-full mt-4" type="submit" disabled={isUploading}>
+              {isUploading ? "Uploading document..." : "Continue to Preference Setup"}
             </Button>
           </form>
         </CardBody>

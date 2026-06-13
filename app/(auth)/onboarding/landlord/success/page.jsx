@@ -21,7 +21,7 @@ export default function LandlordSuccessPage() {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      // resetOnboarding(); // clear onboarding state
+      resetOnboarding(); // clear onboarding state
       router.push(`/pending/landlord`); // redirect to dashboard
     }, 3000);
 

@@ -21,7 +21,6 @@ import {
   DropdownItem,
 } from "@heroui/dropdown";
 import { usePathname, useRouter } from "next/navigation";
-import { useSession, signOut } from "next-auth/react";
 import NextLink from "next/link";
 import { useState } from "react";
 import clsx from "clsx";
@@ -36,14 +35,13 @@ import {
 } from "lucide-react";
 import { Avatar } from "@heroui/avatar";
 
+import { useSession, signOut } from "@/lib/auth/client";
 import { siteConfig } from "@/config/site";
 import { ThemeSwitch } from "@/components/theme-switch";
 
 export default function Navbar() {
   const { data: session } = useSession();
   const user = session?.user;
-
-  console.log("Navbar session user:", user);
   const pathname = usePathname();
   const router = useRouter();
   const [showSearch, setShowSearch] = useState(false);
@@ -55,7 +53,7 @@ export default function Navbar() {
     ...(user
       ? [
           {
-            href: `/dashboard?role=${user.role}`,
+            href: `/dashboard`,
             label: "Dashboard",
             icon: <User size={16} />,
           },
@@ -66,6 +64,7 @@ export default function Navbar() {
   const searchInput = (
     <Input
       aria-label="Search"
+      aria-labelledby="Search"
       classNames={{
         inputWrapper: "bg-default-100",
         input: "text-sm",
@@ -84,7 +83,8 @@ export default function Navbar() {
   );
 
   const handleLogout = async () => {
-    await signOut({ redirect: true, callbackUrl: "/" });
+    await signOut();
+    router.push("/");
   };
 
   return (
@@ -93,7 +93,6 @@ export default function Navbar() {
       maxWidth="xl"
       position="sticky"
     >
-      {/* Left section */}
       <NavbarContent justify="start">
         <NavbarBrand className="gap-2 cursor-pointer">
           <NextLink
@@ -125,7 +124,6 @@ export default function Navbar() {
         </ul>
       </NavbarContent>
 
-      {/* Right section */}
       <NavbarContent
         className="hidden sm:flex items-center gap-4"
         justify="end"
@@ -149,7 +147,7 @@ export default function Navbar() {
               </DropdownItem>
               <DropdownItem
                 key="dashboard"
-                onClick={() => router.push(`/dashboard?role=${user.role}`)}
+                onClick={() => router.push("/dashboard")}
               >
                 Dashboard
               </DropdownItem>
@@ -179,7 +177,6 @@ export default function Navbar() {
         )}
       </NavbarContent>
 
-      {/* Mobile controls */}
       <NavbarContent className="sm:hidden basis-1 pl-2" justify="end">
         <ThemeSwitch />
         <Button
@@ -192,7 +189,6 @@ export default function Navbar() {
         <NavbarMenuToggle icon={<Menu />} />
       </NavbarContent>
 
-      {/* Mobile menu */}
       <NavbarMenu>
         {showSearch && <div className="p-3">{searchInput}</div>}
         {navItems.map((item) => (

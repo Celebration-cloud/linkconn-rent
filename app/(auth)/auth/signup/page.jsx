@@ -68,11 +68,13 @@ export default function SignupPage() {
 
     dispatch(signupUser(formData)).then((res) => {
       if (!res.error) {
-        router.push(
-          data.onboarded
-            ? `/dashboard/${data.role}`
-            : `/onboarding/${data.role}`,
-        );
+        if (res.payload?.needsVerification) {
+          router.push(
+            `/auth/verify-email?email=${encodeURIComponent(data.email)}`,
+          );
+        } else {
+          router.push("/dashboard");
+        }
       }
     });
   };

@@ -3,12 +3,12 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { SearchX, Home } from "lucide-react";
-import { useSession } from "next-auth/react";
 
+import { useSession } from "@/lib/auth/client";
 import Button from "@/components/ui/Button";
 
 export default function NotFound() {
-  const { data: session, status } = useSession();
+  const { data: session, isPending } = useSession();
 
   return (
     <motion.div
@@ -28,7 +28,7 @@ export default function NotFound() {
       </p>
 
       <div className="flex flex-col sm:flex-row gap-3">
-        <Link href={`/dashboard?role=${session?.user?.role}`}>
+        <Link href={`/dashboard`}>
           <Button className="flex items-center gap-2">
             <Home size={16} />
             Go to Dashboard

@@ -52,6 +52,8 @@
     "@heroui/user": "2.2.22",
     "@hookform/resolvers": "^5.2.2",
     "@internationalized/date": "^3.10.0",
+    "@neondatabase/auth": "^0.4.1-beta",
+    "@neondatabase/serverless": "^1.1.0",
     "@react-aria/i18n": "^3.12.13",
     "@react-aria/ssr": "3.9.10",
     "@react-aria/visually-hidden": "3.8.28",

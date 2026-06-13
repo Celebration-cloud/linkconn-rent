@@ -13,6 +13,7 @@ import Input from "@/components/ui/Input";
 import { AppTextarea } from "@/components/ui/Textarea";
 import { landlordPropertySchema } from "@/lib/zodSchemas";
 import { useLandlordOnboardStore } from "@/store/useLandlordOnboardStore";
+import { uploadFile } from "@/lib/puterClient";
 
 export default function LandlordPropertySetup() {
   const router = useRouter();
@@ -48,18 +49,35 @@ export default function LandlordPropertySetup() {
     },
   });
 
-  const onSubmit = (data) => {
+  const onSubmit = async (data) => {
     setIsSubmitting(true);
 
-    // Save property data to Zustand
-    setProperty(data);
-
-    // Simulate API call or next step
-    setTimeout(() => {
+    const uploadedUrls = [];
+    try {
+      if (data.images && data.images.length > 0) {
+        for (let i = 0; i < data.images.length; i++) {
+          const file = data.images[i];
+          const path = `properties/prop_${Date.now()}_${i}_${file.name}`;
+          const { url } = await uploadFile({ path, file });
+          uploadedUrls.push(url);
+        }
+      }
+    } catch (err) {
+      console.error("Property images upload failed:", err);
+      alert("Failed to upload property images. Please try again.");
       setIsSubmitting(false);
-      nextStep();
-      router.push("/onboarding/landlord/payout");
-    }, 500);
+      return;
+    }
+
+    // Save property data to Zustand
+    setProperty({
+      ...data,
+      images: uploadedUrls,
+    });
+
+    setIsSubmitting(false);
+    nextStep();
+    router.push("/onboarding/landlord/payout");
   };
 
   return (

@@ -22,12 +22,12 @@ export default function TenantSuccessPage() {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      // resetOnboarding();
+      resetOnboarding();
       router.push(`/pending/tenant`);
     }, 3000);
 
     return () => clearTimeout(timer);
-  }, [router]);
+  }, [router, resetOnboarding]);
 
   return (
     <motion.div

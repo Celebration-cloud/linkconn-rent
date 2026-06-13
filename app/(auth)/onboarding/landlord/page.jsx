@@ -11,6 +11,7 @@ import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import { landlordIdentitySchema } from "@/lib/zodSchemas";
 import { useLandlordOnboardStore } from "@/store/useLandlordOnboardStore";
+import { uploadFile } from "@/lib/puterClient";
 
 export default function LandlordIdentityPage() {
   const router = useRouter();
@@ -46,18 +47,43 @@ export default function LandlordIdentityPage() {
     },
   });
 
-  const onSubmit = (data) => {
+  const onSubmit = async (data) => {
     setIsSubmitting(true);
 
-    // Save to Zustand
-    setIdentity(data);
+    let idUrl = null;
+    let docUrl = null;
 
-    // Simulate API or next step
-    setTimeout(() => {
+    try {
+      if (data.idFile?.[0]) {
+        const file = data.idFile[0];
+        const path = `landlords/id_${Date.now()}_${file.name}`;
+        const { url } = await uploadFile({ path, file });
+        idUrl = url;
+      }
+
+      if (data.landDoc?.[0]) {
+        const file = data.landDoc[0];
+        const path = `landlords/doc_${Date.now()}_${file.name}`;
+        const { url } = await uploadFile({ path, file });
+        docUrl = url;
+      }
+    } catch (err) {
+      console.error("Landlord file upload failed:", err);
+      alert("Failed to upload verification documents. Please try again.");
       setIsSubmitting(false);
-      nextStep();
-      router.push("/onboarding/landlord/property");
-    }, 500);
+      return;
+    }
+
+    // Save to Zustand
+    setIdentity({
+      ...data,
+      idFile: idUrl,
+      landDoc: docUrl,
+    });
+
+    setIsSubmitting(false);
+    nextStep();
+    router.push("/onboarding/landlord/property");
   };
 
   return (

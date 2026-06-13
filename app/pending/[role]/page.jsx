@@ -1,8 +1,8 @@
 "use client";
 import React from "react";
-import { signOut, useSession } from "next-auth/react";
 import { Loader2, ShieldCheck, LogOut } from "lucide-react";
 
+import { signOut, useSession } from "@/lib/auth/client";
 import Button from "@/components/ui/Button";
 
 export default function PendingPage({ params }) {
@@ -36,7 +36,10 @@ export default function PendingPage({ params }) {
 
         <Button
           className="inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
-          onPress={() => signOut({ redirect: true })}
+          onPress={async () => {
+            await signOut();
+            window.location.href = "/";
+          }}
         >
           <LogOut className="w-4 h-4" />
           Logout

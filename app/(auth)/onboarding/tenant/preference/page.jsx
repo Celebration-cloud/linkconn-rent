@@ -25,7 +25,7 @@ import { useTenantOnboardStore } from "@/store/tenantOnboardStore";
 export default function TenantPreference() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const { preference, setPreference, step, setStep, reset } =
+  const { preference, setPreference, step, setStep } =
     useTenantOnboardStore();
 
   const {
@@ -55,13 +55,34 @@ export default function TenantPreference() {
 
     console.log("✅ Tenant Preferences:", values);
 
-    // Optionally send all onboarding data to backend here
-    // const payload = useTenantOnboardStore.getState();
-    // await fetch("/api/onboarding/tenant", { method: "POST", body: JSON.stringify(payload) });
+    const state = useTenantOnboardStore.getState();
+    const payload = {
+      identity: state.identity,
+      employment: state.employment,
+      preference: values,
+    };
 
-    setTimeout(() => {
+    try {
+      const res = await fetch("/api/onboarding/tenant", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const json = await res.json();
+      if (!res.ok) {
+        throw new Error(json.error || "Onboarding submission failed");
+      }
+
       router.push("/onboarding/tenant/success");
-    }, 1000);
+    } catch (err) {
+      console.error("Onboarding failed:", err);
+      alert(err.message || "Failed to complete onboarding. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

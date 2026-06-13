@@ -7,24 +7,23 @@ import { motion } from "framer-motion";
 import { Select, SelectItem, Card, CardHeader, CardBody } from "@heroui/react";
 import { useState, useEffect } from "react";
 import { CheckCircle2 } from "lucide-react";
-import { useSession } from "next-auth/react";
 
+import { useSession } from "@/lib/auth/client";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import { tenantIdentitySchema } from "@/lib/zodSchemas";
 import { useTenantOnboardStore } from "@/store/tenantOnboardStore";
-
-// import { initPuter, uploadFile } from "@/lib/puterClient";
+import { uploadFile } from "@/lib/puterClient";
 
 export default function TenantIdentityPage() {
   const router = useRouter();
   const { data } = useSession();
 
-  console.log("Session data:", data);
   const [otpVerified, setOtpVerified] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
   const [pinId, setPinId] = useState("");
   const [otp, setOtp] = useState("");
+  const [isUploading, setIsUploading] = useState(false);
   const { identity, setIdentity, step, setStep, employment, preference } =
     useTenantOnboardStore();
 
@@ -33,7 +32,7 @@ export default function TenantIdentityPage() {
     defaultValues: identity || {
       fullName: data?.user?.name || "",
       phone: "",
-      address: data?.user?.address || "",
+      address: "",
       idType: "",
       idUpload: [],
       confirm: false,
@@ -45,103 +44,76 @@ export default function TenantIdentityPage() {
 
     if (!phone) return alert("Enter phone number first");
 
-    const res = await fetch("/api/send-otp", {
+    const res = await fetch("/api/otp/send-otp", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ phone }),
     });
 
-    const data = await res.json();
+    const result = await res.json();
 
-    if (data.success) {
+    if (result.success) {
       setOtpSent(true);
-      setPinId(data.pinId);
+      setPinId(result.pinId);
     } else {
       alert("Failed to send OTP");
     }
   };
 
   const handleVerifyOtp = async () => {
-    const res = await fetch("/api/verify-otp", {
+    const res = await fetch("/api/otp/verify-otp", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ pinId, pin: otp }),
     });
 
-    const data = await res.json();
+    const result = await res.json();
 
-    if (data.verified) setOtpVerified(true);
+    if (result.verified) setOtpVerified(true);
     else alert("Invalid OTP");
   };
 
-  useEffect(() => {
-    if (!identity) {
-      router.replace("/onboarding/tenant");
-    } else if (!employment) {
-      router.replace("/onboarding/tenant/employment");
-    } else if (!preference) {
-      router.replace("/onboarding/tenant/preference");
-    } else {
-      router.replace("/onboarding/tenant/success");
-    }
-  }, [identity, employment, preference, router]);
-
-  // Restore step on mount
   useEffect(() => {
     setStep(1);
   }, [setStep]);
 
   const handleVerifyPhone = async () => {
-    // Simulate OTP verification
     setTimeout(() => setOtpVerified(true), 1000);
   };
 
   const onSubmit = async (values) => {
     if (!otpVerified) {
-      alert("Please verify your phone number via OTP first.");
+      alert("Please verify your phone number first.");
 
       return;
     }
 
-    try {
-      // await initPuter();
+    setIsUploading(true);
+    let uploadedUrl = null;
 
-      // const files = values?.idUpload || [];
-      // const uploadedFiles = [];
+    if (values.idUpload?.[0]) {
+      const file = values.idUpload[0];
+      const path = `tenants/id_${Date.now()}_${file.name}`;
 
-      // if (files.length > 0) {
-      //   for (const file of files) {
-      //     if (!file?.name) continue;
+      try {
+        const { url } = await uploadFile({ path, file });
 
-      //     const userId = data?.user?.id || "unknown_user";
-      //     const safeName = file.name.replace(/[^\w.-]/g, "_"); // sanitize filename
-      //     const path = `tenants/${userId}/ids/${safeName}`;
+        uploadedUrl = url;
+      } catch (err) {
+        console.error("ID upload failed:", err);
+        alert("Failed to upload ID document. Please try again.");
+        setIsUploading(false);
 
-      //     console.log("⬆️ Uploading:", path);
-
-      //     try {
-      //       const { url } = await uploadFile({ path, file });
-      //       if (url) uploadedFiles.push({ name: file.name, url });
-      //     } catch (err) {
-      //       console.error("❌ Upload failed:", err.message || err);
-      //     }
-      //   }
-
-      // } else {
-      //   console.warn("No ID files selected for upload.");
-      // }
-
-      // console.log("✅ Uploaded ID files:", uploadedFiles);
-
-      setIdentity({
-        ...values,
-      });
-
-      router.push("/onboarding/tenant/employment");
-    } catch (err) {
-      console.error("❌ Submission failed:", err.message || err);
-      alert("Something went wrong during upload. Try again.");
+        return;
+      }
     }
+
+    setIdentity({
+      ...values,
+      idUpload: uploadedUrl,
+    });
+    setIsUploading(false);
+    router.push("/onboarding/tenant/employment");
   };
 
   return (
@@ -151,7 +123,6 @@ export default function TenantIdentityPage() {
       initial={{ opacity: 0, y: 25 }}
       transition={{ duration: 0.5 }}
     >
-      {/* Step tracker */}
       <div className="mb-4 flex justify-between items-center">
         <div
           className={`w-1/3 h-2 rounded ${step >= 1 ? "bg-primary" : "bg-gray-300"}`}
@@ -176,7 +147,6 @@ export default function TenantIdentityPage() {
 
         <CardBody>
           <form className="space-y-5" onSubmit={form.handleSubmit(onSubmit)}>
-            {/* Full Name */}
             <div>
               <label>Full Name</label>
               <Input
@@ -191,7 +161,6 @@ export default function TenantIdentityPage() {
               )}
             </div>
 
-            {/* Phone + OTP */}
             <div>
               <label>Phone Number</label>
               <div className="flex gap-2 mt-1">
@@ -202,15 +171,26 @@ export default function TenantIdentityPage() {
                 <Button
                   type="button"
                   variant={otpVerified ? "success" : "outline"}
-                  onClick={handleVerifyPhone}
+                  onClick={otpSent ? handleVerifyOtp : handleSendOtp}
                 >
                   {otpVerified ? (
                     <CheckCircle2 className="w-5 h-5 text-green-500" />
+                  ) : otpSent ? (
+                    "Verify OTP"
                   ) : (
                     "Verify"
                   )}
                 </Button>
               </div>
+              {otpSent && !otpVerified && (
+                <Input
+                  className="mt-2"
+                  maxLength={6}
+                  placeholder="Enter OTP code"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value)}
+                />
+              )}
               {form.formState.errors.phone && (
                 <p className="text-red-500 text-sm mt-1">
                   {form.formState.errors.phone.message}
@@ -218,7 +198,6 @@ export default function TenantIdentityPage() {
               )}
             </div>
 
-            {/* Address */}
             <div>
               <label>Address</label>
               <Input
@@ -233,7 +212,6 @@ export default function TenantIdentityPage() {
               )}
             </div>
 
-            {/* ID Type */}
             <div>
               <label>Identification Type</label>
               <Select
@@ -258,7 +236,6 @@ export default function TenantIdentityPage() {
               )}
             </div>
 
-            {/* ID Upload */}
             <div>
               <label>Upload ID Document</label>
               <Input
@@ -275,7 +252,6 @@ export default function TenantIdentityPage() {
               )}
             </div>
 
-            {/* Confirm Checkbox */}
             <div className="flex items-center gap-2 mt-2">
               <input
                 type="checkbox"
@@ -292,8 +268,12 @@ export default function TenantIdentityPage() {
               </p>
             )}
 
-            <Button className="w-full mt-4" type="submit">
-              Continue to Employment Info
+            <Button
+              className="w-full mt-4"
+              disabled={isUploading}
+              type="submit"
+            >
+              {isUploading ? "Uploading ID..." : "Continue to Employment Info"}
             </Button>
           </form>
         </CardBody>

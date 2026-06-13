@@ -1,14 +1,46 @@
-import UserAccessGuard from "@/components/shared/auth/UserAccessGuard";
+import { redirect } from "next/navigation";
 
-export default function DashboardEntry() {
-  return (
-    <UserAccessGuard>
-      <div className="p-6">
-        <h1 className="text-xl font-semibold">Welcome to your dashboard</h1>
-        <p className="text-muted-foreground text-sm">
-          Redirecting if access is restricted...
-        </p>
-      </div>
-    </UserAccessGuard>
-  );
+import { auth } from "@/lib/auth/server";
+import { sql } from "@/lib/db";
+
+export default async function DashboardEntry() {
+  const sessionData = await auth.getSession();
+  const session = sessionData.data;
+
+  if (!session?.user) {
+    redirect("/auth/login");
+  }
+
+  const userId = session.user.id;
+  let role = "tenant";
+  let onboarded = false;
+  let verified = false;
+
+  try {
+    const profiles = await sql`
+      SELECT role, onboarded, verified FROM profiles WHERE id = ${userId} LIMIT 1
+    `;
+    if (profiles.length > 0) {
+      const profile = profiles[0];
+      role = profile.role || "tenant";
+      onboarded = profile.onboarded;
+      verified = profile.verified;
+    } else {
+      // If no profile yet, they need onboarding
+      redirect("/onboarding/tenant");
+    }
+  } catch (err) {
+    console.error("Dashboard profile fetch error:", err);
+    redirect("/auth/login");
+  }
+
+  if (!onboarded) {
+    redirect(`/onboarding/${role}`);
+  }
+
+  if (!verified) {
+    redirect(`/pending/${role}`);
+  }
+
+  redirect(`/dashboard/${role}`);
 }

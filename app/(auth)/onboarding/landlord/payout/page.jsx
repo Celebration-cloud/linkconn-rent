@@ -38,15 +38,39 @@ export default function LandlordPayoutSetup() {
     form.setValue("accountName", "John Doe");
   };
 
-  const onSubmit = (values) => {
+  const onSubmit = async (values) => {
     setIsSubmitting(true);
     setPayout(values);
 
-    setTimeout(() => {
-      setIsSubmitting(false);
+    const state = useLandlordOnboardStore.getState();
+    const payload = {
+      identity: state.identity,
+      property: state.property,
+      payout: values,
+    };
+
+    try {
+      const res = await fetch("/api/onboarding/landlord", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const json = await res.json();
+      if (!res.ok) {
+        throw new Error(json.error || "Onboarding submission failed");
+      }
+
       nextStep();
       router.push("/onboarding/landlord/success");
-    }, 500);
+    } catch (err) {
+      console.error("Landlord onboarding failed:", err);
+      alert(err.message || "Failed to complete onboarding. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (

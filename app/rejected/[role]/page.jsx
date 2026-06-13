@@ -1,8 +1,9 @@
 "use client";
 import React from "react";
-import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { XCircle, LogIn } from "lucide-react";
+
+import { useSession } from "@/lib/auth/client";
 
 export default function RejectedPage({ params }) {
   // ✅ unwrap params for Next.js 15+

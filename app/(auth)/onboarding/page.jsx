@@ -1,28 +1,28 @@
-"use client";
+import { redirect } from "next/navigation";
 
-import { useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { Spinner } from "@heroui/react";
+import { auth } from "@/lib/auth/server";
+import { sql } from "@/lib/db";
 
-export default function OnboardingPage() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const role = searchParams.get("role");
+export default async function OnboardingPage() {
+  const session = await auth.getSession();
 
-  useEffect(() => {
-    if (role) {
-      router.replace(`/onboarding/${role}`);
-    } else {
-      router.replace("/auth/signup");
+  if (!session?.user) {
+    redirect("/auth/login");
+  }
+
+  const userId = session.user.id;
+  let role = "tenant";
+
+  try {
+    const profiles = await sql`
+      SELECT role FROM profiles WHERE id = ${userId} LIMIT 1
+    `;
+    if (profiles.length > 0) {
+      role = profiles[0].role || "tenant";
     }
-  }, [role, router]);
+  } catch (err) {
+    console.error("Onboarding role fetch error:", err);
+  }
 
-  return (
-    <div className="flex items-center justify-center min-h-[70vh]">
-      <Spinner
-        color="primary"
-        label="Preparing your onboarding experience..."
-      />
-    </div>
-  );
+  redirect(`/onboarding/${role}`);
 }

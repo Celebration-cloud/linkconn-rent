@@ -1,29 +1,71 @@
 "use client";
 
-import { useSearchParams, useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/lib/auth/client";
+import { useEffect, useState } from "react";
+import { useRouter, usePathname } from "next/navigation";
 
 export default function DashboardLayout({ children }) {
-  const searchParams = useSearchParams();
-  const role = searchParams.get("role");
+  const { data: session, isPending } = useSession();
   const router = useRouter();
-  const { data: session, status } = useSession();
+  const pathname = usePathname();
+  const [profile, setProfile] = useState(null);
+  const [loadingProfile, setLoadingProfile] = useState(true);
 
-  // useEffect(() => {
-  //   if (status === "loading") return;
+  useEffect(() => {
+    if (isPending) return;
 
-  //   // No session, kick to login
-  //   if (!session?.user) {
-  //     router.replace("/auth/login");
-  //     return;
-  //   }
+    if (!session?.user) {
+      router.push("/auth/login");
+      return;
+    }
 
-  //   // Missing role in URL
-  //   if (!role) {
-  //     router.replace("/");
-  //     return;
-  //   }
-  // }, [status, session, role, router]);
+    async function checkProfile() {
+      try {
+        const res = await fetch("/api/auth/profile");
+        const json = await res.json();
+        
+        if (json.success && json.data) {
+          const uProfile = json.data;
+          setProfile(uProfile);
+          
+          const role = uProfile.role || "tenant";
+          
+          if (!uProfile.onboarded) {
+            router.push(`/onboarding/${role}`);
+            return;
+          }
+          
+          if (!uProfile.verified) {
+            router.push(`/pending/${role}`);
+            return;
+          }
+          
+          // Verify they aren't accessing another role's dashboard
+          if (pathname.startsWith("/dashboard/") && !pathname.startsWith(`/dashboard/${role}`)) {
+            router.push(`/dashboard/${role}`);
+            return;
+          }
+        } else {
+          // Fallback to onboarding if no profile found
+          router.push("/onboarding/tenant");
+        }
+      } catch (err) {
+        console.error("Error checking profile:", err);
+      } finally {
+        setLoadingProfile(false);
+      }
+    }
+
+    checkProfile();
+  }, [session, isPending, pathname, router]);
+
+  if (isPending || loadingProfile) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <p className="text-sm text-muted-foreground">Loading dashboard...</p>
+      </div>
+    );
+  }
 
   return <div className="min-h-screen">{children}</div>;
 }
