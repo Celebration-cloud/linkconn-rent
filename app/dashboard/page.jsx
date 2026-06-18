@@ -2,9 +2,12 @@ import { redirect } from "next/navigation";
 
 import { auth } from "@/lib/auth/server";
 import { sql } from "@/lib/db";
+import { headers } from "next/headers";
 
 export default async function DashboardEntry() {
-  const sessionData = await auth.getSession();
+  
+
+const sessionData = await auth.getSession({ headers: headers() });
   const session = sessionData.data;
 
   if (!session?.user) {

@@ -160,7 +160,7 @@ export default function VerifyEmailPage() {
           description: "Could not identify email address to verify.",
           type: "error",
         });
-
+        setVerifyingOtp(false);
         return;
       }
 
@@ -230,7 +230,14 @@ export default function VerifyEmailPage() {
   const handleResend = async () => {
     const emailToUse = session?.user?.email || emailParam;
 
-    if (!emailToUse) return;
+    if (!emailToUse) {
+      showToast({
+        title: "Missing email",
+        description: "No email address available to resend verification.",
+        type: "error",
+      });
+      return;
+    }
     setResending(true);
     try {
       const { error } = await authClient.emailOtp.sendVerificationOtp({

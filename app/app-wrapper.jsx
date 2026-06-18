@@ -22,6 +22,9 @@ export default function AppWrapper({ children }) {
     ? hiddenLayoutRoutes.some((route) => pathname.startsWith(route))
     : false;
 
+  // Homepage needs full-width edge-to-edge sections — skip the container constraint
+  const isHomePage = pathname === "/";
+
   return (
     <div className="relative flex flex-col min-h-screen">
       {!hideLayout && <Navbar />}
@@ -29,7 +32,7 @@ export default function AppWrapper({ children }) {
       <main
         className={clsx(
           "flex-grow",
-          !hideLayout && "container mx-auto max-w-7xl pt-10",
+          !hideLayout && !isHomePage && "container mx-auto max-w-7xl pt-10",
         )}
       >
         {children}

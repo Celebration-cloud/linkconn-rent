@@ -2,9 +2,10 @@ import { redirect } from "next/navigation";
 
 import { auth } from "@/lib/auth/server";
 import { sql } from "@/lib/db";
+import { headers } from "next/headers";
 
 export default async function OnboardingPage() {
-  const session = await auth.getSession();
+  const session = await auth.getSession({ headers: headers() });
 
   if (!session?.user) {
     redirect("/auth/login");

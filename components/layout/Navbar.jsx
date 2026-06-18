@@ -26,12 +26,12 @@ import { useState } from "react";
 import clsx from "clsx";
 import {
   Search,
-  Home,
   Building2,
   User,
   LogIn,
   LogOut,
   Menu,
+  Home,
 } from "lucide-react";
 import { Avatar } from "@heroui/avatar";
 
@@ -47,18 +47,9 @@ export default function Navbar() {
   const [showSearch, setShowSearch] = useState(false);
 
   const navItems = [
-    { href: "/", label: "Home", icon: <Home size={16} /> },
-    { href: "/properties", label: "Browse", icon: <Building2 size={16} /> },
-    { href: "/landlords", label: "Landlords", icon: <User size={16} /> },
-    ...(user
-      ? [
-          {
-            href: `/dashboard`,
-            label: "Dashboard",
-            icon: <User size={16} />,
-          },
-        ]
-      : []),
+    { href: "/properties", label: "Find Rent", icon: <Building2 size={16} /> },
+    { href: "/dashboard", label: "List Property", icon: <User size={16} /> },
+    { href: "/#how-it-works", label: "How it Works", icon: <Home size={16} /> },
   ];
 
   const searchInput = (
@@ -66,8 +57,8 @@ export default function Navbar() {
       aria-label="Search"
       aria-labelledby="Search"
       classNames={{
-        inputWrapper: "bg-default-100",
-        input: "text-sm",
+        inputWrapper: "bg-surface-container-low border border-outline-variant",
+        input: "text-sm text-on-surface",
       }}
       endContent={
         <Kbd className="hidden lg:inline-block" keys={["⌘"]}>
@@ -76,7 +67,7 @@ export default function Navbar() {
       }
       placeholder="Search properties..."
       startContent={
-        <Search className="text-base text-default-400 pointer-events-none flex-shrink-0" />
+        <Search className="text-base text-outline pointer-events-none flex-shrink-0" />
       }
       type="search"
     />
@@ -89,34 +80,33 @@ export default function Navbar() {
 
   return (
     <HeroUINavbar
-      className="shadow-sm backdrop-blur-md transition-all"
+      className="bg-surface shadow-sm docked full-width top-0 z-50 sticky border-b border-default-100"
       maxWidth="xl"
       position="sticky"
     >
       <NavbarContent justify="start">
         <NavbarBrand className="gap-2 cursor-pointer">
           <NextLink
-            className="flex items-center gap-1 hover:scale-105 transition-transform"
+            className="flex items-center gap-2 hover:scale-105 transition-transform"
             href="/"
           >
-            <Image alt="Logo" height={30} src={siteConfig.logo} width={30} />
-            <p className="font-bold text-lg">LinkConn Rent</p>
+            <Building2 className="w-8 h-8 text-secondary" />
+            <p className="font-headline-md text-headline-md text-secondary font-bold">LinkConn Rent</p>
           </NextLink>
         </NavbarBrand>
 
-        <ul className="hidden lg:flex gap-4 ml-4">
+        <ul className="hidden lg:flex gap-lg ml-6">
           {navItems.map((item) => (
             <NavbarItem key={item.href}>
               <NextLink
                 className={clsx(
-                  "flex items-center gap-1 text-sm transition-colors",
+                  "font-body-md text-body-md transition-all pb-1",
                   pathname === item.href
-                    ? "text-primary font-semibold"
-                    : "text-foreground hover:text-primary",
+                    ? "text-secondary font-bold border-b-2 border-secondary"
+                    : "text-on-surface-variant hover:text-secondary",
                 )}
                 href={item.href}
               >
-                {item.icon}
                 {item.label}
               </NextLink>
             </NavbarItem>
@@ -125,7 +115,7 @@ export default function Navbar() {
       </NavbarContent>
 
       <NavbarContent
-        className="hidden sm:flex items-center gap-4"
+        className="hidden sm:flex items-center gap-md"
         justify="end"
       >
         <NavbarItem className="hidden lg:flex w-60">{searchInput}</NavbarItem>
@@ -135,7 +125,7 @@ export default function Navbar() {
             <DropdownTrigger>
               <Avatar
                 alt="User Avatar"
-                className="cursor-pointer border border-default-200"
+                className="cursor-pointer border border-secondary"
                 name={user?.name || "User"}
                 size="sm"
                 src={user?.image}
@@ -163,15 +153,20 @@ export default function Navbar() {
           <>
             <Button
               as={NextLink}
+              className="font-label-md text-label-md text-secondary border border-secondary px-md py-sm rounded-lg hover:bg-surface-container-low transition-all bg-transparent"
               href="/auth/login"
-              size="sm"
-              startContent={<LogIn size={16} />}
-              variant="flat"
+              size="md"
+              variant="bordered"
             >
               Login
             </Button>
-            <Button as={NextLink} color="primary" href="/auth/signup" size="sm">
-              Get Started
+            <Button
+              as={NextLink}
+              className="font-label-md text-label-md bg-secondary text-on-secondary px-md py-sm rounded-lg hover:bg-secondary-container hover:text-on-secondary-container transition-all shadow-sm"
+              href="/auth/signup"
+              size="md"
+            >
+              Signup
             </Button>
           </>
         )}
@@ -189,16 +184,16 @@ export default function Navbar() {
         <NavbarMenuToggle icon={<Menu />} />
       </NavbarContent>
 
-      <NavbarMenu>
+      <NavbarMenu className="bg-surface">
         {showSearch && <div className="p-3">{searchInput}</div>}
         {navItems.map((item) => (
           <NavbarMenuItem key={item.href}>
             <Link
               className={clsx(
-                "flex items-center gap-2 text-base",
+                "flex items-center gap-2 text-base font-body-md py-2",
                 pathname === item.href
-                  ? "text-primary font-semibold"
-                  : "text-foreground hover:text-primary",
+                  ? "text-secondary font-bold"
+                  : "text-on-surface-variant hover:text-secondary",
               )}
               href={item.href}
             >
@@ -210,7 +205,7 @@ export default function Navbar() {
         {user ? (
           <NavbarMenuItem>
             <Link
-              className="flex items-center gap-2 cursor-pointer"
+              className="flex items-center gap-2 cursor-pointer py-2 font-body-md"
               color="danger"
               onClick={handleLogout}
             >
@@ -218,14 +213,22 @@ export default function Navbar() {
             </Link>
           </NavbarMenuItem>
         ) : (
-          <NavbarMenuItem>
-            <Link
-              className="flex items-center gap-2"
-              color="primary"
+          <NavbarMenuItem className="flex flex-col gap-2 mt-4">
+            <Button
+              as={NextLink}
+              className="w-full text-secondary border border-secondary bg-transparent"
               href="/auth/login"
+              variant="bordered"
             >
-              <LogIn size={16} /> Login / Sign Up
-            </Link>
+              Login
+            </Button>
+            <Button
+              as={NextLink}
+              className="w-full bg-secondary text-on-secondary"
+              href="/auth/signup"
+            >
+              Signup
+            </Button>
           </NavbarMenuItem>
         )}
       </NavbarMenu>

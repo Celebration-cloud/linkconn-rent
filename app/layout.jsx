@@ -5,7 +5,7 @@ import { Providers } from "./providers";
 import AppWrapper from "./app-wrapper";
 
 import { siteConfig } from "@/config/site";
-import { fontSans } from "@/config/fonts";
+import { fontSans, fontPublicSans } from "@/config/fonts";
 
 export const metadata = {
   title: {
@@ -32,6 +32,7 @@ export default function RootLayout({ children }) {
         className={clsx(
           "min-h-screen text-foreground bg-background font-sans antialiased",
           fontSans.variable,
+          fontPublicSans.variable,
         )}
       >
         <Providers themeProps={{ attribute: "class", defaultTheme: "dark" }}>

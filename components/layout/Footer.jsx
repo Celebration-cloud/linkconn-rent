@@ -1,105 +1,105 @@
 "use client";
 
 import Link from "next/link";
-import { Twitter, Facebook, Linkedin, Mail, Phone } from "lucide-react";
+import { Building2 } from "lucide-react";
 
 export const AppFooter = () => {
   return (
-    <footer className="w-full border-t bg-default-50 py-8 text-default-600 text-sm">
-      <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between gap-8 px-4">
-        {/* Quick Links */}
-        <div className="flex-1 text-center md:text-left">
-          <h3 className="font-semibold mb-3 text-default-800">Quick Links</h3>
-          <ul className="space-y-2">
+    <footer className="bg-primary-container text-on-primary-container w-full py-xl px-margin-mobile md:px-margin-desktop border-t border-surface-tint/20">
+      <div className="max-w-max-width mx-auto grid grid-cols-1 md:grid-cols-4 gap-gutter">
+        {/* Brand Column */}
+        <div className="col-span-1">
+          <div className="flex items-center gap-sm mb-md">
+            <Building2 className="w-8 h-8 text-on-primary" />
+            <span className="font-headline-md text-headline-md text-on-primary font-bold">LinkConn Rent</span>
+          </div>
+          <p className="font-body-md text-body-md text-on-primary-container/80 mb-md">
+            Securing your next home with transparency, efficiency, and trust.
+          </p>
+        </div>
+
+        {/* Platform Links */}
+        <div className="col-span-1">
+          <h4 className="font-headline-sm text-headline-sm text-on-primary mb-sm">Platform</h4>
+          <ul className="space-y-sm">
             <li>
               <Link
-                className="hover:text-primary transition-colors block"
-                href="/"
+                className="font-body-md text-body-md text-on-primary-container/80 hover:text-secondary-container transition-colors"
+                href="/properties"
               >
-                Home
+                Verified Listings
               </Link>
             </li>
             <li>
               <Link
-                className="hover:text-primary transition-colors block"
-                href="/pricing"
+                className="font-body-md text-body-md text-on-primary-container/80 hover:text-secondary-container transition-colors"
+                href="/#how-it-works"
               >
-                Pricing
+                How it Works
               </Link>
             </li>
             <li>
               <Link
-                className="hover:text-primary transition-colors block"
+                className="font-body-md text-body-md text-on-primary-container/80 hover:text-secondary-container transition-colors"
                 href="/about"
               >
-                About
-              </Link>
-            </li>
-            <li>
-              <Link
-                className="hover:text-primary transition-colors block"
-                href="/contact"
-              >
-                Contact
+                About Us
               </Link>
             </li>
           </ul>
         </div>
 
-        {/* Contact Info */}
-        <div className="flex-1 text-center md:text-left">
-          <h3 className="font-semibold mb-3 text-default-800">Contact</h3>
-          <p className="flex justify-center md:justify-start items-center gap-2 mb-2">
-            <Mail className="w-4 h-4" />
-            <a
-              className="hover:text-primary transition-colors"
-              href="mailto:support@linkconnrent.com"
-            >
-              support@linkconnrent.com
-            </a>
-          </p>
-          <p className="flex justify-center md:justify-start items-center gap-2">
-            <Phone className="w-4 h-4" />
-            <a
-              className="hover:text-primary transition-colors"
-              href="tel:+2348000000000"
-            >
-              +234 800 000 0000
-            </a>
-          </p>
+        {/* Support Links */}
+        <div className="col-span-1">
+          <h4 className="font-headline-sm text-headline-sm text-on-primary mb-sm">Support</h4>
+          <ul className="space-y-sm">
+            <li>
+              <Link
+                className="font-body-md text-body-md text-on-primary-container/80 hover:text-secondary-container transition-colors"
+                href="/help"
+              >
+                Help Center
+              </Link>
+            </li>
+            <li>
+              <Link
+                className="font-body-md text-body-md text-on-primary-container/80 hover:text-secondary-container transition-colors"
+                href="/contact"
+              >
+                Contact Support
+              </Link>
+            </li>
+          </ul>
         </div>
 
-        {/* Social Icons */}
-        <div className="flex-1 text-center md:text-left">
-          <h3 className="font-semibold mb-3 text-default-800">Follow Us</h3>
-          <div className="flex justify-center md:justify-start gap-4 text-lg mt-1">
-            <Link
-              aria-label="Twitter"
-              className="p-2 rounded hover:bg-default-100 dark:hover:bg-gray-700 transition-colors"
-              href="#"
-            >
-              <Twitter className="w-5 h-5" />
-            </Link>
-            <Link
-              aria-label="Facebook"
-              className="p-2 rounded hover:bg-default-100 dark:hover:bg-gray-700 transition-colors"
-              href="#"
-            >
-              <Facebook className="w-5 h-5" />
-            </Link>
-            <Link
-              aria-label="LinkedIn"
-              className="p-2 rounded hover:bg-default-100 dark:hover:bg-gray-700 transition-colors"
-              href="#"
-            >
-              <Linkedin className="w-5 h-5" />
-            </Link>
-          </div>
+        {/* Legal Links */}
+        <div className="col-span-1">
+          <h4 className="font-headline-sm text-headline-sm text-on-primary mb-sm">Legal</h4>
+          <ul className="space-y-sm">
+            <li>
+              <Link
+                className="font-body-md text-body-md text-on-primary-container/80 hover:text-secondary-container transition-colors"
+                href="/privacy"
+              >
+                Privacy Policy
+              </Link>
+            </li>
+            <li>
+              <Link
+                className="font-body-md text-body-md text-on-primary-container/80 hover:text-secondary-container transition-colors"
+                href="/terms"
+              >
+                Terms of Service
+              </Link>
+            </li>
+          </ul>
         </div>
       </div>
 
-      <div className="border-t mt-6 pt-4 text-center text-xs text-default-500">
-        © {new Date().getFullYear()} LinkConn Rent — All rights reserved.
+      <div className="max-w-max-width mx-auto mt-xl pt-md border-t border-surface-tint/30 text-center">
+        <p className="font-body-md text-body-md text-on-primary-container/60">
+          © {new Date().getFullYear()} LinkConn Rent. All rights reserved.
+        </p>
       </div>
     </footer>
   );
