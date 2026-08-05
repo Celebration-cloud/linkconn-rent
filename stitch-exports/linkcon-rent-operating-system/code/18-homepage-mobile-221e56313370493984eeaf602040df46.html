@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Linkcon Rent - Homepage</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "outline": "#6f7a72",
+                        "surface-container-high": "#ece8df",
+                        "on-secondary": "#ffffff",
+                        "on-primary-fixed-variant": "#005236",
+                        "on-tertiary-fixed-variant": "#354e00",
+                        "primary-fixed": "#a0f4c9",
+                        "secondary-container": "#c1e9d5",
+                        "surface-container-highest": "#e6e2d9",
+                        "secondary-fixed": "#c3ebd8",
+                        "on-secondary-fixed": "#002116",
+                        "surface-container": "#f1eee5",
+                        "on-tertiary-fixed": "#131f00",
+                        "background": "#fdf9f0",
+                        "tertiary-container": "#537707",
+                        "primary-container": "#237a57",
+                        "surface-variant": "#e6e2d9",
+                        "tertiary": "#3f5d00",
+                        "on-tertiary": "#ffffff",
+                        "on-tertiary-container": "#d2fe85",
+                        "on-surface-variant": "#3f4943",
+                        "on-primary-container": "#b1ffd6",
+                        "on-primary-fixed": "#002113",
+                        "primary-fixed-dim": "#84d7ae",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "on-secondary-fixed-variant": "#2a4e3f",
+                        "surface-container-low": "#f7f3ea",
+                        "on-error": "#ffffff",
+                        "inverse-primary": "#84d7ae",
+                        "on-error-container": "#93000a",
+                        "tertiary-fixed": "#c5f17a",
+                        "tertiary-fixed-dim": "#aad461",
+                        "surface-dim": "#dddad1",
+                        "on-secondary-container": "#466a5b",
+                        "error-container": "#ffdad6",
+                        "outline-variant": "#bec9c1",
+                        "surface": "#fdf9f0",
+                        "surface-tint": "#0c6c4a",
+                        "error": "#ba1a1a",
+                        "secondary-fixed-dim": "#a8cfbd",
+                        "inverse-on-surface": "#f4f0e7",
+                        "on-surface": "#1c1c16",
+                        "surface-bright": "#fdf9f0",
+                        "on-background": "#1c1c16",
+                        "secondary": "#416656",
+                        "inverse-surface": "#31302b",
+                        "primary": "#006041"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px",
+                        "2xl": "1rem"
+                    },
+                    "spacing": {
+                        "stack-sm": "8px",
+                        "stack-md": "16px",
+                        "stack-lg": "32px",
+                        "unit": "8px",
+                        "margin-mobile": "20px",
+                        "margin-desktop": "40px",
+                        "gutter": "24px",
+                        "container-max": "1280px"
+                    },
+                    "fontFamily": {
+                        "label-md": ["Manrope"],
+                        "display-lg": ["Manrope"],
+                        "headline-lg-mobile": ["Manrope"],
+                        "headline-md": ["Manrope"],
+                        "body-md": ["Manrope"],
+                        "price-display": ["Manrope"],
+                        "headline-lg": ["Manrope"],
+                        "caption": ["Manrope"],
+                        "body-lg": ["Manrope"]
+                    },
+                    "fontSize": {
+                        "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+                        "headline-lg-mobile": ["28px", { "lineHeight": "36px", "fontWeight": "700" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "price-display": ["20px", { "lineHeight": "28px", "fontWeight": "800" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+                        "caption": ["12px", { "lineHeight": "16px", "fontWeight": "500" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        /* Custom scrollbar to hide it but keep functionality */
+        ::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scroll {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body-md h-screen w-full overflow-hidden flex flex-col md:hidden">
+<!-- Top Navigation (Mobile minimal) -->
+<header class="flex justify-between items-center w-full px-margin-mobile h-16 shrink-0 bg-surface z-10 sticky top-0">
+<div class="font-headline-md text-headline-md font-bold text-primary">
+            Linkcon Rent
+        </div>
+<button aria-label="Notifications" class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-on-surface hover:bg-surface-variant transition-colors">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+</header>
+<!-- Main Scrollable Canvas -->
+<main class="flex-1 overflow-y-auto overflow-x-hidden hide-scroll pb-24">
+<!-- Hero Section -->
+<section class="px-margin-mobile pt-stack-sm pb-stack-lg">
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface mb-stack-sm">
+                Rent directly.<br/>Verify everything.<br/>Pay safely.
+            </h1>
+<p class="font-body-md text-body-md text-on-surface-variant mb-stack-lg max-w-sm">
+                Discover verified homes across Nigeria with transparent pricing and secure payments.
+            </p>
+<!-- Search Bento -->
+<div class="bg-surface-container-lowest rounded-2xl border border-outline-variant p-1 shadow-sm flex flex-col gap-1">
+<!-- Location Input -->
+<div class="bg-surface flex items-center px-4 py-3 rounded-xl hover:bg-surface-container-low transition-colors group cursor-text">
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors mr-3" data-icon="search">search</span>
+<input class="bg-transparent border-none p-0 focus:ring-0 text-on-surface font-body-md placeholder-outline w-full outline-none" placeholder="Where do you want to live?" type="text"/>
+</div>
+<!-- Filters Grid -->
+<div class="grid grid-cols-2 gap-1 h-14">
+<!-- Property Type -->
+<button class="bg-surface flex items-center justify-between px-4 rounded-xl hover:bg-surface-container-low transition-colors text-left group">
+<div class="flex flex-col justify-center">
+<span class="font-caption text-caption text-outline">Property Type</span>
+<span class="font-label-md text-label-md text-on-surface truncate">Any</span>
+</div>
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors" data-icon="arrow_drop_down">arrow_drop_down</span>
+</button>
+<!-- Budget -->
+<button class="bg-surface flex items-center justify-between px-4 rounded-xl hover:bg-surface-container-low transition-colors text-left group">
+<div class="flex flex-col justify-center">
+<span class="font-caption text-caption text-outline">Budget</span>
+<span class="font-label-md text-label-md text-on-surface truncate">Any</span>
+</div>
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors" data-icon="arrow_drop_down">arrow_drop_down</span>
+</button>
+</div>
+<!-- Search Button -->
+<button class="bg-primary text-on-primary w-full py-4 rounded-xl font-label-md text-label-md flex items-center justify-center gap-2 hover:bg-surface-tint transition-colors mt-1">
+                    Search Homes
+                </button>
+</div>
+</section>
+<!-- Trust Strip -->
+<section class="py-stack-md bg-surface-container-low border-y border-outline-variant/50 overflow-x-auto hide-scroll flex gap-4 px-margin-mobile whitespace-nowrap mb-stack-lg items-center">
+<span class="font-label-md text-label-md text-on-surface-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-xl" data-icon="verified_user">verified_user</span>
+                Verified Landlords
+            </span>
+<div class="w-1 h-1 rounded-full bg-outline-variant"></div>
+<span class="font-label-md text-label-md text-on-surface-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-xl" data-icon="verified">verified</span>
+                Verified Properties
+            </span>
+<div class="w-1 h-1 rounded-full bg-outline-variant"></div>
+<span class="font-label-md text-label-md text-on-surface-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-xl" data-icon="shield">shield</span>
+                Secure Payments
+            </span>
+</section>
+<!-- Featured Listings -->
+<section class="px-margin-mobile mb-stack-lg">
+<div class="flex justify-between items-end mb-stack-md">
+<h2 class="font-headline-md text-headline-md text-on-surface">Featured Listings</h2>
+<a class="font-label-md text-label-md text-primary flex items-center gap-1 hover:underline" href="#">
+                    View all
+                    <span class="material-symbols-outlined text-sm" data-icon="arrow_forward">arrow_forward</span>
+</a>
+</div>
+<!-- Horizontal Scroll Cards Container -->
+<div class="flex gap-4 overflow-x-auto hide-scroll pb-4 -mx-margin-mobile px-margin-mobile snap-x snap-mandatory">
+<!-- Property Card 1 -->
+<div class="min-w-[280px] w-[85vw] max-w-[320px] bg-surface-container-lowest border border-outline-variant rounded-[16px] overflow-hidden flex flex-col snap-center shrink-0">
+<div class="relative w-full h-48">
+<img class="w-full h-full object-cover" data-alt="A bright, modern apartment interior in Lagos, Nigeria. Natural light floods through large windows onto a minimalist living space with wooden floors and neutral toned contemporary furniture. The aesthetic is clean, inviting, and reflects a modern light-mode architectural feel." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDmQcmQWxiRUfFbelgQYTXwa21sBsS2OOvBFUy34Ls9hC1jGSyqD9n8wFnieeniXPGyAodEtJoyZE-cA1eGu7lOPtAyTedLtWHEfZBWS23OP_UUYNCAlNVLVpAgo_rUhmQI8UJtUS2ye6REPoD_Cj2PmRdTjhndU8wtAVT3W5xuGAkp4is0qdIo-S2_iX_z76CUrbwdMCgxp_v6aRdcZdV3cfzDGUCqd4tFHOdHNjmFRHgLvEPo6bCHsg"/>
+<!-- Verification Badge overlay -->
+<div class="absolute top-3 left-3 bg-primary/10 backdrop-blur-md border border-primary/20 px-2 py-1 rounded-full flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-primary" data-icon="check_circle">check_circle</span>
+<span class="font-caption text-caption text-primary">Verified Property</span>
+</div>
+<!-- Favorite Button -->
+<button class="absolute top-3 right-3 w-8 h-8 rounded-full bg-surface-container-lowest/80 backdrop-blur-sm flex items-center justify-center text-on-surface hover:bg-surface-container-lowest transition-colors">
+<span class="material-symbols-outlined text-[18px]" data-icon="favorite_border">favorite_border</span>
+</button>
+</div>
+<div class="p-4 flex flex-col gap-2">
+<div class="flex justify-between items-start">
+<div>
+<h3 class="font-price-display text-price-display text-on-surface flex items-baseline">
+<span class="font-body-md text-body-md mr-0.5 font-bold">₦</span>3.5m<span class="font-caption text-caption text-on-surface-variant font-normal ml-1">/yr</span>
+</h3>
+<p class="font-body-md text-body-md text-on-surface-variant line-clamp-1">3 Bed Detached Duplex</p>
+</div>
+</div>
+<div class="flex items-center text-on-surface-variant font-caption text-caption mt-1">
+<span class="material-symbols-outlined text-[16px] mr-1" data-icon="location_on">location_on</span>
+                            Lekki Phase 1, Lagos
+                        </div>
+<div class="mt-2 pt-2 border-t border-outline-variant/30 flex justify-between items-center">
+<div class="flex gap-3 text-on-surface-variant font-caption text-caption">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]" data-icon="bed">bed</span> 3</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]" data-icon="bathtub">bathtub</span> 3</span>
+</div>
+<span class="font-caption text-caption text-on-surface-variant opacity-80">Replies in &lt; 2 hrs</span>
+</div>
+</div>
+</div>
+<!-- Property Card 2 -->
+<div class="min-w-[280px] w-[85vw] max-w-[320px] bg-surface-container-lowest border border-outline-variant rounded-[16px] overflow-hidden flex flex-col snap-center shrink-0">
+<div class="relative w-full h-48">
+<img class="w-full h-full object-cover" data-alt="Exterior view of a newly built contemporary townhouse in Abuja, Nigeria. The architecture features clean geometric lines, warm wood accents against white walls, and a small landscaped front yard. Photographed during golden hour to enhance the warm, structured design system aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA_PLxfspBAYW-_qaOGVKO0u0nVNNNXCVI4iF4eofbKU8AGfF_fpArLx5GgQofzjQBFAFaui3kz2RAOBR9aZNB7AZ47jnlP_2g3OHbjD58Tu3K4r_RpXbe8dvpSrJ0SH7Q8pBMq1QBK9-xT0IiXauHUy2WH8sNCUZLvN0PVlfBcNonAQxpMYjEYKhAxOkkm-8AormqO7fg1jsEuSae6E-RJ2Pgk1GNHQxM1vQSD8YPBTp5YqbedMZ2KNw"/>
+<!-- Verification Badge overlay -->
+<div class="absolute top-3 left-3 bg-primary/10 backdrop-blur-md border border-primary/20 px-2 py-1 rounded-full flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-primary" data-icon="check_circle">check_circle</span>
+<span class="font-caption text-caption text-primary">Verified Property</span>
+</div>
+<!-- Favorite Button -->
+<button class="absolute top-3 right-3 w-8 h-8 rounded-full bg-surface-container-lowest/80 backdrop-blur-sm flex items-center justify-center text-on-surface hover:bg-surface-container-lowest transition-colors">
+<span class="material-symbols-outlined text-[18px]" data-icon="favorite_border">favorite_border</span>
+</button>
+</div>
+<div class="p-4 flex flex-col gap-2">
+<div class="flex justify-between items-start">
+<div>
+<h3 class="font-price-display text-price-display text-on-surface flex items-baseline">
+<span class="font-body-md text-body-md mr-0.5 font-bold">₦</span>1.2m<span class="font-caption text-caption text-on-surface-variant font-normal ml-1">/yr</span>
+</h3>
+<p class="font-body-md text-body-md text-on-surface-variant line-clamp-1">Luxury 1 Bed Apartment</p>
+</div>
+</div>
+<div class="flex items-center text-on-surface-variant font-caption text-caption mt-1">
+<span class="material-symbols-outlined text-[16px] mr-1" data-icon="location_on">location_on</span>
+                            Yaba, Lagos
+                        </div>
+<div class="mt-2 pt-2 border-t border-outline-variant/30 flex justify-between items-center">
+<div class="flex gap-3 text-on-surface-variant font-caption text-caption">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]" data-icon="bed">bed</span> 1</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]" data-icon="bathtub">bathtub</span> 1</span>
+</div>
+<span class="font-caption text-caption text-on-surface-variant opacity-80">Replies in &lt; 1 hr</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Navigation Bar -->
+<nav class="bg-surface-container-low border-t-0 flex justify-between items-center w-full px-4 h-20 fixed bottom-0 left-0 right-0 z-50 md:hidden pb-safe">
+<!-- Active: Home -->
+<a class="flex flex-col items-center justify-center w-16 h-full text-primary gap-1" href="#">
+<div class="w-16 h-8 flex items-center justify-center rounded-full bg-secondary-container">
+<span class="material-symbols-outlined" data-icon="home" data-weight="fill" style="font-variation-settings: 'FILL' 1;">home</span>
+</div>
+<span class="font-caption text-caption text-on-surface font-semibold">Home</span>
+</a>
+<!-- Inactive: Saved -->
+<a class="flex flex-col items-center justify-center w-16 h-full text-on-surface-variant hover:text-on-surface transition-colors gap-1" href="#">
+<div class="w-16 h-8 flex items-center justify-center rounded-full">
+<span class="material-symbols-outlined" data-icon="favorite_border">favorite_border</span>
+</div>
+<span class="font-caption text-caption">Saved</span>
+</a>
+<!-- Inactive: Viewings -->
+<a class="flex flex-col items-center justify-center w-16 h-full text-on-surface-variant hover:text-on-surface transition-colors gap-1" href="#">
+<div class="w-16 h-8 flex items-center justify-center rounded-full">
+<span class="material-symbols-outlined" data-icon="calendar_today">calendar_today</span>
+</div>
+<span class="font-caption text-caption">Viewings</span>
+</a>
+<!-- Inactive: Applications -->
+<a class="flex flex-col items-center justify-center w-16 h-full text-on-surface-variant hover:text-on-surface transition-colors gap-1" href="#">
+<div class="w-16 h-8 flex items-center justify-center rounded-full">
+<span class="material-symbols-outlined" data-icon="assignment">assignment</span>
+</div>
+<span class="font-caption text-caption">Apps</span>
+</a>
+<!-- Inactive: Profile -->
+<a class="flex flex-col items-center justify-center w-16 h-full text-on-surface-variant hover:text-on-surface transition-colors gap-1" href="#">
+<div class="w-16 h-8 flex items-center justify-center rounded-full">
+<span class="material-symbols-outlined" data-icon="person_outline">person_outline</span>
+</div>
+<span class="font-caption text-caption">Profile</span>
+</a>
+</nav>
+<!-- Safe area spacing for iOS -->
+<style>
+        .pb-safe {
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+    </style>
+</body></html>

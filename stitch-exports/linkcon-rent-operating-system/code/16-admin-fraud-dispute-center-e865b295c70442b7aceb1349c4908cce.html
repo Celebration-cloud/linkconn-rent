@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Admin Fraud &amp; Dispute Center - Linkcon Rent</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "primary-fixed-dim": "#84d7ae",
+                      "surface-container-high": "#ece8df",
+                      "primary-container": "#237a57",
+                      "error-container": "#ffdad6",
+                      "error": "#ba1a1a",
+                      "on-tertiary-fixed-variant": "#354e00",
+                      "surface-variant": "#e6e2d9",
+                      "tertiary-fixed-dim": "#aad461",
+                      "on-tertiary": "#ffffff",
+                      "on-primary-fixed": "#002113",
+                      "on-background": "#1c1c16",
+                      "surface-container-low": "#f7f3ea",
+                      "on-error": "#ffffff",
+                      "inverse-surface": "#31302b",
+                      "tertiary": "#3f5d00",
+                      "secondary-fixed": "#c3ebd8",
+                      "on-error-container": "#93000a",
+                      "on-surface": "#1c1c16",
+                      "inverse-primary": "#84d7ae",
+                      "surface-container-lowest": "#ffffff",
+                      "on-secondary-fixed": "#002116",
+                      "surface-dim": "#dddad1",
+                      "secondary": "#416656",
+                      "secondary-container": "#c1e9d5",
+                      "inverse-on-surface": "#f4f0e7",
+                      "surface-bright": "#fdf9f0",
+                      "on-primary-fixed-variant": "#005236",
+                      "surface": "#fdf9f0",
+                      "primary-fixed": "#a0f4c9",
+                      "on-surface-variant": "#3f4943",
+                      "tertiary-container": "#537707",
+                      "outline": "#6f7a72",
+                      "on-secondary-container": "#466a5b",
+                      "tertiary-fixed": "#c5f17a",
+                      "on-tertiary-container": "#d2fe85",
+                      "background": "#fdf9f0",
+                      "surface-container-highest": "#e6e2d9",
+                      "on-secondary-fixed-variant": "#2a4e3f",
+                      "surface-tint": "#0c6c4a",
+                      "primary": "#006041",
+                      "on-secondary": "#ffffff",
+                      "on-primary": "#ffffff",
+                      "surface-container": "#f1eee5",
+                      "on-tertiary-fixed": "#131f00",
+                      "outline-variant": "#bec9c1",
+                      "on-primary-container": "#b1ffd6",
+                      "secondary-fixed-dim": "#a8cfbd"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "stack-md": "16px",
+                      "stack-lg": "32px",
+                      "gutter": "24px",
+                      "container-max": "1280px",
+                      "unit": "8px",
+                      "margin-desktop": "40px",
+                      "stack-sm": "8px",
+                      "margin-mobile": "20px"
+              },
+              "fontFamily": {
+                      "body-md": ["Manrope"],
+                      "display-lg": ["Manrope"],
+                      "caption": ["Manrope"],
+                      "price-display": ["Manrope"],
+                      "headline-lg-mobile": ["Manrope"],
+                      "label-md": ["Manrope"],
+                      "headline-lg": ["Manrope"],
+                      "headline-md": ["Manrope"],
+                      "body-lg": ["Manrope"]
+              },
+              "fontSize": {
+                      "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                      "caption": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                      "price-display": ["20px", {"lineHeight": "28px", "fontWeight": "800"}],
+                      "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                      "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                      "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                      "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                      "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}]
+              }
+            }
+          }
+        }
+    </script>
+<style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #bec9c1;
+            border-radius: 20px;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md h-screen overflow-hidden flex">
+<!-- SideNavBar Component -->
+<nav class="fixed left-0 top-0 h-full w-64 bg-surface dark:bg-inverse-surface border-r border-outline-variant dark:border-outline flat no shadows flex flex-col p-stack-md z-40">
+<!-- Brand/Header -->
+<div class="mb-stack-lg flex items-center gap-unit">
+<img class="w-8 h-8 object-contain" data-alt="A minimalist geometric logo for Linkcon Rent representing a stylized house in Primary Green on a transparent background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAZMp2wzMkd_VuA9tZLVkFNMCKe8l5D8CgoL6VIimt9OriKYG2BCsY8RJyI5HJTebLKAgsLRJqSdRVR4uSoo2vMnzswL4LA30EQgvHijk37ZjzH8_MhlMCELP934sjb2ArZDUggJIfXlkgTp9_sdhlv1sedN_C1fVfyaU736rLvtwAPIRMpf4L-E1SXt-usfwtGGWLF9nFp9QwAyUGgAlZBZkRSpysDyJu-F5CVCoVt9xhy31MxZiV-VA"/>
+<div>
+<h1 class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed-dim">Linkcon Rent</h1>
+<p class="font-caption text-caption text-on-surface-variant">Landlord Portal</p>
+</div>
+</div>
+<!-- Navigation Tabs -->
+<ul class="flex-1 space-y-unit flex flex-col font-label-md text-label-md">
+<!-- Inactive Tab -->
+<li>
+<a class="flex items-center gap-unit px-4 py-3 rounded-lg text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-primary-fixed-dim hover:bg-surface-container-low dark:hover:bg-surface-variant scale-95 active:scale-90 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">dashboard</span>
+                    Dashboard
+                </a>
+</li>
+<!-- Inactive Tab -->
+<li>
+<a class="flex items-center gap-unit px-4 py-3 rounded-lg text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-primary-fixed-dim hover:bg-surface-container-low dark:hover:bg-surface-variant scale-95 active:scale-90 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">domain</span>
+                    My Properties
+                </a>
+</li>
+<!-- Inactive Tab -->
+<li>
+<a class="flex items-center gap-unit px-4 py-3 rounded-lg text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-primary-fixed-dim hover:bg-surface-container-low dark:hover:bg-surface-variant scale-95 active:scale-90 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">calendar_month</span>
+                    Viewings
+                </a>
+</li>
+<!-- Inactive Tab -->
+<li>
+<a class="flex items-center gap-unit px-4 py-3 rounded-lg text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-primary-fixed-dim hover:bg-surface-container-low dark:hover:bg-surface-variant scale-95 active:scale-90 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">group</span>
+                    Applicants
+                </a>
+</li>
+<!-- Active Tab (Mapping Dispute to Verification context) -->
+<li>
+<a class="flex items-center gap-unit px-4 py-3 bg-secondary-container dark:bg-secondary text-on-secondary-container dark:text-on-secondary font-bold rounded-lg scale-95 active:scale-90 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">verified_user</span>
+                    Verification
+                </a>
+</li>
+</ul>
+<!-- CTA -->
+<div class="mt-auto mb-stack-md">
+<button class="w-full bg-primary text-on-primary py-3 rounded-lg font-label-md text-label-md hover:bg-surface-tint transition-colors">
+                Add New Property
+            </button>
+</div>
+<!-- Footer Tabs -->
+<ul class="space-y-unit font-label-md text-label-md pt-stack-md border-t border-outline-variant">
+<li>
+<a class="flex items-center gap-unit px-4 py-3 rounded-lg text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-primary-fixed-dim hover:bg-surface-container-low dark:hover:bg-surface-variant scale-95 active:scale-90 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">settings</span>
+                    Settings
+                </a>
+</li>
+<li>
+<a class="flex items-center gap-unit px-4 py-3 rounded-lg text-error hover:bg-error-container hover:text-on-error-container scale-95 active:scale-90 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">logout</span>
+                    Log Out
+                </a>
+</li>
+</ul>
+</nav>
+<!-- TopNavBar Component (Offset visually by padding the inner container) -->
+<header class="fixed top-0 w-full z-50 bg-background dark:bg-inverse-surface border-b border-outline-variant dark:border-outline flat no shadows text-primary dark:text-primary-fixed-dim font-headline-md text-headline-md transition-colors duration-200 flex justify-between items-center px-margin-desktop py-4 pl-[296px]">
+<div class="flex items-center gap-4">
+<span class="text-headline-md font-headline-md font-extrabold text-primary dark:text-primary-fixed-dim">Linkcon Rent</span>
+<span class="font-label-md text-label-md text-on-surface-variant bg-surface-container-high px-3 py-1 rounded-full ml-4">Admin Hub</span>
+</div>
+<div class="flex items-center gap-gutter">
+<!-- Trailing Icons -->
+<button class="text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-on-surface-variant p-2 rounded-full transition-colors duration-200">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-on-surface-variant p-2 rounded-full transition-colors duration-200">
+<span class="material-symbols-outlined">help</span>
+</button>
+<!-- Profile -->
+<div class="h-10 w-10 rounded-full border border-outline-variant overflow-hidden">
+<img alt="Landlord Profile" class="w-full h-full object-cover" data-alt="A professional studio portrait of a Nigerian administrator wearing formal business attire against a clean light grey background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAxUMQkczjkHWnOmZm9P5X3xI2rF88lOS4YmQJByq2xqQfxdk1Co4d9FByh6VChD7q64SAoHO9__uTdvJHagrjFr77ctVUH6d9TZ0IWsUsTWnMh66UvvKL1MRTA9y_1-T1clx-kTZHs-A65ou63_9j_PNAHY6RUMTf79Q0Llc2bjvAyo2ymoKNW1jSrtZHK6QJWlCOWHf99SfP673JE7-7xAxwV6b8_QQe75ZumHIpHZ_NTFZcdrq3RtA"/>
+</div>
+</div>
+</header>
+<!-- Main Canvas Area -->
+<main class="flex-1 ml-64 mt-[73px] p-gutter bg-surface-container-low flex flex-col h-[calc(100vh-73px)]">
+<!-- Header -->
+<div class="mb-gutter flex justify-between items-end">
+<div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface">Fraud &amp; Dispute Center</h2>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">Manage reported listings and resolve payment escrow disputes.</p>
+</div>
+<div class="flex gap-unit">
+<button class="bg-surface-container-highest text-on-surface px-4 py-2 rounded-full font-label-md text-label-md border border-outline-variant hover:bg-surface-dim transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">filter_list</span>
+                    Filter
+                </button>
+</div>
+</div>
+<!-- Dashboard Layout: 1/3 List, 2/3 Detail -->
+<div class="flex-1 flex gap-gutter overflow-hidden">
+<!-- Left Column: Open Cases List -->
+<div class="w-[380px] bg-surface-container-lowest border border-outline-variant rounded-xl flex flex-col shadow-sm">
+<div class="p-4 border-b border-outline-variant bg-surface-bright rounded-t-xl">
+<h3 class="font-headline-md text-headline-md text-on-surface">Open Cases</h3>
+<div class="relative mt-3">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
+<input class="w-full pl-10 pr-4 py-2 bg-surface-container border border-outline-variant rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" placeholder="Search case ID or name..." type="text"/>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto custom-scrollbar p-2 space-y-2">
+<!-- Case Item 1 (Active) -->
+<div class="p-4 bg-secondary-container/20 border border-primary-fixed-dim rounded-lg cursor-pointer transition-colors relative overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-primary"></div>
+<div class="flex justify-between items-start mb-2">
+<span class="font-caption text-caption text-on-surface-variant">Case #D-8492</span>
+<span class="bg-error-container text-on-error-container px-2 py-0.5 rounded-full font-caption text-caption flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-error"></span> High Urgency
+                            </span>
+</div>
+<h4 class="font-label-md text-label-md text-on-surface mb-1">Fake Listing Report</h4>
+<p class="font-body-md text-body-md text-on-surface-variant text-sm flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">person</span> Adebayo (T) vs 
+                            <span class="material-symbols-outlined text-[16px]">domain</span> Ikoyi Homes (L)
+                        </p>
+</div>
+<!-- Case Item 2 -->
+<div class="p-4 bg-surface hover:bg-surface-container-low border border-outline-variant rounded-lg cursor-pointer transition-colors">
+<div class="flex justify-between items-start mb-2">
+<span class="font-caption text-caption text-on-surface-variant">Case #P-1102</span>
+<span class="bg-surface-container-highest text-on-surface-variant px-2 py-0.5 rounded-full font-caption text-caption flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-outline"></span> Med Urgency
+                            </span>
+</div>
+<h4 class="font-label-md text-label-md text-on-surface mb-1">Payment Escrow Issue</h4>
+<p class="font-body-md text-body-md text-on-surface-variant text-sm flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">person</span> Chioma (T) vs 
+                            <span class="material-symbols-outlined text-[16px]">domain</span> Lekki Prop (L)
+                        </p>
+</div>
+<!-- Case Item 3 -->
+<div class="p-4 bg-surface hover:bg-surface-container-low border border-outline-variant rounded-lg cursor-pointer transition-colors">
+<div class="flex justify-between items-start mb-2">
+<span class="font-caption text-caption text-on-surface-variant">Case #M-4039</span>
+<span class="bg-surface-container-highest text-on-surface-variant px-2 py-0.5 rounded-full font-caption text-caption flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-outline"></span> Low Urgency
+                            </span>
+</div>
+<h4 class="font-label-md text-label-md text-on-surface mb-1">Maintenance Dispute</h4>
+<p class="font-body-md text-body-md text-on-surface-variant text-sm flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">person</span> Ibrahim (T) vs 
+                            <span class="material-symbols-outlined text-[16px]">domain</span> Victoria A. (L)
+                        </p>
+</div>
+</div>
+</div>
+<!-- Right Column: Case Detail Preview (Bento Grid Style) -->
+<div class="flex-1 flex flex-col gap-gutter overflow-hidden">
+<!-- Action Header Card -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-stack-md flex justify-between items-center shadow-sm shrink-0">
+<div>
+<div class="flex items-center gap-3 mb-1">
+<h3 class="font-headline-md text-headline-md text-on-surface">Case #D-8492</h3>
+<span class="bg-error/10 text-error px-3 py-1 rounded-full font-label-md text-label-md border border-error/20 flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">warning</span> Fake Listing Suspected
+                            </span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">Opened 2 hours ago by Tenant (Adebayo O.)</p>
+</div>
+<div class="flex gap-unit">
+<button class="px-5 py-2.5 rounded-full font-label-md text-label-md border border-outline text-on-surface hover:bg-surface-container transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">receipt_long</span>
+                            Refund Recommendation
+                        </button>
+<button class="px-5 py-2.5 rounded-full font-label-md text-label-md bg-primary text-on-primary hover:bg-surface-tint transition-colors shadow-sm flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">lock_open</span>
+                            Release Payment
+                        </button>
+<button class="px-5 py-2.5 rounded-full font-label-md text-label-md bg-error text-on-error hover:bg-on-error-container transition-colors shadow-sm flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">block</span>
+                            Freeze Account
+                        </button>
+</div>
+</div>
+<!-- Detail Grid Canvas -->
+<div class="flex-1 grid grid-cols-12 gap-gutter overflow-hidden">
+<!-- Middle Left: Message History -->
+<div class="col-span-7 bg-surface-container-lowest border border-outline-variant rounded-xl flex flex-col shadow-sm overflow-hidden">
+<div class="p-4 border-b border-outline-variant bg-surface-bright flex justify-between items-center">
+<h4 class="font-label-md text-label-md text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined">forum</span> Communication History
+                            </h4>
+</div>
+<div class="flex-1 overflow-y-auto p-4 space-y-6 custom-scrollbar bg-surface-bright/50">
+<!-- System Msg -->
+<div class="text-center">
+<span class="bg-surface-container px-3 py-1 rounded-full font-caption text-caption text-on-surface-variant">Dispute Opened - Today, 09:45 AM</span>
+</div>
+<!-- Tenant Msg -->
+<div class="flex gap-3 max-w-[85%]">
+<div class="w-8 h-8 rounded-full bg-tertiary-container flex items-center justify-center text-on-tertiary-container font-label-md shrink-0">A</div>
+<div>
+<div class="flex items-baseline gap-2 mb-1">
+<span class="font-label-md text-label-md text-on-surface">Adebayo (Tenant)</span>
+<span class="font-caption text-caption text-on-surface-variant">09:50 AM</span>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant p-3 rounded-2xl rounded-tl-none font-body-md text-body-md text-on-surface shadow-sm">
+                                        I arrived at the property address listed for the inspection today, and the building does not exist. It's an empty plot of land. I've been trying to call the landlord but their phone is switched off. Please do not release my caution fee!
+                                    </div>
+</div>
+</div>
+<!-- Admin Note -->
+<div class="flex gap-3 max-w-[85%] ml-auto flex-row-reverse">
+<div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-on-primary font-label-md shrink-0">
+<span class="material-symbols-outlined text-[18px]">admin_panel_settings</span>
+</div>
+<div>
+<div class="flex items-baseline gap-2 mb-1 justify-end">
+<span class="font-caption text-caption text-on-surface-variant">10:15 AM</span>
+<span class="font-label-md text-label-md text-on-surface">Admin (You)</span>
+</div>
+<div class="bg-primary-container/20 border border-primary-fixed p-3 rounded-2xl rounded-tr-none font-body-md text-body-md text-on-surface shadow-sm text-right">
+                                        Noted. We have paused the escrow payout. We are currently attempting to verify the landlord's registered identity documents.
+                                    </div>
+</div>
+</div>
+</div>
+<div class="p-4 border-t border-outline-variant bg-surface-container-lowest">
+<div class="relative">
+<textarea class="w-full pl-4 pr-12 py-3 bg-surface-container-low border border-outline-variant rounded-xl font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary resize-none h-14" placeholder="Add an internal note or reply..."></textarea>
+<button class="absolute right-3 top-1/2 -translate-y-1/2 text-primary hover:bg-primary/10 p-2 rounded-full transition-colors">
+<span class="material-symbols-outlined">send</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Middle Right: Escrow & Evidence -->
+<div class="col-span-5 flex flex-col gap-gutter overflow-y-auto custom-scrollbar pr-2">
+<!-- Payment Records Bento Card -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-stack-md shadow-sm">
+<h4 class="font-label-md text-label-md text-on-surface flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined">payments</span> Payment in Escrow
+                            </h4>
+<div class="bg-secondary-container/30 border border-secondary-fixed rounded-lg p-4 flex items-center justify-between mb-4">
+<div>
+<p class="font-caption text-caption text-on-surface-variant mb-1">Total Held Amount</p>
+<p class="font-price-display text-price-display text-on-surface">₦ 1,250,000</p>
+</div>
+<span class="material-symbols-outlined text-primary text-[32px]">lock</span>
+</div>
+<div class="space-y-3 font-body-md text-body-md">
+<div class="flex justify-between border-b border-outline-variant/50 pb-2">
+<span class="text-on-surface-variant">Transaction ID</span>
+<span class="text-on-surface font-medium">TXN-099281-LR</span>
+</div>
+<div class="flex justify-between border-b border-outline-variant/50 pb-2">
+<span class="text-on-surface-variant">Scheduled Payout</span>
+<span class="text-on-surface font-medium line-through text-error">Oct 24, 2023</span>
+</div>
+<div class="flex justify-between pb-1">
+<span class="text-on-surface-variant">Status</span>
+<span class="text-error font-bold">FROZEN (Dispute)</span>
+</div>
+</div>
+</div>
+<!-- Evidence Bento Card -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-stack-md shadow-sm flex-1">
+<div class="flex justify-between items-center mb-4">
+<h4 class="font-label-md text-label-md text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined">attachment</span> Uploaded Evidence
+                                </h4>
+<span class="font-caption text-caption text-on-surface-variant">2 Files</span>
+</div>
+<div class="grid grid-cols-2 gap-unit">
+<div class="relative group cursor-pointer">
+<img class="w-full aspect-square object-cover rounded-lg border border-outline-variant" data-alt="A smartphone photo showing an empty, overgrown plot of land surrounded by a dilapidated brick fence in a residential area in Lagos, Nigeria. The photo is taken during daylight under a clear sky, acting as evidence of a non-existent building." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDjjhUfgJjG-Ai9RH7bpz1iktzK23JChJyusPe5nyJqFmnln_dJA4kMPrSg8CAKaPJmsc7Bzv8J127Um6lGFOjEzePfKLbtLk4E6LM2Q2x-mcqVDH2Fl0TIV7NgT1_fGx535rpr0OFxyYAUqDfDYq2mw-2QE5HebbxobKGaCZpv9kMV-fN-X_-i8RsUd2P8cmMX5ivI3Mr5xR2Foqw7xJab7SGQIAJwSdDBO5RzFC38UFWg2sb-DidAMQ"/>
+<div class="absolute inset-0 bg-on-background/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-on-primary text-[32px]">zoom_in</span>
+</div>
+<p class="font-caption text-caption text-on-surface-variant mt-1 truncate">site_photo_1.jpg</p>
+</div>
+<div class="relative group cursor-pointer">
+<img class="w-full aspect-square object-cover rounded-lg border border-outline-variant" data-alt="A screenshot of a WhatsApp conversation showing unreturned messages to a landlord regarding a viewing appointment. The interface is in light mode with green chat bubbles." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD5cAqOZas473Utz6RCnvk7TVyzYXY49bBEgnN4sEIMbf2CvOB46vDeQlJe6Xd23GbttzBGDJ04T9yhvCmSRIxVTc96YQFFi8ix9M-V90yeiZPCdFFQaUT4l5K0tmJbEEtECGadUULNx3l61xu7fXzS5Al206MF9c913dAmWX_J8c9NRh9jHgLA9L5MSJnuD8BXhCk4FHUhA7FfU7cQzIkY1C3hwDVJm4vTjsYymMIpXqV_SwTcEQZO1w"/>
+<div class="absolute inset-0 bg-on-background/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-on-primary text-[32px]">zoom_in</span>
+</div>
+<p class="font-caption text-caption text-on-surface-variant mt-1 truncate">chat_log.png</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Rental Search Results - Linkcon Rent</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-container": "#537707",
+                        "on-tertiary-fixed-variant": "#354e00",
+                        "on-secondary-container": "#466a5b",
+                        "on-secondary": "#ffffff",
+                        "surface-tint": "#0c6c4a",
+                        "secondary-fixed": "#c3ebd8",
+                        "on-primary-fixed": "#002113",
+                        "inverse-on-surface": "#f4f0e7",
+                        "surface-variant": "#e6e2d9",
+                        "on-surface": "#1c1c16",
+                        "on-primary": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "on-tertiary-fixed": "#131f00",
+                        "on-secondary-fixed": "#002116",
+                        "surface-container-high": "#ece8df",
+                        "secondary-fixed-dim": "#a8cfbd",
+                        "background": "#fdf9f0",
+                        "surface-dim": "#dddad1",
+                        "tertiary-fixed": "#c5f17a",
+                        "primary-fixed": "#a0f4c9",
+                        "secondary-container": "#c1e9d5",
+                        "on-primary-container": "#b1ffd6",
+                        "tertiary": "#3f5d00",
+                        "on-surface-variant": "#3f4943",
+                        "inverse-primary": "#84d7ae",
+                        "outline": "#6f7a72",
+                        "surface-container": "#f1eee5",
+                        "on-error": "#ffffff",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-low": "#f7f3ea",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary-fixed-variant": "#2a4e3f",
+                        "on-primary-fixed-variant": "#005236",
+                        "on-background": "#1c1c16",
+                        "error": "#ba1a1a",
+                        "secondary": "#416656",
+                        "tertiary-fixed-dim": "#aad461",
+                        "surface-container-highest": "#e6e2d9",
+                        "primary-fixed-dim": "#84d7ae",
+                        "on-error-container": "#93000a",
+                        "surface": "#fdf9f0",
+                        "on-tertiary-container": "#d2fe85",
+                        "surface-bright": "#fdf9f0",
+                        "primary-container": "#237a57",
+                        "primary": "#006041",
+                        "inverse-surface": "#31302b",
+                        "outline-variant": "#bec9c1"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-md": "16px",
+                        "stack-lg": "32px",
+                        "margin-mobile": "20px",
+                        "margin-desktop": "40px",
+                        "gutter": "24px",
+                        "container-max": "1280px",
+                        "unit": "8px",
+                        "stack-sm": "8px"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["Manrope"],
+                        "headline-lg-mobile": ["Manrope"],
+                        "headline-lg": ["Manrope"],
+                        "caption": ["Manrope"],
+                        "label-md": ["Manrope"],
+                        "body-md": ["Manrope"],
+                        "headline-md": ["Manrope"],
+                        "price-display": ["Manrope"],
+                        "display-lg": ["Manrope"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "headline-lg-mobile": ["28px", { "lineHeight": "36px", "fontWeight": "700" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+                        "caption": ["12px", { "lineHeight": "16px", "fontWeight": "500" }],
+                        "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+                        "price-display": ["20px", { "lineHeight": "28px", "fontWeight": "800" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800" }]
+                    }
+                },
+            }
+        }
+    </script>
+<style>
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md antialiased flex flex-col min-h-screen">
+<!-- TopNavBar -->
+<nav class="bg-surface dark:bg-surface-dim docked full-width top-0 border-b border-outline-variant dark:border-outline flat no shadows sticky z-50">
+<div class="flex justify-between items-center px-margin-desktop py-4 w-full max-w-container-max mx-auto">
+<div class="flex items-center gap-8">
+<a class="text-headline-md font-headline-md font-extrabold text-primary dark:text-primary-fixed" href="#">Linkcon Rent</a>
+<div class="hidden md:flex items-center gap-6">
+<a class="text-primary dark:text-primary-fixed font-bold border-b-2 border-primary pb-1 hover:text-primary dark:hover:text-primary-fixed transition-colors opacity-80 transition-all font-label-md text-label-md" href="#">Rent</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:text-primary dark:hover:text-primary-fixed transition-colors font-label-md text-label-md" href="#">Map</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:text-primary dark:hover:text-primary-fixed transition-colors font-label-md text-label-md" href="#">List a Property</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:text-primary dark:hover:text-primary-fixed transition-colors font-label-md text-label-md" href="#">How It Works</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:text-primary dark:hover:text-primary-fixed transition-colors font-label-md text-label-md" href="#">Safety</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:text-primary dark:hover:text-primary-fixed transition-colors font-label-md text-label-md" href="#">Pricing</a>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="hidden md:flex items-center gap-2 text-on-surface-variant">
+<button class="p-2 hover:text-primary transition-colors flex items-center justify-center rounded-full hover:bg-surface-variant"><span class="material-symbols-outlined">favorite</span></button>
+<button class="p-2 hover:text-primary transition-colors flex items-center justify-center rounded-full hover:bg-surface-variant"><span class="material-symbols-outlined">mail</span></button>
+<button class="p-2 hover:text-primary transition-colors flex items-center justify-center rounded-full hover:bg-surface-variant"><span class="material-symbols-outlined">help</span></button>
+</div>
+<div class="flex items-center gap-4">
+<a class="hidden md:block font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors" href="#">Sign In</a>
+<button class="bg-primary text-on-primary font-label-md text-label-md px-6 py-2.5 rounded-full hover:bg-primary-container hover:text-on-primary-container transition-colors shadow-sm">Create Account</button>
+</div>
+</div>
+</div>
+</nav>
+<!-- Main Content -->
+<main class="flex-grow flex w-full max-w-container-max mx-auto relative px-margin-desktop py-stack-lg gap-gutter">
+<!-- Filter Sidebar -->
+<aside class="hidden lg:block w-72 flex-shrink-0 sticky top-24 h-[calc(100vh-120px)] overflow-y-auto no-scrollbar pr-4 pb-stack-lg">
+<div class="flex justify-between items-center mb-stack-md">
+<h2 class="font-headline-md text-headline-md text-on-surface">Filters</h2>
+<button class="text-primary font-label-md text-label-md hover:underline">Reset</button>
+</div>
+<div class="space-y-stack-md">
+<!-- Location -->
+<div>
+<label class="block font-label-md text-label-md text-on-surface-variant mb-unit">Location</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">location_on</span>
+<input class="w-full pl-10 pr-4 py-3 rounded-lg border border-outline-variant bg-surface-container-lowest focus:border-primary focus:ring-1 focus:ring-primary font-body-md text-body-md text-on-surface transition-all" placeholder="e.g. Yaba, Surulere" type="text"/>
+</div>
+</div>
+<!-- Rent Type Toggle -->
+<div class="bg-surface-container-high rounded-lg p-1 flex mt-stack-md">
+<button class="flex-1 py-2 font-label-md text-label-md rounded-md bg-primary text-on-primary shadow-sm transition-all">Yearly</button>
+<button class="flex-1 py-2 font-label-md text-label-md rounded-md text-on-surface-variant hover:bg-surface-variant transition-all">Monthly</button>
+</div>
+<!-- Price Range -->
+<div>
+<label class="block font-label-md text-label-md text-on-surface-variant mb-unit">Rent Range (₦)</label>
+<div class="flex gap-2 items-center">
+<input class="w-full px-3 py-2 rounded-lg border border-outline-variant bg-surface-container-lowest focus:border-primary font-body-md text-body-md" placeholder="Min" type="text"/>
+<span class="text-outline-variant">-</span>
+<input class="w-full px-3 py-2 rounded-lg border border-outline-variant bg-surface-container-lowest focus:border-primary font-body-md text-body-md" placeholder="Max" type="text"/>
+</div>
+</div>
+<!-- Property Type -->
+<div>
+<label class="block font-label-md text-label-md text-on-surface-variant mb-unit">Property Type</label>
+<div class="space-y-2">
+<label class="flex items-center gap-3 cursor-pointer group">
+<input class="w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary" type="checkbox"/>
+<span class="font-body-md text-body-md text-on-surface group-hover:text-primary transition-colors">Apartment</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<input class="w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary" type="checkbox"/>
+<span class="font-body-md text-body-md text-on-surface group-hover:text-primary transition-colors">Self Contain</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<input class="w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary" type="checkbox"/>
+<span class="font-body-md text-body-md text-on-surface group-hover:text-primary transition-colors">Mini Flat</span>
+</label>
+</div>
+</div>
+<!-- Rooms -->
+<div>
+<label class="block font-label-md text-label-md text-on-surface-variant mb-unit">Bedrooms</label>
+<div class="flex gap-2">
+<button class="w-10 h-10 rounded-full border border-outline-variant flex items-center justify-center font-label-md text-label-md hover:border-primary hover:text-primary transition-colors bg-surface-container-lowest">Any</button>
+<button class="w-10 h-10 rounded-full border border-primary bg-primary-container text-on-primary-container flex items-center justify-center font-label-md text-label-md transition-colors">1</button>
+<button class="w-10 h-10 rounded-full border border-outline-variant flex items-center justify-center font-label-md text-label-md hover:border-primary hover:text-primary transition-colors bg-surface-container-lowest">2</button>
+<button class="w-10 h-10 rounded-full border border-outline-variant flex items-center justify-center font-label-md text-label-md hover:border-primary hover:text-primary transition-colors bg-surface-container-lowest">3+</button>
+</div>
+</div>
+<!-- Verification -->
+<div class="pt-stack-sm border-t border-surface-variant">
+<label class="flex items-center justify-between cursor-pointer group p-3 rounded-lg hover:bg-surface-container transition-colors -mx-3">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">verified</span>
+<span class="font-label-md text-label-md text-on-surface">Verified Properties Only</span>
+</div>
+<div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
+<input checked="" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer border-primary top-0 right-0 z-10 transition-transform duration-200 ease-in-out" id="toggle1" name="toggle" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-5 rounded-full bg-primary-container cursor-pointer" for="toggle1"></label>
+</div>
+<style>
+                            .toggle-checkbox:checked { right: 0; border-color: #006041; }
+                            .toggle-checkbox:checked + .toggle-label { background-color: #a0f4c9; }
+                            .toggle-checkbox:not(:checked) { right: 1.25rem; border-color: #6f7a72; }
+                            .toggle-checkbox:not(:checked) + .toggle-label { background-color: #e6e2d9; }
+                        </style>
+</label>
+</div>
+</div>
+<button class="w-full mt-stack-lg bg-on-surface text-surface py-3 rounded-lg font-label-md text-label-md hover:bg-inverse-surface transition-colors shadow-md">Show 124 Results</button>
+</aside>
+<!-- Results Area -->
+<section class="flex-1 w-full flex flex-col">
+<!-- Header & Map Toggle -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-stack-md bg-surface-container-low p-4 rounded-xl border border-surface-variant">
+<div>
+<h1 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface">Properties in Lagos</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">124 results available</p>
+</div>
+<div class="flex items-center gap-3">
+<button class="flex items-center gap-2 px-4 py-2 rounded-lg border border-outline-variant bg-surface-container-lowest font-label-md text-label-md hover:bg-surface-variant transition-colors">
+<span class="material-symbols-outlined">sort</span> Sort: Recommended
+                    </button>
+<button class="lg:hidden flex items-center gap-2 px-4 py-2 rounded-lg border border-outline-variant bg-surface-container-lowest font-label-md text-label-md hover:bg-surface-variant transition-colors">
+<span class="material-symbols-outlined">filter_list</span> Filters
+                    </button>
+<button class="hidden sm:flex items-center gap-2 px-4 py-2 rounded-lg bg-secondary-container text-on-secondary-container font-label-md text-label-md hover:bg-secondary-fixed transition-colors">
+<span class="material-symbols-outlined">map</span> Show Map
+                    </button>
+</div>
+</div>
+<!-- Property Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-stack-md pb-stack-lg">
+<!-- Card 1 -->
+<article class="bg-surface-container-lowest rounded-xl border border-surface-variant overflow-hidden hover:shadow-[0px_4px_20px_rgba(18,55,42,0.08)] transition-shadow group flex flex-col h-full relative">
+<div class="absolute top-3 left-3 z-10 flex flex-col gap-2">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary/90 text-on-primary font-caption text-caption shadow-sm backdrop-blur-sm">
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">verified</span> Verified Property
+                        </span>
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-surface/90 text-on-surface font-caption text-caption shadow-sm backdrop-blur-sm">
+<span class="material-symbols-outlined text-[14px] text-primary" style="font-variation-settings: 'FILL' 1;">shield_person</span> Verified Landlord
+                        </span>
+</div>
+<button class="absolute top-3 right-3 z-10 p-2 rounded-full bg-surface/80 text-on-surface backdrop-blur-sm hover:bg-surface hover:text-primary transition-colors shadow-sm">
+<span class="material-symbols-outlined">favorite</span>
+</button>
+<div class="relative w-full h-48 overflow-hidden bg-surface-variant">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="A modern well-lit living room in a Nigerian apartment. Warm afternoon sunlight streaming through large windows. Contemporary minimalist furniture with neutral tones, a subtle patterned rug, and a few indoor plants. Clean lines, inviting atmosphere, bright and airy real estate photography style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBGW_iSj7trmzZOnSrKpjQZ8B7K4h42GbWI3Z2xL2aMizUlCUOsVOz7DqcTgvjtTkKuNo2YRd6nP4jx9IEoQcdhDHkzRb1c5auYiefIVeOBM1THVs30xvxB06JkU2q1eKKwT1idT-RZcdoJMlNx7tXgaVFPlqeNdJjvalNyAfho3ye6XbFRMfDLS2Bg71ol102a4l1W9JXJ-HbMY9B3K7gf_Q67a1PHohC_0nFULOXmJ0OR-J61vF3u9w"/>
+</div>
+<div class="p-4 flex flex-col flex-grow">
+<div class="flex justify-between items-start mb-2">
+<h3 class="font-price-display text-price-display text-on-surface">₦2,500,000<span class="font-body-md text-body-md text-on-surface-variant font-normal">/yr</span></h3>
+</div>
+<h4 class="font-headline-md text-[18px] text-on-surface mb-1 truncate">Modern 2 Bed Apartment</h4>
+<div class="flex items-center gap-1 text-on-surface-variant font-body-md text-body-md mb-3">
+<span class="material-symbols-outlined text-[18px]">location_on</span>
+<span class="truncate">Herbert Macaulay Way, Yaba</span>
+</div>
+<div class="flex items-center gap-4 py-3 border-t border-surface-variant mt-auto">
+<div class="flex items-center gap-1 text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px]">bed</span>
+<span class="font-label-md text-label-md">2</span>
+</div>
+<div class="flex items-center gap-1 text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px]">shower</span>
+<span class="font-label-md text-label-md">2</span>
+</div>
+<div class="flex items-center gap-1 text-on-surface-variant ml-auto">
+<span class="font-caption text-caption">Replies in &lt; 2 hrs</span>
+</div>
+</div>
+<button class="w-full mt-3 py-2.5 rounded-lg border border-primary text-primary font-label-md text-label-md hover:bg-primary hover:text-on-primary transition-colors">View Details</button>
+</div>
+</article>
+<!-- Card 2 -->
+<article class="bg-surface-container-lowest rounded-xl border border-surface-variant overflow-hidden hover:shadow-[0px_4px_20px_rgba(18,55,42,0.08)] transition-shadow group flex flex-col h-full relative">
+<div class="absolute top-3 left-3 z-10 flex flex-col gap-2">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary/90 text-on-primary font-caption text-caption shadow-sm backdrop-blur-sm">
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">verified</span> Verified Property
+                        </span>
+</div>
+<button class="absolute top-3 right-3 z-10 p-2 rounded-full bg-surface/80 text-on-surface backdrop-blur-sm hover:bg-surface hover:text-primary transition-colors shadow-sm">
+<span class="material-symbols-outlined">favorite</span>
+</button>
+<div class="relative w-full h-48 overflow-hidden bg-surface-variant">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Exterior view of a newly built block of flats in Surulere, Lagos. Crisp white and grey paint with green accents. Neatly paved compound, clear blue sky overhead. Professional real estate exterior shot highlighting modern reliability and secure environment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuATeoX3ghCs9eU6WNUMbNo-leLUyDwyOxLDNVWcYtuRmHgA37nK6SEcrcgzvjiIpymMx_tNP_RauOs99O68f5GtIG448Pk-s6qJ_cTTLq1ArywRXm9t0GQ11MpXbHNNlJEYnoh7Qln9TQ1EM-SAhz--MRQyyEo5uk2dzEUTLi-I_QJ6UM4qzU_RugJHH01D9T3zwW_D8IBFZKrMyiajdSY2KMp4P1PiHGTiUF5CNKvQtlj0A9FhhZzkyg"/>
+</div>
+<div class="p-4 flex flex-col flex-grow">
+<div class="flex justify-between items-start mb-2">
+<h3 class="font-price-display text-price-display text-on-surface">₦1,200,000<span class="font-body-md text-body-md text-on-surface-variant font-normal">/yr</span></h3>
+</div>
+<h4 class="font-headline-md text-[18px] text-on-surface mb-1 truncate">Spacious Mini Flat</h4>
+<div class="flex items-center gap-1 text-on-surface-variant font-body-md text-body-md mb-3">
+<span class="material-symbols-outlined text-[18px]">location_on</span>
+<span class="truncate">Adeniran Ogunsanya, Surulere</span>
+</div>
+<div class="flex items-center gap-4 py-3 border-t border-surface-variant mt-auto">
+<div class="flex items-center gap-1 text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px]">bed</span>
+<span class="font-label-md text-label-md">1</span>
+</div>
+<div class="flex items-center gap-1 text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px]">shower</span>
+<span class="font-label-md text-label-md">1</span>
+</div>
+<div class="flex items-center gap-1 text-on-surface-variant ml-auto">
+<span class="font-caption text-caption">Replies in &lt; 5 hrs</span>
+</div>
+</div>
+<button class="w-full mt-3 py-2.5 rounded-lg border border-primary text-primary font-label-md text-label-md hover:bg-primary hover:text-on-primary transition-colors">View Details</button>
+</div>
+</article>
+<!-- Card 3 -->
+<article class="bg-surface-container-lowest rounded-xl border border-surface-variant overflow-hidden hover:shadow-[0px_4px_20px_rgba(18,55,42,0.08)] transition-shadow group flex flex-col h-full relative">
+<div class="absolute top-3 left-3 z-10 flex flex-col gap-2">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary/90 text-on-primary font-caption text-caption shadow-sm backdrop-blur-sm">
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">verified</span> Verified Property
+                        </span>
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-surface/90 text-on-surface font-caption text-caption shadow-sm backdrop-blur-sm">
+<span class="material-symbols-outlined text-[14px] text-primary" style="font-variation-settings: 'FILL' 1;">shield_person</span> Verified Landlord
+                        </span>
+</div>
+<button class="absolute top-3 right-3 z-10 p-2 rounded-full bg-surface/80 text-on-surface backdrop-blur-sm hover:bg-surface hover:text-primary transition-colors shadow-sm">
+<span class="material-symbols-outlined">favorite</span>
+</button>
+<div class="relative w-full h-48 overflow-hidden bg-surface-variant">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="A clean, modern kitchen in a Lagos apartment. White cabinetry, sleek granite countertops, stainless steel sink. Soft under-cabinet lighting. Pristine and unused, ready for a new tenant. High quality architectural photography style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDb4N7TBLthfsCTqkRMzwZ6h34BvhT2oxqNpK0o3zqsJ5O_RRlRDjif00xCJQMvmGQK4dyrZbyXlD2L5v8tBv3FKNnm4BW75rwCfRTMVenIhHOkdrVKpIBhYD6ew2br20EVztuHt_CBnN7lrLgdj6QEM3kQZATgigdAaVdTHeshfIesnkG1BFeNhAuRcrRgHcb2sx3bWfGg2TllOMXZFFx13e8Ljel6RWbdefp9JTH-_FJ895HHh5_PXw"/>
+</div>
+<div class="p-4 flex flex-col flex-grow">
+<div class="flex justify-between items-start mb-2">
+<h3 class="font-price-display text-price-display text-on-surface">₦4,000,000<span class="font-body-md text-body-md text-on-surface-variant font-normal">/yr</span></h3>
+</div>
+<h4 class="font-headline-md text-[18px] text-on-surface mb-1 truncate">Premium 3 Bed Terraced Duplex</h4>
+<div class="flex items-center gap-1 text-on-surface-variant font-body-md text-body-md mb-3">
+<span class="material-symbols-outlined text-[18px]">location_on</span>
+<span class="truncate">Alagomeji, Yaba</span>
+</div>
+<div class="flex items-center gap-4 py-3 border-t border-surface-variant mt-auto">
+<div class="flex items-center gap-1 text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px]">bed</span>
+<span class="font-label-md text-label-md">3</span>
+</div>
+<div class="flex items-center gap-1 text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px]">shower</span>
+<span class="font-label-md text-label-md">3.5</span>
+</div>
+<div class="flex items-center gap-1 text-on-surface-variant ml-auto">
+<span class="font-caption text-caption text-tertiary">Replies usually instantly</span>
+</div>
+</div>
+<button class="w-full mt-3 py-2.5 rounded-lg border border-primary text-primary font-label-md text-label-md hover:bg-primary hover:text-on-primary transition-colors">View Details</button>
+</div>
+</article>
+</div>
+<!-- Pagination -->
+<div class="mt-auto pt-stack-md flex justify-center items-center gap-2 border-t border-surface-variant">
+<button class="w-10 h-10 flex items-center justify-center rounded-lg border border-outline-variant text-on-surface-variant hover:bg-surface-variant disabled:opacity-50" disabled="">
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center rounded-lg bg-primary text-on-primary font-label-md text-label-md">1</button>
+<button class="w-10 h-10 flex items-center justify-center rounded-lg border border-surface-variant text-on-surface font-label-md text-label-md hover:bg-surface-variant">2</button>
+<button class="w-10 h-10 flex items-center justify-center rounded-lg border border-surface-variant text-on-surface font-label-md text-label-md hover:bg-surface-variant">3</button>
+<span class="text-on-surface-variant">...</span>
+<button class="w-10 h-10 flex items-center justify-center rounded-lg border border-surface-variant text-on-surface font-label-md text-label-md hover:bg-surface-variant">12</button>
+<button class="w-10 h-10 flex items-center justify-center rounded-lg border border-outline-variant text-on-surface-variant hover:bg-surface-variant">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-inverse-surface dark:bg-surface-container-lowest full-width mt-auto">
+<div class="flex flex-col md:flex-row justify-between items-start px-margin-desktop py-stack-lg w-full max-w-container-max mx-auto">
+<div class="mb-stack-md md:mb-0">
+<a class="font-headline-md text-headline-md text-inverse-on-surface dark:text-on-surface block mb-2" href="#">Linkcon Rent</a>
+<p class="font-body-md text-body-md text-inverse-on-surface dark:text-on-surface opacity-80">© 2024 Linkcon Rent. Modern Reliability in Nigerian Real Estate.</p>
+</div>
+<div class="flex flex-wrap gap-x-8 gap-y-4">
+<a class="font-body-md text-body-md text-surface-variant dark:text-outline hover:text-primary-fixed dark:hover:text-primary transition-colors" href="#">Renters</a>
+<a class="font-body-md text-body-md text-surface-variant dark:text-outline hover:text-primary-fixed dark:hover:text-primary transition-colors" href="#">Landlords</a>
+<a class="font-body-md text-body-md text-surface-variant dark:text-outline hover:text-primary-fixed dark:hover:text-primary transition-colors" href="#">Safety</a>
+<a class="font-body-md text-body-md text-surface-variant dark:text-outline hover:text-primary-fixed dark:hover:text-primary transition-colors" href="#">Company</a>
+<a class="font-body-md text-body-md text-surface-variant dark:text-outline hover:text-primary-fixed dark:hover:text-primary transition-colors" href="#">Legal</a>
+<a class="font-body-md text-body-md text-surface-variant dark:text-outline hover:text-primary-fixed dark:hover:text-primary transition-colors" href="#">Support</a>
+</div>
+</div>
+</footer>
+</body></html>

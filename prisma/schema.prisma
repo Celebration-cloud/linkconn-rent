@@ -1,0 +1,624 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ─────────────────────────────────────────────────────────────
+// Enums
+// ─────────────────────────────────────────────────────────────
+
+enum AppRole {
+  Tenant
+  Landlord
+  PropertyManager
+  Moderator
+  Admin
+  SuperAdmin
+}
+
+enum VerificationLevel {
+  Unverified
+  PartiallyVerified
+  FullyVerified
+  Trusted
+}
+
+enum EmploymentType {
+  Employed
+  SelfEmployed
+  Freelancer
+  Student
+  Unemployed
+  Retired
+}
+
+enum IncomeRange {
+  Below50k
+  Between50kAnd100k
+  Between100kAnd250k
+  Between250kAnd500k
+  Above500k
+}
+
+enum IdDocStatus {
+  NotSubmitted
+  Pending
+  Approved
+  Rejected
+}
+
+enum RequestPriority {
+  Low
+  Medium
+  High
+}
+
+enum RequestStatus {
+  Pending
+  InProgress
+  Completed
+  Closed
+}
+
+enum PaymentStatus {
+  Paid
+  Due
+  Overdue
+  Processing
+  Failed
+}
+
+enum PropertyStatus {
+  Draft
+  Available
+  Rented
+  UnderMaintenance
+  Archived
+}
+
+enum ApplicationStatus {
+  Pending
+  Shortlisted
+  Accepted
+  Declined
+}
+
+enum ViewingStatus {
+  Requested
+  Confirmed
+  Rescheduled
+  Completed
+  Cancelled
+}
+
+enum MessageType {
+  Text
+  Document
+  System
+}
+
+enum VerificationSubmissionType {
+  Identity
+  PropertyOwnership
+}
+
+enum VerificationSubmissionStatus {
+  Draft
+  Pending
+  Approved
+  Rejected
+}
+
+enum AccountStatus {
+  Active
+  Restricted
+  Suspended
+}
+
+enum ModerationStatus {
+  PendingReview
+  Approved
+  Flagged
+  Removed
+}
+
+enum DisputeStatus {
+  Open
+  Investigating
+  Resolved
+  Dismissed
+}
+
+enum DisputePriority {
+  Low
+  Medium
+  High
+  Critical
+}
+
+enum DisputeCategory {
+  Payment
+  Listing
+  Fraud
+  Harassment
+  Identity
+  Other
+}
+
+enum AdminAuditTarget {
+  Verification
+  Dispute
+  User
+  Property
+  Payment
+  Maintenance
+}
+
+enum SupportTicketStatus {
+  Open
+  InProgress
+  WaitingOnCustomer
+  Resolved
+  Closed
+}
+
+// ─────────────────────────────────────────────────────────────
+// Profile — mirrors neon_auth user by id (public schema)
+// One Profile per Neon Auth user. Created on first login.
+// ─────────────────────────────────────────────────────────────
+
+model Profile {
+  id                 String            @id // = neon_auth user id
+  email              String            @unique
+  firstName          String            @default("")
+  lastName           String            @default("")
+  phone              String?
+  avatar             String?
+  bio                String?
+  location           String?
+  role               AppRole           @default(Tenant)
+  accountStatus      AccountStatus     @default(Active)
+  verificationLevel  VerificationLevel @default(Unverified)
+  twoFactorEnabled   Boolean           @default(false)
+  onboardingComplete Boolean           @default(false)
+  emailVerified      Boolean           @default(false)
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @default(now()) @updatedAt
+
+  // Role sub-profiles (at most one each)
+  tenantProfile   TenantProfile?
+  landlordProfile LandlordProfile?
+
+  // Ownership & activities
+  properties              Property[]               @relation("OwnerProperties")
+  applications            Application[]            @relation("TenantApplications")
+  maintenance             MaintenanceRequest[]
+  payments                Payment[]
+  savedProperties         SavedProperty[]
+  requestedViewings       Viewing[]                @relation("TenantViewings")
+  hostedViewings          Viewing[]                @relation("LandlordViewings")
+  tenantConversations     Conversation[]           @relation("TenantConversations")
+  landlordConversations   Conversation[]           @relation("LandlordConversations")
+  sentMessages            Message[]                @relation("MessageSender")
+  verificationSubmissions VerificationSubmission[]
+  assignedVerifications   VerificationSubmission[] @relation("VerificationAssignee")
+  reviewedVerifications   VerificationSubmission[] @relation("VerificationReviewer")
+  assignedDisputes        DisputeCase[]            @relation("DisputeAssignee")
+  reportedDisputes        DisputeCase[]            @relation("DisputeReporter")
+  disputeNotes            DisputeNote[]
+  auditEvents             AdminAuditEvent[]        @relation("AuditActor")
+  moderationReviews       Property[]               @relation("PropertyReviewer")
+  maintenanceActivities   MaintenanceActivity[]
+  supportTickets          SupportTicket[]
+
+  @@map("profiles")
+}
+
+// ─────────────────────────────────────────────────────────────
+// Tenant sub-profile
+// ─────────────────────────────────────────────────────────────
+
+model TenantProfile {
+  id        String  @id @default(uuid())
+  profileId String  @unique
+  profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  // Employment
+  employmentType EmploymentType @default(Employed)
+  employerName   String?
+  jobTitle       String?
+  incomeRange    IncomeRange    @default(Below50k)
+
+  // Preferences
+  preferredLocations String[]  @default([])
+  preferredTypes     String[]  @default([])
+  budgetMin          Float?
+  budgetMax          Float?
+  moveInDate         DateTime?
+
+  // Identity verification
+  ninStatus IdDocStatus @default(NotSubmitted)
+  ninNumber String? // store hashed / encrypted in prod
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("tenant_profiles")
+}
+
+// ─────────────────────────────────────────────────────────────
+// Landlord sub-profile
+// ─────────────────────────────────────────────────────────────
+
+model LandlordProfile {
+  id        String  @id @default(uuid())
+  profileId String  @unique
+  profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  // Business info
+  businessName         String?
+  propertyCount        Int      @default(0)
+  propertyTypesOffered String[] @default([])
+
+  // Identity
+  ninStatus IdDocStatus @default(NotSubmitted)
+  ninNumber String?
+
+  // Payout details (treat as sensitive — encrypt at rest in production)
+  bankName      String?
+  accountNumber String? // store last 4 digits for display; full value encrypted
+  accountName   String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("landlord_profiles")
+}
+
+// ─────────────────────────────────────────────────────────────
+// Property
+// ─────────────────────────────────────────────────────────────
+
+model Property {
+  id               String           @id @default(uuid())
+  title            String
+  type             String
+  location         String
+  city             String
+  price            Float
+  period           String           @default("year")
+  bedrooms         Int
+  bathrooms        Int
+  toilets          Int
+  area             Float
+  latitude         Float?
+  longitude        Float?
+  publicLatitude   Float?
+  publicLongitude  Float?
+  coordinateVerified Boolean @default(false)
+  images           String[]         @default([])
+  amenities        String[]         @default([])
+  houseRules       String[]         @default([])
+  cautionFee       Float            @default(0)
+  legalFee         Float            @default(0)
+  agencyFee        Float            @default(0)
+  serviceCharge    Float            @default(0)
+  verified         Boolean          @default(false)
+  featured         Boolean          @default(false)
+  rating           Float            @default(0.0)
+  status           PropertyStatus   @default(Available)
+  moderationStatus ModerationStatus @default(PendingReview)
+  moderationReason String?
+  reviewedById     String?
+  reviewedBy       Profile?         @relation("PropertyReviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
+  reviewedAt       DateTime?
+  description      String
+
+  ownerId String
+  owner   Profile @relation("OwnerProperties", fields: [ownerId], references: [id])
+
+  applications            Application[]
+  maintenance             MaintenanceRequest[]
+  payments                Payment[]
+  savedBy                 SavedProperty[]
+  viewings                Viewing[]
+  conversations           Conversation[]
+  verificationSubmissions VerificationSubmission[]
+  disputes                DisputeCase[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status, city])
+  @@index([latitude, longitude])
+  @@index([publicLatitude, publicLongitude])
+  @@index([ownerId, status])
+  @@index([moderationStatus, updatedAt])
+  @@map("properties")
+}
+
+// ─────────────────────────────────────────────────────────────
+// Application
+// ─────────────────────────────────────────────────────────────
+
+model Application {
+  id           String            @id @default(uuid())
+  propertyId   String
+  property     Property          @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  tenantId     String
+  tenant       Profile           @relation("TenantApplications", fields: [tenantId], references: [id])
+  status       ApplicationStatus @default(Pending)
+  score        Int               @default(0)
+  message      String?
+  conversation Conversation?
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  @@unique([propertyId, tenantId])
+  @@index([tenantId, status])
+  @@index([propertyId, status])
+  @@map("applications")
+}
+
+// ─────────────────────────────────────────────────────────────
+// MaintenanceRequest
+// ─────────────────────────────────────────────────────────────
+
+model MaintenanceRequest {
+  id          String                @id @default(uuid())
+  title       String
+  description String?
+  propertyId  String
+  property    Property              @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  requesterId String
+  requester   Profile               @relation(fields: [requesterId], references: [id])
+  status      RequestStatus         @default(Pending)
+  priority    RequestPriority       @default(Medium)
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
+  closedAt    DateTime?
+  activities  MaintenanceActivity[]
+
+  @@index([requesterId, status])
+  @@index([propertyId, status])
+  @@map("maintenance_requests")
+}
+
+// ─────────────────────────────────────────────────────────────
+// Payment
+// ─────────────────────────────────────────────────────────────
+
+model Payment {
+  id            String        @id @default(uuid())
+  propertyId    String
+  property      Property      @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  tenantId      String
+  tenant        Profile       @relation(fields: [tenantId], references: [id])
+  amount        Float
+  dueDate       DateTime
+  paidAt        DateTime?
+  status        PaymentStatus @default(Due)
+  reference     String?       @unique
+  accessCode    String?
+  initializedAt DateTime?
+  failureReason String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  disputes      DisputeCase[]
+
+  @@index([tenantId, status, dueDate])
+  @@index([propertyId, status])
+  @@map("payments")
+}
+
+model SavedProperty {
+  profileId  String
+  propertyId String
+  profile    Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@id([profileId, propertyId])
+  @@index([propertyId])
+  @@map("saved_properties")
+}
+
+model Viewing {
+  id          String        @id @default(uuid())
+  propertyId  String
+  property    Property      @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  tenantId    String
+  tenant      Profile       @relation("TenantViewings", fields: [tenantId], references: [id], onDelete: Cascade)
+  landlordId  String
+  landlord    Profile       @relation("LandlordViewings", fields: [landlordId], references: [id], onDelete: Cascade)
+  scheduledAt DateTime
+  status      ViewingStatus @default(Requested)
+  note        String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([tenantId, scheduledAt])
+  @@index([landlordId, scheduledAt])
+  @@index([propertyId, scheduledAt])
+  @@map("viewings")
+}
+
+model Conversation {
+  id                 String       @id @default(uuid())
+  propertyId         String?
+  property           Property?    @relation(fields: [propertyId], references: [id], onDelete: SetNull)
+  applicationId      String?      @unique
+  application        Application? @relation(fields: [applicationId], references: [id], onDelete: SetNull)
+  tenantId           String
+  tenant             Profile      @relation("TenantConversations", fields: [tenantId], references: [id], onDelete: Cascade)
+  landlordId         String
+  landlord           Profile      @relation("LandlordConversations", fields: [landlordId], references: [id], onDelete: Cascade)
+  archivedByTenant   Boolean      @default(false)
+  archivedByLandlord Boolean      @default(false)
+  lastMessageAt      DateTime     @default(now())
+  messages           Message[]
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+
+  @@index([tenantId, lastMessageAt])
+  @@index([landlordId, lastMessageAt])
+  @@index([propertyId])
+  @@map("conversations")
+}
+
+model Message {
+  id             String       @id @default(uuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderId       String
+  sender         Profile      @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
+  type           MessageType  @default(Text)
+  body           String
+  attachmentName String?
+  attachmentUrl  String?
+  readAt         DateTime?
+  createdAt      DateTime     @default(now())
+
+  @@index([conversationId, createdAt])
+  @@index([senderId])
+  @@map("messages")
+}
+
+model VerificationSubmission {
+  id             String                       @id @default(uuid())
+  ownerId        String
+  owner          Profile                      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  propertyId     String?
+  property       Property?                    @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  type           VerificationSubmissionType
+  status         VerificationSubmissionStatus @default(Draft)
+  documentType   String?
+  note           String?
+  assignedToId   String?
+  assignedTo     Profile?                     @relation("VerificationAssignee", fields: [assignedToId], references: [id], onDelete: SetNull)
+  reviewedById   String?
+  reviewedBy     Profile?                     @relation("VerificationReviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
+  decisionReason String?
+  reviewNotes    String?
+  documents      VerificationDocument[]
+  submittedAt    DateTime?
+  reviewedAt     DateTime?
+  createdAt      DateTime                     @default(now())
+  updatedAt      DateTime                     @updatedAt
+
+  @@index([ownerId, status])
+  @@index([propertyId, status])
+  @@index([status, assignedToId, createdAt])
+  @@map("verification_submissions")
+}
+
+model VerificationDocument {
+  id           String                 @id @default(uuid())
+  submissionId String
+  submission   VerificationSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  fileName     String
+  storageKey   String?
+  mimeType     String?
+  size         Int?
+  createdAt    DateTime               @default(now())
+
+  @@index([submissionId])
+  @@map("verification_documents")
+}
+
+model DisputeCase {
+  id           String          @id @default(uuid())
+  reference    String          @unique
+  title        String
+  description  String
+  category     DisputeCategory
+  priority     DisputePriority @default(Medium)
+  status       DisputeStatus   @default(Open)
+  reporterId   String
+  reporter     Profile         @relation("DisputeReporter", fields: [reporterId], references: [id])
+  assignedToId String?
+  assignedTo   Profile?        @relation("DisputeAssignee", fields: [assignedToId], references: [id], onDelete: SetNull)
+  propertyId   String?
+  property     Property?       @relation(fields: [propertyId], references: [id], onDelete: SetNull)
+  paymentId    String?
+  payment      Payment?        @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+  resolution   String?
+  resolvedAt   DateTime?
+  notes        DisputeNote[]
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  @@index([status, priority, createdAt])
+  @@index([assignedToId, status])
+  @@index([reporterId, createdAt])
+  @@map("dispute_cases")
+}
+
+model DisputeNote {
+  id        String      @id @default(uuid())
+  disputeId String
+  dispute   DisputeCase @relation(fields: [disputeId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    Profile     @relation(fields: [authorId], references: [id])
+  body      String
+  internal  Boolean     @default(true)
+  createdAt DateTime    @default(now())
+
+  @@index([disputeId, createdAt])
+  @@map("dispute_notes")
+}
+
+model MaintenanceActivity {
+  id         String             @id @default(uuid())
+  requestId  String
+  request    MaintenanceRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  actorId    String
+  actor      Profile            @relation(fields: [actorId], references: [id])
+  fromStatus RequestStatus?
+  toStatus   RequestStatus?
+  note       String?
+  createdAt  DateTime           @default(now())
+
+  @@index([requestId, createdAt])
+  @@map("maintenance_activities")
+}
+
+model AdminAuditEvent {
+  id             String           @id @default(uuid())
+  actorId        String
+  actor          Profile          @relation("AuditActor", fields: [actorId], references: [id])
+  action         String
+  targetType     AdminAuditTarget
+  targetId       String
+  previousState  Json?
+  resultingState Json?
+  reason         String
+  createdAt      DateTime         @default(now())
+
+  @@index([targetType, targetId, createdAt])
+  @@index([actorId, createdAt])
+  @@map("admin_audit_events")
+}
+
+model SupportTicket {
+  id        String              @id @default(uuid())
+  reference String              @unique
+  profileId String?
+  profile   Profile?            @relation(fields: [profileId], references: [id], onDelete: SetNull)
+  name      String
+  email     String
+  category  String
+  subject   String
+  message   String
+  status    SupportTicketStatus @default(Open)
+  createdAt DateTime            @default(now())
+  updatedAt DateTime            @updatedAt
+
+  @@index([profileId, createdAt])
+  @@index([email, createdAt])
+  @@map("support_tickets")
+}

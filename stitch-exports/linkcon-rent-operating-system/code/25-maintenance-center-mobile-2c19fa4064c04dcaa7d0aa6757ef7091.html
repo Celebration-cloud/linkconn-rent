@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Maintenance Requests - Linkcon Rent</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "outline": "#6f7a72",
+                      "surface-container-high": "#ece8df",
+                      "on-secondary": "#ffffff",
+                      "on-primary-fixed-variant": "#005236",
+                      "on-tertiary-fixed-variant": "#354e00",
+                      "primary-fixed": "#a0f4c9",
+                      "secondary-container": "#c1e9d5",
+                      "surface-container-highest": "#e6e2d9",
+                      "secondary-fixed": "#c3ebd8",
+                      "on-secondary-fixed": "#002116",
+                      "surface-container": "#f1eee5",
+                      "on-tertiary-fixed": "#131f00",
+                      "background": "#fdf9f0",
+                      "tertiary-container": "#537707",
+                      "primary-container": "#237a57",
+                      "surface-variant": "#e6e2d9",
+                      "tertiary": "#3f5d00",
+                      "on-tertiary": "#ffffff",
+                      "on-tertiary-container": "#d2fe85",
+                      "on-surface-variant": "#3f4943",
+                      "on-primary-container": "#b1ffd6",
+                      "on-primary-fixed": "#002113",
+                      "primary-fixed-dim": "#84d7ae",
+                      "surface-container-lowest": "#ffffff",
+                      "on-primary": "#ffffff",
+                      "on-secondary-fixed-variant": "#2a4e3f",
+                      "surface-container-low": "#f7f3ea",
+                      "on-error": "#ffffff",
+                      "inverse-primary": "#84d7ae",
+                      "on-error-container": "#93000a",
+                      "tertiary-fixed": "#c5f17a",
+                      "tertiary-fixed-dim": "#aad461",
+                      "surface-dim": "#dddad1",
+                      "on-secondary-container": "#466a5b",
+                      "error-container": "#ffdad6",
+                      "outline-variant": "#bec9c1",
+                      "surface": "#fdf9f0",
+                      "surface-tint": "#0c6c4a",
+                      "error": "#ba1a1a",
+                      "secondary-fixed-dim": "#a8cfbd",
+                      "inverse-on-surface": "#f4f0e7",
+                      "on-surface": "#1c1c16",
+                      "surface-bright": "#fdf9f0",
+                      "on-background": "#1c1c16",
+                      "secondary": "#416656",
+                      "inverse-surface": "#31302b",
+                      "primary": "#006041"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "stack-sm": "8px",
+                      "stack-md": "16px",
+                      "stack-lg": "32px",
+                      "unit": "8px",
+                      "margin-mobile": "20px",
+                      "margin-desktop": "40px",
+                      "gutter": "24px",
+                      "container-max": "1280px"
+              },
+              "fontFamily": {
+                      "label-md": ["Manrope"],
+                      "display-lg": ["Manrope"],
+                      "headline-lg-mobile": ["Manrope"],
+                      "headline-md": ["Manrope"],
+                      "body-md": ["Manrope"],
+                      "price-display": ["Manrope"],
+                      "headline-lg": ["Manrope"],
+                      "caption": ["Manrope"],
+                      "body-lg": ["Manrope"]
+              },
+              "fontSize": {
+                      "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                      "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                      "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                      "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                      "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "price-display": ["20px", {"lineHeight": "28px", "fontWeight": "800"}],
+                      "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                      "caption": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                      "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.fill {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        
+        /* Hide scrollbar for clean horizontal scroll */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        
+        /* Modal Animation */
+        #new-request-modal {
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+        }
+        .modal-open {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        .modal-closed {
+            transform: translateY(100%);
+            opacity: 0;
+            pointer-events: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-md min-h-screen flex flex-col md:hidden">
+<!-- Top App Bar (Mobile Sub-page variant) -->
+<header class="bg-surface sticky top-0 z-40 border-b border-surface-variant">
+<div class="flex items-center justify-between px-margin-mobile h-16">
+<button aria-label="Go back" class="text-on-surface-variant p-2 -ml-2 rounded-full hover:bg-surface-variant transition-colors">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<h1 class="font-headline-md text-headline-md text-primary font-bold">Maintenance</h1>
+<button aria-label="Help" class="text-on-surface-variant p-2 -mr-2 rounded-full hover:bg-surface-variant transition-colors">
+<span class="material-symbols-outlined">help</span>
+</button>
+</div>
+</header>
+<main class="flex-1 px-margin-mobile py-stack-md flex flex-col gap-stack-lg relative pb-24">
+<!-- Active Requests Summary -->
+<section>
+<div class="flex justify-between items-end mb-stack-md">
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile text-on-background">Active Requests</h2>
+<span class="font-label-md text-label-md text-primary bg-primary/10 px-3 py-1 rounded-full">2 Open</span>
+</div>
+<!-- Bento-style Request Card 1 (Urgent) -->
+<div class="bg-surface-container-lowest rounded-xl border border-outline-variant p-4 shadow-sm relative overflow-hidden mb-stack-md">
+<div class="absolute top-0 left-0 w-1 h-full bg-error"></div>
+<div class="flex justify-between items-start mb-3">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-error fill" style="font-variation-settings: 'FILL' 1;">water_damage</span>
+<h3 class="font-label-md text-label-md text-on-surface">Plumbing Issue</h3>
+</div>
+<span class="font-caption text-caption text-error bg-error-container px-2 py-0.5 rounded-full font-bold">Urgent</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant mb-4 line-clamp-2">Major leak under the kitchen sink. Water is pooling on the floor rapidly.</p>
+<!-- Timeline/Progress -->
+<div class="border-t border-surface-variant pt-3">
+<p class="font-caption text-caption text-on-surface-variant mb-2">Status Tracking</p>
+<div class="flex items-center gap-2">
+<div class="flex flex-col items-center">
+<div class="w-4 h-4 rounded-full bg-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-[10px] fill" style="font-variation-settings: 'FILL' 1;">check</span>
+</div>
+</div>
+<div class="h-[2px] flex-1 bg-primary"></div>
+<div class="flex flex-col items-center">
+<div class="w-4 h-4 rounded-full bg-primary-container animate-pulse"></div>
+</div>
+<div class="h-[2px] flex-1 bg-surface-variant"></div>
+<div class="flex flex-col items-center">
+<div class="w-4 h-4 rounded-full border-2 border-outline-variant bg-surface"></div>
+</div>
+</div>
+<div class="flex justify-between mt-1">
+<span class="font-caption text-caption text-on-surface-variant text-[10px]">Submitted</span>
+<span class="font-caption text-caption text-primary text-[10px] font-bold">Reviewing</span>
+<span class="font-caption text-caption text-on-surface-variant text-[10px]">Scheduled</span>
+</div>
+</div>
+</div>
+<!-- Bento-style Request Card 2 (Standard) -->
+<div class="bg-surface-container-lowest rounded-xl border border-outline-variant p-4 shadow-sm relative overflow-hidden">
+<div class="absolute top-0 left-0 w-1 h-full bg-secondary"></div>
+<div class="flex justify-between items-start mb-3">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary fill" style="font-variation-settings: 'FILL' 1;">kitchen</span>
+<h3 class="font-label-md text-label-md text-on-surface">Appliance Repair</h3>
+</div>
+<span class="font-caption text-caption text-on-surface-variant bg-surface-variant px-2 py-0.5 rounded-full">Standard</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant mb-4 line-clamp-1">Oven is not heating properly.</p>
+<!-- Timeline/Progress -->
+<div class="border-t border-surface-variant pt-3">
+<div class="flex items-center gap-2">
+<div class="flex flex-col items-center">
+<div class="w-4 h-4 rounded-full bg-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-[10px] fill" style="font-variation-settings: 'FILL' 1;">check</span>
+</div>
+</div>
+<div class="h-[2px] flex-1 bg-primary"></div>
+<div class="flex flex-col items-center">
+<div class="w-4 h-4 rounded-full bg-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-[10px] fill" style="font-variation-settings: 'FILL' 1;">check</span>
+</div>
+</div>
+<div class="h-[2px] flex-1 bg-primary"></div>
+<div class="flex flex-col items-center">
+<div class="w-4 h-4 rounded-full bg-primary-container animate-pulse"></div>
+</div>
+</div>
+<div class="flex justify-between mt-1">
+<span class="font-caption text-caption text-on-surface-variant text-[10px]">Submitted</span>
+<span class="font-caption text-caption text-on-surface-variant text-[10px]">Reviewed</span>
+<span class="font-caption text-caption text-primary text-[10px] font-bold">Scheduled (Tomorrow)</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Past Requests (Collapsible/Simplified) -->
+<section>
+<h3 class="font-label-md text-label-md text-on-surface-variant mb-stack-sm uppercase tracking-wider">Past Requests</h3>
+<div class="bg-surface-container-low rounded-lg p-3 flex justify-between items-center opacity-70">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-outline">lightbulb</span>
+<span class="font-body-md text-body-md text-on-surface">Hallway Light Replacement</span>
+</div>
+<span class="font-caption text-caption text-outline">Resolved</span>
+</div>
+</section>
+</main>
+<!-- Floating Action Button for New Request -->
+<button class="fixed bottom-6 right-margin-mobile bg-primary text-white rounded-xl shadow-[0px_4px_20px_rgba(18,55,42,0.3)] p-4 flex items-center gap-2 z-30 hover:bg-primary-container transition-colors focus:ring-4 focus:ring-primary/20 outline-none" onclick="toggleModal()">
+<span class="material-symbols-outlined fill" style="font-variation-settings: 'FILL' 1;">add</span>
+<span class="font-label-md text-label-md">New Request</span>
+</button>
+<!-- New Request Modal / Bottom Sheet -->
+<div class="fixed inset-0 z-50 flex items-end justify-center modal-closed" id="new-request-modal">
+<!-- Backdrop -->
+<div class="absolute inset-0 bg-on-background/40 backdrop-blur-sm" onclick="toggleModal()"></div>
+<!-- Sheet Content -->
+<div class="bg-surface w-full rounded-t-2xl relative shadow-lg flex flex-col h-[795px] max-h-[800px]">
+<!-- Drag handle -->
+<div class="w-full flex justify-center py-3" onclick="toggleModal()">
+<div class="w-12 h-1.5 bg-outline-variant rounded-full"></div>
+</div>
+<div class="px-margin-mobile pb-4 border-b border-surface-variant flex justify-between items-center">
+<h2 class="font-headline-md text-headline-md text-on-background">Create Request</h2>
+<button class="text-on-surface-variant p-2 rounded-full hover:bg-surface-variant" onclick="toggleModal()">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+<div class="flex-1 overflow-y-auto px-margin-mobile py-stack-md space-y-stack-md">
+<!-- Category Select -->
+<div class="space-y-stack-sm">
+<label class="block font-label-md text-label-md text-on-surface">Issue Category</label>
+<div class="grid grid-cols-2 gap-3">
+<label class="cursor-pointer">
+<input class="peer sr-only" name="category" type="radio"/>
+<div class="rounded-lg border border-outline-variant p-3 flex flex-col items-center gap-2 peer-checked:border-primary peer-checked:bg-primary/5 transition-all">
+<span class="material-symbols-outlined text-on-surface-variant peer-checked:text-primary">water_drop</span>
+<span class="font-caption text-caption text-on-surface">Plumbing</span>
+</div>
+</label>
+<label class="cursor-pointer">
+<input class="peer sr-only" name="category" type="radio"/>
+<div class="rounded-lg border border-outline-variant p-3 flex flex-col items-center gap-2 peer-checked:border-primary peer-checked:bg-primary/5 transition-all">
+<span class="material-symbols-outlined text-on-surface-variant peer-checked:text-primary">electric_bolt</span>
+<span class="font-caption text-caption text-on-surface">Electrical</span>
+</div>
+</label>
+<label class="cursor-pointer">
+<input class="peer sr-only" name="category" type="radio"/>
+<div class="rounded-lg border border-outline-variant p-3 flex flex-col items-center gap-2 peer-checked:border-primary peer-checked:bg-primary/5 transition-all">
+<span class="material-symbols-outlined text-on-surface-variant peer-checked:text-primary">kitchen</span>
+<span class="font-caption text-caption text-on-surface">Appliance</span>
+</div>
+</label>
+<label class="cursor-pointer">
+<input class="peer sr-only" name="category" type="radio"/>
+<div class="rounded-lg border border-outline-variant p-3 flex flex-col items-center gap-2 peer-checked:border-primary peer-checked:bg-primary/5 transition-all">
+<span class="material-symbols-outlined text-on-surface-variant peer-checked:text-primary">more_horiz</span>
+<span class="font-caption text-caption text-on-surface">Other</span>
+</div>
+</label>
+</div>
+</div>
+<!-- Urgency Toggle -->
+<div class="space-y-stack-sm">
+<label class="block font-label-md text-label-md text-on-surface">Urgency Level</label>
+<div class="flex bg-surface-container-low rounded-lg p-1 border border-outline-variant">
+<label class="flex-1 text-center cursor-pointer">
+<input checked="" class="peer sr-only" name="urgency" type="radio" value="standard"/>
+<div class="py-2 rounded-md font-label-md text-label-md text-on-surface-variant peer-checked:bg-white peer-checked:text-primary peer-checked:shadow-sm transition-all">Standard</div>
+</label>
+<label class="flex-1 text-center cursor-pointer">
+<input class="peer sr-only" name="urgency" type="radio" value="urgent"/>
+<div class="py-2 rounded-md font-label-md text-label-md text-on-surface-variant peer-checked:bg-error peer-checked:text-white peer-checked:shadow-sm transition-all">Urgent</div>
+</label>
+</div>
+<p class="font-caption text-caption text-outline">Urgent requests are typically responded to within 2-4 hours.</p>
+</div>
+<!-- Description -->
+<div class="space-y-stack-sm">
+<label class="block font-label-md text-label-md text-on-surface" for="description">Description</label>
+<textarea class="w-full rounded-lg border-outline-variant bg-surface-container-lowest focus:border-primary focus:ring-0 resize-none font-body-md text-body-md" id="description" placeholder="Please describe the issue in detail..." rows="4"></textarea>
+</div>
+<!-- Media Upload -->
+<div class="space-y-stack-sm">
+<label class="block font-label-md text-label-md text-on-surface">Photos/Videos</label>
+<div class="border-2 border-dashed border-outline-variant rounded-xl p-6 flex flex-col items-center justify-center bg-surface-container-low cursor-pointer hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-outline text-3xl mb-2">add_a_photo</span>
+<span class="font-label-md text-label-md text-on-surface text-center">Tap to upload media</span>
+<span class="font-caption text-caption text-outline text-center mt-1">Max 5 files (JPG, PNG, MP4)</span>
+</div>
+</div>
+</div>
+<!-- Submit Button Area -->
+<div class="p-margin-mobile border-t border-surface-variant bg-surface">
+<button class="w-full bg-primary text-white font-label-md text-label-md py-4 rounded-xl hover:bg-primary-container transition-colors focus:ring-4 focus:ring-primary/20 outline-none flex justify-center items-center gap-2" type="button">
+                    Submit Request
+                    <span class="material-symbols-outlined text-sm">send</span>
+</button>
+</div>
+</div>
+</div>
+<script>
+        function toggleModal() {
+            const modal = document.getElementById('new-request-modal');
+            if (modal.classList.contains('modal-closed')) {
+                modal.classList.remove('modal-closed');
+                modal.classList.add('modal-open');
+                document.body.style.overflow = 'hidden'; // Prevent background scrolling
+            } else {
+                modal.classList.remove('modal-open');
+                modal.classList.add('modal-closed');
+                document.body.style.overflow = '';
+            }
+        }
+    </script>
+</body></html>

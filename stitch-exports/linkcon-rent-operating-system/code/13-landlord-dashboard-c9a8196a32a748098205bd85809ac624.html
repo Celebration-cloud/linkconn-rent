@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Landlord Dashboard - Linkcon Rent</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary-container": "#b1ffd6",
+                        "tertiary": "#3f5d00",
+                        "on-surface-variant": "#3f4943",
+                        "surface-variant": "#e6e2d9",
+                        "surface-container-high": "#ece8df",
+                        "secondary-container": "#c1e9d5",
+                        "on-primary": "#ffffff",
+                        "on-secondary-fixed-variant": "#2a4e3f",
+                        "secondary-fixed-dim": "#a8cfbd",
+                        "on-background": "#1c1c16",
+                        "primary-fixed-dim": "#84d7ae",
+                        "tertiary-fixed-dim": "#aad461",
+                        "tertiary-fixed": "#c5f17a",
+                        "on-error-container": "#93000a",
+                        "on-tertiary": "#ffffff",
+                        "outline-variant": "#bec9c1",
+                        "outline": "#6f7a72",
+                        "on-error": "#ffffff",
+                        "on-tertiary-fixed": "#131f00",
+                        "on-secondary-container": "#466a5b",
+                        "surface-container": "#f1eee5",
+                        "primary": "#006041",
+                        "tertiary-container": "#537707",
+                        "surface-container-highest": "#e6e2d9",
+                        "on-tertiary-container": "#d2fe85",
+                        "on-surface": "#1c1c16",
+                        "on-primary-fixed": "#002113",
+                        "surface-container-lowest": "#ffffff",
+                        "error": "#ba1a1a",
+                        "on-secondary-fixed": "#002116",
+                        "surface-tint": "#0c6c4a",
+                        "primary-container": "#237a57",
+                        "background": "#fdf9f0",
+                        "secondary-fixed": "#c3ebd8",
+                        "surface-bright": "#fdf9f0",
+                        "primary-fixed": "#a0f4c9",
+                        "surface-dim": "#dddad1",
+                        "inverse-on-surface": "#f4f0e7",
+                        "surface-container-low": "#f7f3ea",
+                        "secondary": "#416656",
+                        "on-tertiary-fixed-variant": "#354e00",
+                        "on-primary-fixed-variant": "#005236",
+                        "surface": "#fdf9f0",
+                        "inverse-surface": "#31302b",
+                        "on-secondary": "#ffffff",
+                        "inverse-primary": "#84d7ae",
+                        "error-container": "#ffdad6"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-lg": "32px",
+                        "unit": "8px",
+                        "margin-mobile": "20px",
+                        "gutter": "24px",
+                        "container-max": "1280px",
+                        "stack-sm": "8px",
+                        "stack-md": "16px",
+                        "margin-desktop": "40px"
+                    },
+                    "fontFamily": {
+                        "label-md": ["Manrope"],
+                        "display-lg": ["Manrope"],
+                        "headline-md": ["Manrope"],
+                        "headline-lg": ["Manrope"],
+                        "price-display": ["Manrope"],
+                        "headline-lg-mobile": ["Manrope"],
+                        "caption": ["Manrope"],
+                        "body-md": ["Manrope"],
+                        "body-lg": ["Manrope"]
+                    },
+                    "fontSize": {
+                        "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+                        "price-display": ["20px", { "lineHeight": "28px", "fontWeight": "800" }],
+                        "headline-lg-mobile": ["28px", { "lineHeight": "36px", "fontWeight": "700" }],
+                        "caption": ["12px", { "lineHeight": "16px", "fontWeight": "500" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .verified-badge {
+            background-color: rgba(35, 122, 87, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen flex">
+<!-- SideNavBar (Desktop Only) -->
+<aside class="hidden md:flex flex-col h-screen p-stack-md bg-surface dark:bg-inverse-surface text-primary dark:text-primary-fixed-dim font-label-md text-label-md fixed left-0 top-0 w-64 border-r border-outline-variant dark:border-outline">
+<div class="mb-stack-lg flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center font-bold">
+                LR
+            </div>
+<div>
+<h1 class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed-dim">Linkcon Rent</h1>
+<p class="font-caption text-caption text-on-surface-variant">Landlord Portal</p>
+</div>
+</div>
+<nav class="flex-1 space-y-2">
+<a class="flex items-center gap-3 px-4 py-3 bg-secondary-container dark:bg-secondary text-on-secondary-container dark:text-on-secondary font-bold rounded-lg scale-95 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+                Dashboard
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-primary-fixed-dim hover:bg-surface-container-low dark:hover:bg-surface-variant rounded-lg scale-95 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined">domain</span>
+                My Properties
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-primary-fixed-dim hover:bg-surface-container-low dark:hover:bg-surface-variant rounded-lg scale-95 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined">calendar_month</span>
+                Viewings
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-primary-fixed-dim hover:bg-surface-container-low dark:hover:bg-surface-variant rounded-lg scale-95 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined">group</span>
+                Applicants
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-primary-fixed-dim hover:bg-surface-container-low dark:hover:bg-surface-variant rounded-lg scale-95 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined">verified_user</span>
+                Verification
+            </a>
+</nav>
+<div class="mt-auto pt-stack-md border-t border-outline-variant space-y-2">
+<button class="w-full flex items-center justify-center gap-2 bg-primary text-on-primary py-3 rounded-lg font-label-md text-label-md hover:bg-primary-container transition-colors mb-4">
+<span class="material-symbols-outlined">add</span>
+                Add New Property
+            </button>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-primary-fixed-dim hover:bg-surface-container-low dark:hover:bg-surface-variant rounded-lg scale-95 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined">settings</span>
+                Settings
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-error hover:bg-error-container rounded-lg scale-95 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined">logout</span>
+                Log Out
+            </a>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 md:ml-64 p-margin-mobile md:p-margin-desktop bg-surface-container-lowest min-h-screen">
+<!-- Header -->
+<header class="flex justify-between items-center mb-stack-lg">
+<div>
+<h2 class="font-headline-lg text-headline-lg text-on-primary-fixed-variant">Overview</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Welcome back, here's what's happening with your properties today.</p>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 rounded-full bg-surface-container-highest hover:bg-surface-variant transition-colors text-on-surface">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<div class="w-10 h-10 rounded-full overflow-hidden border border-outline-variant">
+<img alt="Profile" class="w-full h-full object-cover" data-alt="A professional headshot of a Nigerian property manager, wearing a crisp white shirt, smiling subtly. The lighting is soft and natural, suggesting a reliable and trustworthy persona, fitting the modern, architectural aesthetic of the platform. The background is a muted, warm white." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCFS1F78Te_CP8I-8O3ehwnArw2GKtn-i6gbx8EBRgXDAShQOdNbcXiZNpdIz3lw8GKb9B3aHnjSeSfD-akqs9_uw7BuIP1YUhkk_2PinkTRrduXts-twkQ1CSH7H7AaLbTaxrZWMXqyM-KRDnZ4QOdYRigRh3HLhRA_fkwTT3Ia1HOaoJdiBFbgF_ZCGRZEg6NdWA7PO68uzR3d2ydEgnapLonOGU2N_X0xu11Ojdh3IcZvVmzfx50CA"/>
+</div>
+</div>
+</header>
+<!-- Stats Bento Grid -->
+<section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter mb-stack-lg">
+<!-- Total Portfolio Value -->
+<div class="bg-surface p-stack-md rounded-xl border border-surface-variant flex flex-col justify-between">
+<div class="flex justify-between items-start mb-4">
+<div class="p-2 rounded-lg bg-primary-container/20 text-primary">
+<span class="material-symbols-outlined">account_balance</span>
+</div>
+<span class="font-caption text-caption text-primary flex items-center">
+<span class="material-symbols-outlined text-[16px]">trending_up</span> +2.4%
+                    </span>
+</div>
+<div>
+<p class="font-body-md text-body-md text-on-surface-variant mb-1">Total Portfolio Value</p>
+<h3 class="font-price-display text-price-display text-on-background">₦450,000,000</h3>
+</div>
+</div>
+<!-- Occupancy Rate -->
+<div class="bg-surface p-stack-md rounded-xl border border-surface-variant flex flex-col justify-between">
+<div class="flex justify-between items-start mb-4">
+<div class="p-2 rounded-lg bg-secondary-container/50 text-secondary">
+<span class="material-symbols-outlined">pie_chart</span>
+</div>
+</div>
+<div>
+<p class="font-body-md text-body-md text-on-surface-variant mb-1">Occupancy Rate</p>
+<h3 class="font-display-lg text-[32px] leading-tight font-extrabold text-on-background">92%</h3>
+<div class="w-full bg-surface-container-highest h-2 rounded-full mt-2 overflow-hidden">
+<div class="bg-primary h-full rounded-full" style="width: 92%"></div>
+</div>
+</div>
+</div>
+<!-- Active Listings -->
+<div class="bg-surface p-stack-md rounded-xl border border-surface-variant flex flex-col justify-between">
+<div class="flex justify-between items-start mb-4">
+<div class="p-2 rounded-lg bg-surface-container-highest text-on-surface">
+<span class="material-symbols-outlined">real_estate_agent</span>
+</div>
+</div>
+<div>
+<p class="font-body-md text-body-md text-on-surface-variant mb-1">Active Listings</p>
+<h3 class="font-display-lg text-[32px] leading-tight font-extrabold text-on-background">3</h3>
+<p class="font-caption text-caption text-on-surface-variant mt-1">2 in Ikeja, 1 in Lekki Phase 1</p>
+</div>
+</div>
+<!-- Pending Applications -->
+<div class="bg-surface p-stack-md rounded-xl border border-surface-variant flex flex-col justify-between">
+<div class="flex justify-between items-start mb-4">
+<div class="p-2 rounded-lg bg-tertiary-container/20 text-tertiary">
+<span class="material-symbols-outlined">pending_actions</span>
+</div>
+<span class="w-2 h-2 rounded-full bg-error animate-pulse"></span>
+</div>
+<div>
+<p class="font-body-md text-body-md text-on-surface-variant mb-1">Pending Applications</p>
+<h3 class="font-display-lg text-[32px] leading-tight font-extrabold text-on-background">7</h3>
+<p class="font-caption text-caption text-on-surface-variant mt-1">Require your review</p>
+</div>
+</div>
+</section>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-gutter">
+<!-- Left Column (Applications & Maintenance) -->
+<div class="lg:col-span-2 space-y-stack-lg">
+<!-- Recent Applications -->
+<section class="bg-surface rounded-xl border border-surface-variant p-stack-md">
+<div class="flex justify-between items-center mb-stack-md border-b border-surface-variant pb-4">
+<h3 class="font-headline-md text-headline-md text-on-primary-fixed-variant">Recent Applications</h3>
+<a class="font-label-md text-label-md text-primary hover:underline" href="#">View All</a>
+</div>
+<div class="space-y-4">
+<!-- Applicant Item -->
+<div class="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-surface-container-lowest rounded-lg border border-outline-variant hover:shadow-[0px_4px_20px_rgba(18,55,42,0.08)] transition-shadow">
+<div class="flex items-center gap-4 mb-3 sm:mb-0">
+<div class="w-12 h-12 rounded-full overflow-hidden bg-surface-variant">
+<img alt="Applicant" class="w-full h-full object-cover" data-alt="A candid shot of a young Nigerian professional, looking optimistic. Warm lighting, modern setting. Fits the high-quality, trustworthy aesthetic of the platform." src="https://lh3.googleusercontent.com/aida-public/AB6AXuArUEZ3SBJeajt8qoA9M7ddB7Zi_ql6Eer7PKn-nnyv5IhIXVE4YWXK6Z7H8FqjIPyBHFW8WXUeC-0mVk-PWpZNxgc5jSPJAghtLoKe3h7Q1AiEHAHh5muU5QNFdM1ZXF9uHnx1_RLpwyMdUBRoOKIyWK_ZCcLFjLmbyL6hlQnCGZWcxRdx9nDAZ_uH21tOITxUqyazfH1KfF25VV-Teztj4WqCKgJo9xEiU6kOrPQAal9rZePAmlh6bQ"/>
+</div>
+<div>
+<h4 class="font-label-md text-label-md text-on-background">Chidi Okonkwo</h4>
+<p class="font-caption text-caption text-on-surface-variant">Applied for: 3BDR Flat, Lekki Phase 1</p>
+</div>
+</div>
+<div class="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
+<span class="verified-badge px-3 py-1 rounded-full flex items-center gap-1 font-caption text-caption text-primary">
+<span class="material-symbols-outlined text-[14px]">check_circle</span>
+                                    Identity Verified
+                                </span>
+<button class="font-label-md text-label-md text-on-primary bg-primary px-4 py-2 rounded-lg hover:bg-primary-container transition-colors">Review</button>
+</div>
+</div>
+<!-- Applicant Item 2 -->
+<div class="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-surface-container-lowest rounded-lg border border-outline-variant hover:shadow-[0px_4px_20px_rgba(18,55,42,0.08)] transition-shadow">
+<div class="flex items-center gap-4 mb-3 sm:mb-0">
+<div class="w-12 h-12 rounded-full overflow-hidden bg-surface-variant flex items-center justify-center text-on-surface-variant font-bold">
+                                     AA
+                                </div>
+<div>
+<h4 class="font-label-md text-label-md text-on-background">Aisha Abubakar</h4>
+<p class="font-caption text-caption text-on-surface-variant">Applied for: 2BDR, Ikeja GRA</p>
+</div>
+</div>
+<div class="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
+<span class="px-3 py-1 rounded-full flex items-center gap-1 font-caption text-caption bg-surface-variant text-on-surface-variant">
+<span class="material-symbols-outlined text-[14px]">pending</span>
+                                    Pending Employer Varification
+                                </span>
+<button class="font-label-md text-label-md text-on-surface bg-surface-container-highest px-4 py-2 rounded-lg hover:bg-surface-variant transition-colors">Review</button>
+</div>
+</div>
+</div>
+</section>
+<!-- Maintenance Overview -->
+<section class="bg-surface rounded-xl border border-surface-variant p-stack-md">
+<div class="flex justify-between items-center mb-stack-md border-b border-surface-variant pb-4">
+<h3 class="font-headline-md text-headline-md text-on-primary-fixed-variant">Maintenance Overview</h3>
+<button class="p-2 text-on-surface-variant hover:text-primary"><span class="material-symbols-outlined">more_vert</span></button>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+<div class="p-4 border-l-4 border-error bg-error-container/20 rounded-r-lg">
+<div class="flex justify-between items-start">
+<div>
+<span class="font-caption text-caption text-error font-bold mb-1 block">URGENT</span>
+<h4 class="font-label-md text-label-md text-on-background">Plumbing Issue</h4>
+<p class="font-caption text-caption text-on-surface-variant">Unit 4, Surulere Complex</p>
+</div>
+<span class="material-symbols-outlined text-error">water_drop</span>
+</div>
+<div class="mt-4 flex gap-2">
+<button class="font-caption text-caption px-3 py-1 border border-outline-variant rounded-md hover:bg-surface-variant text-on-surface">Contact Tenant</button>
+<button class="font-caption text-caption px-3 py-1 bg-on-background text-surface rounded-md hover:opacity-90">Assign Vendor</button>
+</div>
+</div>
+<div class="p-4 border-l-4 border-tertiary bg-tertiary-container/10 rounded-r-lg">
+<div class="flex justify-between items-start">
+<div>
+<span class="font-caption text-caption text-tertiary font-bold mb-1 block">SCHEDULED</span>
+<h4 class="font-label-md text-label-md text-on-background">AC Servicing</h4>
+<p class="font-caption text-caption text-on-surface-variant">Multiple Units, Victoria Island</p>
+</div>
+<span class="material-symbols-outlined text-tertiary">ac_unit</span>
+</div>
+<div class="mt-4 text-right">
+<p class="font-caption text-caption text-on-surface-variant">Scheduled for: Tomorrow, 10:00 AM</p>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- Right Column (Upcoming Viewings) -->
+<div class="space-y-stack-lg">
+<section class="bg-surface rounded-xl border border-surface-variant p-stack-md h-full">
+<div class="flex justify-between items-center mb-stack-md border-b border-surface-variant pb-4">
+<h3 class="font-headline-md text-headline-md text-on-primary-fixed-variant">Upcoming Viewings</h3>
+<span class="material-symbols-outlined text-on-surface-variant">calendar_month</span>
+</div>
+<div class="relative border-l-2 border-outline-variant ml-3 space-y-6 pb-4">
+<!-- Agenda Item 1 -->
+<div class="relative pl-6">
+<div class="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-surface border-2 border-primary"></div>
+<div class="mb-1">
+<span class="font-label-md text-label-md text-primary">Today, 2:00 PM</span>
+</div>
+<div class="bg-surface-container-lowest p-3 rounded-lg border border-outline-variant">
+<h4 class="font-label-md text-label-md text-on-background mb-1">4BDR Duplex, Ikoyi</h4>
+<p class="font-caption text-caption text-on-surface-variant flex items-center gap-1 mb-2">
+<span class="material-symbols-outlined text-[14px]">person</span>
+                                    Viewing with Mr. Femi
+                                </p>
+<div class="flex gap-2">
+<button class="flex-1 font-caption text-caption py-1.5 bg-primary-container/20 text-primary rounded border border-primary/30 hover:bg-primary-container/30">Reschedule</button>
+</div>
+</div>
+</div>
+<!-- Agenda Item 2 -->
+<div class="relative pl-6">
+<div class="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-surface border-2 border-outline-variant"></div>
+<div class="mb-1">
+<span class="font-label-md text-label-md text-on-surface-variant">Today, 4:30 PM</span>
+</div>
+<div class="bg-surface-container-lowest p-3 rounded-lg border border-outline-variant opacity-75 hover:opacity-100 transition-opacity">
+<h4 class="font-label-md text-label-md text-on-background mb-1">Studio Apt, Yaba</h4>
+<p class="font-caption text-caption text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">person</span>
+                                    Viewing with Miss. Sarah
+                                </p>
+</div>
+</div>
+<!-- Agenda Item 3 -->
+<div class="relative pl-6">
+<div class="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-surface border-2 border-outline-variant"></div>
+<div class="mb-1">
+<span class="font-label-md text-label-md text-on-surface-variant">Tomorrow, 10:00 AM</span>
+</div>
+<div class="bg-surface-container-lowest p-3 rounded-lg border border-outline-variant opacity-75 hover:opacity-100 transition-opacity">
+<h4 class="font-label-md text-label-md text-on-background mb-1">3BDR Flat, Lekki Phase 1</h4>
+<p class="font-caption text-caption text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">group</span>
+                                    Open House (3 Registered)
+                                </p>
+</div>
+</div>
+</div>
+<button class="w-full mt-4 font-label-md text-label-md text-on-surface bg-surface-container-highest py-2 rounded-lg hover:bg-surface-variant transition-colors flex items-center justify-center gap-2">
+                        View Full Calendar <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</button>
+</section>
+</div>
+</div>
+</main>
+</body></html>

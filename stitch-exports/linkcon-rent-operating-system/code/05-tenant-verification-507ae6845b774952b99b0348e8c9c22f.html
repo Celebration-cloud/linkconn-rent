@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Tenant Verification - Linkcon Rent</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+          font-variation-settings:
+          'FILL' 0,
+          'wght' 400,
+          'GRAD' 0,
+          'opsz' 24
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-tertiary-fixed": "#131f00",
+                      "on-secondary-container": "#466a5b",
+                      "surface-container": "#f1eee5",
+                      "primary": "#006041",
+                      "on-error": "#ffffff",
+                      "on-tertiary": "#ffffff",
+                      "outline-variant": "#bec9c1",
+                      "outline": "#6f7a72",
+                      "secondary-fixed-dim": "#a8cfbd",
+                      "on-background": "#1c1c16",
+                      "primary-fixed-dim": "#84d7ae",
+                      "tertiary-fixed-dim": "#aad461",
+                      "tertiary-fixed": "#c5f17a",
+                      "on-error-container": "#93000a",
+                      "on-secondary-fixed-variant": "#2a4e3f",
+                      "surface-variant": "#e6e2d9",
+                      "surface-container-high": "#ece8df",
+                      "secondary-container": "#c1e9d5",
+                      "on-primary": "#ffffff",
+                      "tertiary": "#3f5d00",
+                      "on-surface-variant": "#3f4943",
+                      "on-primary-container": "#b1ffd6",
+                      "surface": "#fdf9f0",
+                      "inverse-surface": "#31302b",
+                      "on-secondary": "#ffffff",
+                      "inverse-primary": "#84d7ae",
+                      "error-container": "#ffdad6",
+                      "secondary": "#416656",
+                      "on-tertiary-fixed-variant": "#354e00",
+                      "on-primary-fixed-variant": "#005236",
+                      "surface-dim": "#dddad1",
+                      "inverse-on-surface": "#f4f0e7",
+                      "surface-container-low": "#f7f3ea",
+                      "primary-container": "#237a57",
+                      "background": "#fdf9f0",
+                      "secondary-fixed": "#c3ebd8",
+                      "surface-bright": "#fdf9f0",
+                      "primary-fixed": "#a0f4c9",
+                      "on-secondary-fixed": "#002116",
+                      "surface-tint": "#0c6c4a",
+                      "on-surface": "#1c1c16",
+                      "on-primary-fixed": "#002113",
+                      "surface-container-lowest": "#ffffff",
+                      "error": "#ba1a1a",
+                      "on-tertiary-container": "#d2fe85",
+                      "tertiary-container": "#537707",
+                      "surface-container-highest": "#e6e2d9"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "container-max": "1280px",
+                      "stack-sm": "8px",
+                      "stack-md": "16px",
+                      "margin-desktop": "40px",
+                      "stack-lg": "32px",
+                      "unit": "8px",
+                      "margin-mobile": "20px",
+                      "gutter": "24px"
+              },
+              "fontFamily": {
+                      "headline-lg": [
+                              "Manrope"
+                      ],
+                      "headline-md": [
+                              "Manrope"
+                      ],
+                      "display-lg": [
+                              "Manrope"
+                      ],
+                      "label-md": [
+                              "Manrope"
+                      ],
+                      "body-lg": [
+                              "Manrope"
+                      ],
+                      "body-md": [
+                              "Manrope"
+                      ],
+                      "price-display": [
+                              "Manrope"
+                      ],
+                      "headline-lg-mobile": [
+                              "Manrope"
+                      ],
+                      "caption": [
+                              "Manrope"
+                      ]
+              },
+              "fontSize": {
+                      "headline-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "display-lg": [
+                              "48px",
+                              {
+                                      "lineHeight": "56px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "800"
+                              }
+                      ],
+                      "label-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-lg": [
+                              "18px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "body-md": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "price-display": [
+                              "20px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "800"
+                              }
+                      ],
+                      "headline-lg-mobile": [
+                              "28px",
+                              {
+                                      "lineHeight": "36px",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "caption": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "fontWeight": "500"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+</head>
+<body class="bg-surface text-on-surface min-h-screen flex flex-col font-body-md text-body-md antialiased selection:bg-primary-container selection:text-on-primary-container">
+<!-- Top Navigation (Transactional Layout - suppressed full nav) -->
+<header class="bg-surface border-b border-outline-variant w-full h-20 flex justify-between items-center px-margin-desktop max-w-container-max mx-auto shrink-0 z-50">
+<div class="font-headline-md text-headline-md font-bold text-primary tracking-tight">Linkcon Rent</div>
+<button class="text-on-surface-variant hover:text-primary transition-colors flex items-center gap-2 group">
+<span class="font-label-md text-label-md">Save &amp; Exit</span>
+<span aria-hidden="true" class="material-symbols-outlined group-hover:-translate-x-1 transition-transform" data-icon="close">close</span>
+</button>
+</header>
+<main class="flex-grow w-full max-w-container-max mx-auto px-margin-desktop py-stack-lg flex flex-col md:flex-row gap-gutter">
+<!-- Left Sidebar: Progress Stepper -->
+<aside class="w-full md:w-1/3 shrink-0 flex flex-col gap-stack-lg sticky top-32 self-start hidden md:flex">
+<div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface mb-2">Verification</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">Complete these steps to build your tenant profile and unlock properties.</p>
+</div>
+<div class="relative pl-4 mt-stack-md">
+<!-- Connecting Line Base -->
+<div class="absolute left-[23px] top-4 bottom-4 w-0.5 bg-outline-variant/30 z-0"></div>
+<ul class="relative z-10 flex flex-col gap-stack-lg">
+<!-- Step 1: Completed -->
+<li class="flex gap-stack-md items-start group cursor-default">
+<div class="shrink-0 w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center border-2 border-surface mt-1 z-10">
+<span class="material-symbols-outlined text-[20px]" data-icon="check" data-weight="fill" style="font-variation-settings: 'FILL' 1;">check</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface">Basic Info</span>
+<span class="font-caption text-caption text-on-surface-variant">Completed</span>
+</div>
+</li>
+<!-- Step 2: Active -->
+<li class="flex gap-stack-md items-start group cursor-default">
+<div class="shrink-0 w-8 h-8 rounded-full bg-tertiary-fixed text-on-tertiary-fixed flex items-center justify-center border-2 border-surface mt-1 z-10 shadow-[0_0_0_4px_rgba(197,241,122,0.2)]">
+<div class="w-2.5 h-2.5 bg-primary rounded-full animate-pulse"></div>
+</div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-primary font-bold">Identity Verification</span>
+<span class="font-caption text-caption text-primary">In progress</span>
+</div>
+</li>
+<!-- Step 3: Pending -->
+<li class="flex gap-stack-md items-start group cursor-default opacity-50">
+<div class="shrink-0 w-8 h-8 rounded-full bg-surface text-outline border-2 border-outline-variant flex items-center justify-center mt-1 z-10">
+<span class="font-label-md text-label-md">3</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface">Employment &amp; Income</span>
+<span class="font-caption text-caption text-on-surface-variant">Pending</span>
+</div>
+</li>
+<!-- Step 4: Pending -->
+<li class="flex gap-stack-md items-start group cursor-default opacity-50">
+<div class="shrink-0 w-8 h-8 rounded-full bg-surface text-outline border-2 border-outline-variant flex items-center justify-center mt-1 z-10">
+<span class="font-label-md text-label-md">4</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface">Rental History</span>
+<span class="font-caption text-caption text-on-surface-variant">Pending</span>
+</div>
+</li>
+</ul>
+</div>
+<!-- Privacy Trust Box -->
+<div class="bg-surface-container-low border border-outline-variant rounded-xl p-stack-md flex flex-col gap-unit mt-auto">
+<div class="flex items-center gap-2 text-primary">
+<span class="material-symbols-outlined" data-icon="lock" data-weight="fill" style="font-variation-settings: 'FILL' 1;">lock</span>
+<span class="font-label-md text-label-md">Privacy Guaranteed</span>
+</div>
+<p class="font-caption text-caption text-on-surface-variant">Your sensitive data (ID scans, exact income figures) is encrypted and never shared directly with landlords. They only see verification badges and summary ranges.</p>
+</div>
+</aside>
+<!-- Right Content: Form Area -->
+<section class="w-full md:w-2/3 flex flex-col gap-stack-lg max-w-3xl">
+<!-- Mobile Header/Progress -->
+<div class="md:hidden flex flex-col gap-stack-sm mb-stack-md">
+<span class="font-caption text-caption text-primary tracking-widest uppercase">Step 2 of 4</span>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface">Identity Verification</h1>
+<div class="w-full h-1.5 bg-surface-variant rounded-full mt-2 overflow-hidden">
+<div class="h-full bg-primary w-1/2 rounded-full"></div>
+</div>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant rounded-[16px] p-stack-lg flex flex-col gap-stack-lg shadow-[0_4px_20px_rgba(18,55,42,0.03)]">
+<div class="flex flex-col gap-stack-sm">
+<h2 class="font-headline-md text-headline-md text-on-surface">Verify your identity</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">We need to confirm you are who you say you are to protect both you and property owners.</p>
+</div>
+<!-- Contact Verification Status -->
+<div class="flex flex-col gap-stack-md border-b border-outline-variant pb-stack-lg">
+<h3 class="font-label-md text-label-md text-on-surface">Contact Verification</h3>
+<div class="flex flex-col sm:flex-row gap-stack-md">
+<div class="flex-1 border border-outline-variant rounded-lg p-stack-md flex items-center justify-between bg-surface-container-low">
+<div class="flex items-center gap-stack-md">
+<span class="material-symbols-outlined text-outline" data-icon="mail">mail</span>
+<div class="flex flex-col">
+<span class="font-caption text-caption text-on-surface-variant">Email Address</span>
+<span class="font-label-md text-label-md text-on-surface">ola****@gmail.com</span>
+</div>
+</div>
+<span class="bg-primary/10 text-primary px-3 py-1 rounded-full font-caption text-caption flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]" data-icon="check_circle" data-weight="fill" style="font-variation-settings: 'FILL' 1;">check_circle</span> Verified
+                            </span>
+</div>
+<div class="flex-1 border border-outline-variant rounded-lg p-stack-md flex items-center justify-between bg-surface-container-lowest">
+<div class="flex items-center gap-stack-md">
+<span class="material-symbols-outlined text-outline" data-icon="smartphone">smartphone</span>
+<div class="flex flex-col">
+<span class="font-caption text-caption text-on-surface-variant">Phone Number</span>
+<span class="font-label-md text-label-md text-on-surface">+234 803 *** ****</span>
+</div>
+</div>
+<button class="font-label-md text-label-md text-primary hover:underline">Verify</button>
+</div>
+</div>
+</div>
+<!-- ID Document Upload -->
+<div class="flex flex-col gap-stack-md pt-stack-sm">
+<div class="flex justify-between items-end">
+<h3 class="font-label-md text-label-md text-on-surface">Government ID</h3>
+<span class="font-caption text-caption text-on-surface-variant">Required</span>
+</div>
+<!-- Document Type Selector -->
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-stack-sm">
+<label class="cursor-pointer relative">
+<input checked="" class="peer sr-only" name="id_type" type="radio"/>
+<div class="p-stack-sm border border-outline-variant rounded-lg text-center peer-checked:border-primary peer-checked:bg-primary-container/10 transition-all">
+<span class="font-label-md text-label-md text-on-surface peer-checked:text-primary">NIN Slip</span>
+</div>
+</label>
+<label class="cursor-pointer relative">
+<input class="peer sr-only" name="id_type" type="radio"/>
+<div class="p-stack-sm border border-outline-variant rounded-lg text-center peer-checked:border-primary peer-checked:bg-primary-container/10 transition-all">
+<span class="font-label-md text-label-md text-on-surface peer-checked:text-primary">Driver's License</span>
+</div>
+</label>
+<label class="cursor-pointer relative">
+<input class="peer sr-only" name="id_type" type="radio"/>
+<div class="p-stack-sm border border-outline-variant rounded-lg text-center peer-checked:border-primary peer-checked:bg-primary-container/10 transition-all">
+<span class="font-label-md text-label-md text-on-surface peer-checked:text-primary">Intl. Passport</span>
+</div>
+</label>
+</div>
+<!-- Upload Dropzone -->
+<div class="border-2 border-dashed border-outline-variant rounded-xl p-stack-lg flex flex-col items-center justify-center text-center gap-stack-sm bg-surface-container-low hover:bg-surface-variant transition-colors cursor-pointer group mt-2">
+<div class="w-12 h-12 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-[24px]" data-icon="cloud_upload">cloud_upload</span>
+</div>
+<h4 class="font-label-md text-label-md text-on-surface">Click to upload or drag and drop</h4>
+<p class="font-caption text-caption text-on-surface-variant">SVG, PNG, JPG or PDF (max. 10MB)</p>
+<p class="font-caption text-caption text-on-surface-variant mt-2 max-w-xs">Ensure all details are clearly legible and all 4 corners are visible.</p>
+</div>
+</div>
+<!-- Liveness Check -->
+<div class="flex flex-col gap-stack-md pt-stack-md border-t border-outline-variant">
+<div class="flex justify-between items-end">
+<h3 class="font-label-md text-label-md text-on-surface">Liveness Check</h3>
+<span class="font-caption text-caption text-on-surface-variant">Required</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant text-sm mb-2">We need to match your face to the document provided above.</p>
+<div class="flex flex-col sm:flex-row gap-stack-lg items-center bg-surface-container rounded-xl p-stack-md">
+<div class="w-32 h-32 shrink-0 bg-surface-variant rounded-full border-4 border-surface overflow-hidden relative flex items-center justify-center">
+<img class="object-cover opacity-50 grayscale mix-blend-multiply w-24 h-24" data-alt="A minimal icon graphic of a human face outline inside a camera focus reticle, high-end digital interface style, light sand background, dark green outlines." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDPW40dPXGUrxkBset70leNnvt6uoBr6LygeR7SykUY45gDSk_ISoqD23LO5MGaRPbk4YRrAywI5fpoCqEKGbytOnW0sPkg_hde1nM4Dncp21UjOy2qHXd-C9NUAFafi39PyFXha27koluIshfYAQ0CaYHRIslO675-EdiUinpBal79W95mRXvmmKqPKPOekzm-lTLoa4il8u7giVDpVYfc0_OhG4xGlkm17H2_cS9A2aJWk-HxB9mGew"/>
+</div>
+<div class="flex flex-col gap-stack-sm items-center sm:items-start text-center sm:text-left">
+<h4 class="font-label-md text-label-md text-on-surface">Take a selfie</h4>
+<p class="font-caption text-caption text-on-surface-variant">Please ensure you are in a well-lit environment and remove glasses or hats.</p>
+<button class="mt-2 bg-primary text-on-primary font-label-md text-label-md py-2 px-6 rounded-lg hover:bg-primary-container transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-[20px]" data-icon="photo_camera">photo_camera</span>
+                                Open Camera
+                             </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="flex flex-col-reverse sm:flex-row justify-end items-center gap-stack-md mt-stack-md">
+<button class="w-full sm:w-auto font-label-md text-label-md text-on-surface-variant py-3 px-6 rounded-lg hover:bg-surface-variant transition-colors border border-transparent">
+                    Back
+                </button>
+<button class="w-full sm:w-auto bg-primary text-on-primary font-label-md text-label-md py-3 px-8 rounded-lg hover:bg-primary-container transition-colors shadow-sm">
+                    Continue to Employment
+                </button>
+</div>
+</section>
+</main>
+</body></html>

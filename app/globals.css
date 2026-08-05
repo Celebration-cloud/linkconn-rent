@@ -1,0 +1,372 @@
+@import "tailwindcss";
+@import "leaflet/dist/leaflet.css";
+@import "react-leaflet-cluster/dist/assets/MarkerCluster.css";
+@import "react-leaflet-cluster/dist/assets/MarkerCluster.Default.css";
+
+.leaflet-container {
+  isolation: isolate;
+  font-family: inherit;
+}
+
+.leaflet-control-attribution {
+  max-width: min(82vw, 38rem);
+  font-size: 10px;
+}
+
+.leaflet-building-shadow-pane {
+  z-index: 310;
+}
+
+.leaflet-building-facade-pane {
+  z-index: 320;
+}
+
+.leaflet-building-roof-pane {
+  z-index: 330;
+}
+
+.leaflet-route-pane {
+  z-index: 430;
+}
+
+.linkconn-property-marker-shell,
+.linkconn-cluster-shell {
+  border: 0;
+  background: transparent;
+}
+
+.linkconn-property-marker {
+  display: grid;
+  min-height: 36px;
+  min-width: 70px;
+  place-items: center;
+  border: 2px solid #fff;
+  border-radius: 999px;
+  background: #12372a;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 800;
+  box-shadow: 0 8px 22px rgb(8 35 26 / 28%);
+  transition:
+    background-color 160ms ease,
+    color 160ms ease,
+    transform 160ms ease;
+}
+
+.linkconn-property-marker--hovered {
+  background: #237a57;
+}
+
+.linkconn-property-marker--selected {
+  background: #b8e36e;
+  color: #08231a;
+  transform: scale(1.1);
+}
+
+.leaflet-marker-icon:focus-visible .linkconn-property-marker {
+  outline: 3px solid #006041;
+  outline-offset: 3px;
+}
+
+.linkconn-cluster-marker {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  border: 3px solid #fdf9f0;
+  border-radius: 999px;
+  background: #12372a;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+  box-shadow: 0 10px 26px rgb(8 35 26 / 24%);
+}
+
+.linkconn-property-label {
+  max-width: 12rem;
+  border: 1px solid rgb(255 255 255 / 80%);
+  border-radius: 10px;
+  background: rgb(255 255 255 / 95%);
+  color: #1c1c16;
+  text-align: center;
+  box-shadow: 0 8px 24px rgb(8 35 26 / 16%);
+}
+
+.linkconn-property-label strong,
+.linkconn-property-label span {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.linkconn-property-label span {
+  margin-top: 2px;
+  color: #66736c;
+  font-size: 10px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .leaflet-zoom-animated,
+  .leaflet-pan-anim .leaflet-tile,
+  .linkconn-property-marker {
+    transition: none !important;
+  }
+}
+
+@theme {
+  /* Canonical LinkConn semantic palette. */
+  --color-page: #fdf9f0;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f7f3ea;
+  --color-surface-subtle: #f1eee5;
+  --color-content: #1c1c16;
+  --color-content-muted: #66736c;
+  --color-border: #bec9c1;
+  --color-border-soft: #d9dfda;
+  --color-primary: #006041;
+  --color-primary-hover: #12372a;
+  --color-primary-soft: #d8ede1;
+  --color-accent: #b8e36e;
+  --color-success: #006041;
+  --color-success-soft: #d8ede1;
+  --color-warning: #92400e;
+  --color-warning-soft: #fef3c7;
+  --color-error: #ba1a1a;
+  --color-error-soft: #ffdad6;
+  --color-info: #416656;
+  --color-info-soft: #c1e9d5;
+
+  --color-sand-50: #fdf9f0;
+  --color-sand-100: #f7f3ea;
+  --color-sand-200: #f1eee5;
+  --color-sand-300: #ece8df;
+  --color-sand-400: #e6e2d9;
+  --color-sand-500: #ddd9cf;
+
+  --color-forest-50: #edf7f1;
+  --color-forest-100: #d8ede1;
+  --color-forest-200: #b8dbc7;
+  --color-forest-300: #84c2a2;
+  --color-forest-400: #51a77c;
+  --color-forest-500: #237a57;
+  --color-forest-600: #0c6c4a;
+  --color-forest-700: #006041;
+  --color-forest-800: #004a32;
+  --color-forest-900: #12372a;
+  --color-forest-950: #08231a;
+
+  --color-ink: #1c1c16;
+  --color-muted: #66736c;
+  --color-line: #d9dfda;
+  --color-lime: #b8e36e;
+
+  /* Compatibility aliases while older retained routes are restyled. */
+  --color-navy-50: #f7f3ea;
+  --color-navy-100: #ece8df;
+  --color-navy-200: #d7ddd8;
+  --color-navy-300: #bec9c1;
+  --color-navy-400: #89958d;
+  --color-navy-500: #66736c;
+  --color-navy-600: #4d5a52;
+  --color-navy-700: #34463c;
+  --color-navy-800: #233a2f;
+  --color-navy-900: #12372a;
+  --color-navy-950: #08231a;
+
+  --color-brandgreen-50: #ecfdf5;
+  --color-brandgreen-100: #d1fae5;
+  --color-brandgreen-400: #51a77c;
+  --color-brandgreen-500: #237a57;
+  --color-brandgreen-600: #0c6c4a;
+  --color-brandgreen-700: #006041;
+
+  --color-amber-brand-100: #fef3c7;
+  --color-amber-brand-400: #fbbf24;
+  --color-amber-brand-500: #f59e0b;
+  --color-amber-brand-600: #d97706;
+  --color-amber-brand-700: #b45309;
+
+  --color-sky-bg: #f1eee5;
+
+  --font-sans: "Manrope", "Manrope Fallback", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Manrope", "Manrope Fallback", ui-sans-serif, system-ui, sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+  background: #fdf9f0;
+}
+
+body {
+  font-family: "Manrope", "Manrope Fallback", ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  background: #fdf9f0;
+  color: #1c1c16;
+}
+
+::selection {
+  background: #b8e36e;
+  color: #12372a;
+}
+
+:focus-visible {
+  outline: 2px solid #237a57;
+  outline-offset: 3px;
+}
+
+.stitch-container {
+  width: min(100% - 2.5rem, 80rem);
+  margin-inline: auto;
+}
+
+.stitch-card {
+  border: 1px solid #d9dfda;
+  border-radius: 1rem;
+  background: #fff;
+  box-shadow: 0 4px 20px rgba(18, 55, 42, 0.06);
+}
+
+.stitch-field {
+  min-height: 2.75rem;
+  width: 100%;
+  border: 1px solid #bec9c1;
+  border-radius: 0.5rem;
+  background: #fff;
+  padding: 0.7rem 0.85rem;
+  color: #1c1c16;
+  transition: border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.form-control {
+  min-height: 2.75rem;
+  width: 100%;
+  border: 1px solid #bec9c1;
+  border-radius: 0.5rem;
+  background: #fff;
+  padding: 0.7rem 0.85rem;
+  color: #1c1c16;
+  box-shadow: 0 1px 2px rgb(18 55 42 / 4%);
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    background-color 180ms ease;
+}
+
+.form-control::placeholder {
+  color: #66736c;
+  opacity: 0.78;
+}
+
+.form-control:hover:not(:disabled):not([readonly]) {
+  border-color: #89958d;
+}
+
+.form-control:focus,
+.form-control:focus-visible {
+  border-color: #006041;
+  box-shadow: 0 0 0 2px rgb(0 96 65 / 18%);
+  outline: none;
+}
+
+.form-control[aria-invalid="true"] {
+  border-color: #ba1a1a;
+  box-shadow: 0 0 0 2px rgb(186 26 26 / 12%);
+}
+
+.form-control:disabled,
+.form-control[readonly] {
+  cursor: not-allowed;
+  background: #f1eee5;
+  color: #66736c;
+  opacity: 0.8;
+}
+
+.form-control:-webkit-autofill,
+.form-control:-webkit-autofill:hover,
+.form-control:-webkit-autofill:focus {
+  -webkit-text-fill-color: #1c1c16;
+  box-shadow: 0 0 0 1000px #fff inset;
+  caret-color: #1c1c16;
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+  accent-color: #006041;
+}
+
+.stitch-field:focus {
+  border-color: #237a57;
+  box-shadow: 0 0 0 3px rgba(35, 122, 87, 0.12);
+  outline: none;
+}
+
+.stitch-button {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 0.5rem;
+  background: #006041;
+  padding: 0.7rem 1.1rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #fff;
+  transition: background-color 180ms ease, transform 180ms ease;
+}
+
+.stitch-button:hover {
+  background: #12372a;
+}
+
+.stitch-button:active {
+  transform: translateY(1px) scale(0.99);
+}
+
+.stitch-button-secondary {
+  border: 1px solid #bec9c1;
+  background: #fff;
+  color: #12372a;
+}
+
+.stitch-button-secondary:hover {
+  background: #f1eee5;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: #f1eee5;
+}
+::-webkit-scrollbar-thumb {
+  background: #bec9c1;
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #89958d;
+}
+
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-14px); }
+}
+.animate-float-slow { animation: float-slow 6s ease-in-out infinite; }
+
+@keyframes shimmer {
+  0% { background-position: -1000px 0; }
+  100% { background-position: 1000px 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

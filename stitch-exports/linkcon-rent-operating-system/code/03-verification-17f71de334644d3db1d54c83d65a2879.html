@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Verification - Linkcon Rent</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-primary-container": "#b1ffd6",
+                      "tertiary": "#3f5d00",
+                      "on-surface-variant": "#3f4943",
+                      "surface-variant": "#e6e2d9",
+                      "surface-container-high": "#ece8df",
+                      "secondary-container": "#c1e9d5",
+                      "on-primary": "#ffffff",
+                      "on-secondary-fixed-variant": "#2a4e3f",
+                      "secondary-fixed-dim": "#a8cfbd",
+                      "on-background": "#1c1c16",
+                      "primary-fixed-dim": "#84d7ae",
+                      "tertiary-fixed-dim": "#aad461",
+                      "tertiary-fixed": "#c5f17a",
+                      "on-error-container": "#93000a",
+                      "on-tertiary": "#ffffff",
+                      "outline-variant": "#bec9c1",
+                      "outline": "#6f7a72",
+                      "on-error": "#ffffff",
+                      "on-tertiary-fixed": "#131f00",
+                      "on-secondary-container": "#466a5b",
+                      "surface-container": "#f1eee5",
+                      "primary": "#006041",
+                      "tertiary-container": "#537707",
+                      "surface-container-highest": "#e6e2d9",
+                      "on-tertiary-container": "#d2fe85",
+                      "on-surface": "#1c1c16",
+                      "on-primary-fixed": "#002113",
+                      "surface-container-lowest": "#ffffff",
+                      "error": "#ba1a1a",
+                      "on-secondary-fixed": "#002116",
+                      "surface-tint": "#0c6c4a",
+                      "primary-container": "#237a57",
+                      "background": "#fdf9f0",
+                      "secondary-fixed": "#c3ebd8",
+                      "surface-bright": "#fdf9f0",
+                      "primary-fixed": "#a0f4c9",
+                      "surface-dim": "#dddad1",
+                      "inverse-on-surface": "#f4f0e7",
+                      "surface-container-low": "#f7f3ea",
+                      "secondary": "#416656",
+                      "on-tertiary-fixed-variant": "#354e00",
+                      "on-primary-fixed-variant": "#005236",
+                      "surface": "#fdf9f0",
+                      "inverse-surface": "#31302b",
+                      "on-secondary": "#ffffff",
+                      "inverse-primary": "#84d7ae",
+                      "error-container": "#ffdad6"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "stack-lg": "32px",
+                      "unit": "8px",
+                      "margin-mobile": "20px",
+                      "gutter": "24px",
+                      "container-max": "1280px",
+                      "stack-sm": "8px",
+                      "stack-md": "16px",
+                      "margin-desktop": "40px"
+              },
+              "fontFamily": {
+                      "label-md": [
+                              "Manrope"
+                      ],
+                      "display-lg": [
+                              "Manrope"
+                      ],
+                      "headline-md": [
+                              "Manrope"
+                      ],
+                      "headline-lg": [
+                              "Manrope"
+                      ],
+                      "price-display": [
+                              "Manrope"
+                      ],
+                      "headline-lg-mobile": [
+                              "Manrope"
+                      ],
+                      "caption": [
+                              "Manrope"
+                      ],
+                      "body-md": [
+                              "Manrope"
+                      ],
+                      "body-lg": [
+                              "Manrope"
+                      ]
+              },
+              "fontSize": {
+                      "label-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "display-lg": [
+                              "48px",
+                              {
+                                      "lineHeight": "56px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "800"
+                              }
+                      ],
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "headline-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "price-display": [
+                              "20px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "800"
+                              }
+                      ],
+                      "headline-lg-mobile": [
+                              "28px",
+                              {
+                                      "lineHeight": "36px",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "caption": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "body-md": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "body-lg": [
+                              "18px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "400"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen flex flex-col md:flex-row">
+<!-- TopNavBar (Mobile Only) -->
+<header class="md:hidden flex justify-between items-center px-margin-mobile py-4 w-full bg-background border-b border-outline-variant z-50 fixed top-0">
+<div class="font-headline-md text-headline-md font-extrabold text-primary">Linkcon Rent</div>
+<div class="flex gap-4 items-center text-primary">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+<span class="material-symbols-outlined" data-icon="help">help</span>
+</div>
+</header>
+<!-- SideNavBar (Desktop Only) -->
+<nav class="hidden md:flex flex-col h-screen p-stack-md w-64 bg-surface border-r border-outline-variant fixed left-0 top-0 z-40">
+<div class="mb-stack-lg">
+<h1 class="font-headline-md text-headline-md font-bold text-primary">Linkcon Rent</h1>
+<p class="font-caption text-caption text-on-surface-variant mt-1">Landlord Portal</p>
+</div>
+<button class="w-full bg-primary text-on-primary font-label-md text-label-md py-3 px-4 rounded-lg hover:bg-primary-container hover:text-on-primary-container transition-colors duration-200 mb-stack-lg flex items-center justify-center gap-2">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+            Add New Property
+        </button>
+<ul class="flex-grow space-y-2">
+<li>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container-low transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-label-md text-label-md">Dashboard</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container-low transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="domain">domain</span>
+<span class="font-label-md text-label-md">My Properties</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container-low transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="calendar_month">calendar_month</span>
+<span class="font-label-md text-label-md">Viewings</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container-low transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span class="font-label-md text-label-md">Applicants</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-4 py-3 bg-secondary-container text-on-secondary-container font-bold rounded-lg transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="verified_user">verified_user</span>
+<span class="font-label-md text-label-md">Verification</span>
+</a>
+</li>
+</ul>
+<div class="mt-auto border-t border-outline-variant pt-4 space-y-2">
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container-low transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-label-md text-label-md">Settings</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-error hover:bg-error-container transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+<span class="font-label-md text-label-md">Log Out</span>
+</a>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="flex-grow md:ml-64 mt-20 md:mt-0 p-margin-mobile md:p-margin-desktop bg-surface-bright min-h-screen">
+<header class="mb-stack-lg">
+<h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-background mb-2">Verification Center</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Complete your verification to build trust and unlock all platform features.</p>
+</header>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter max-w-container-max mx-auto">
+<!-- Left Column: Status Overview & Timeline -->
+<div class="lg:col-span-4 space-y-stack-lg">
+<!-- Status Cards -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-stack-md shadow-[0_4px_20px_rgba(18,55,42,0.08)]">
+<h3 class="font-headline-md text-headline-md text-on-background mb-4">Verification Status</h3>
+<div class="space-y-4">
+<div class="flex items-center justify-between p-3 bg-surface-container-low rounded-lg border border-outline-variant">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-primary-container/20 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+</div>
+<div>
+<p class="font-label-md text-label-md text-on-background">Landlord Identity</p>
+<p class="font-caption text-caption text-on-surface-variant">Government ID &amp; Biometrics</p>
+</div>
+</div>
+<span class="inline-flex items-center gap-1 bg-primary/10 text-primary px-3 py-1 rounded-full font-caption text-caption">
+<span class="material-symbols-outlined text-[16px]" data-icon="check_circle">check_circle</span>
+                                Verified
+                            </span>
+</div>
+<div class="flex items-center justify-between p-3 bg-surface-container-low rounded-lg border border-outline-variant">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-surface-variant flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="home_work">home_work</span>
+</div>
+<div>
+<p class="font-label-md text-label-md text-on-background">Property Ownership</p>
+<p class="font-caption text-caption text-on-surface-variant">Modern 3-Bed Terrace, Lekki</p>
+</div>
+</div>
+<span class="inline-flex items-center gap-1 bg-surface-variant text-on-surface-variant px-3 py-1 rounded-full font-caption text-caption">
+<span class="material-symbols-outlined text-[16px]" data-icon="pending">pending</span>
+                                Under Review
+                            </span>
+</div>
+</div>
+</div>
+<!-- Timeline / Why Verify -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-stack-md relative overflow-hidden">
+<div class="absolute inset-0 opacity-10 pointer-events-none" style="background-image: radial-gradient(#006041 1px, transparent 1px); background-size: 16px 16px;"></div>
+<h3 class="font-headline-md text-headline-md text-on-background mb-4 relative z-10">The 'Verify Everything' Promise</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-6 relative z-10">
+                        We check these documents to protect both parties. A verified badge signals institutional trust to prospective tenants, reducing friction and securing better matches.
+                    </p>
+<div class="relative z-10 pl-4 border-l-2 border-surface-variant space-y-6">
+<div class="relative">
+<div class="absolute -left-[21px] top-1 w-3 h-3 rounded-full bg-primary border-2 border-surface-container-lowest"></div>
+<h4 class="font-label-md text-label-md text-on-background">1. Document Submission</h4>
+<p class="font-caption text-caption text-on-surface-variant">You upload required C of O or Title deeds.</p>
+</div>
+<div class="relative">
+<div class="absolute -left-[21px] top-1 w-3 h-3 rounded-full bg-tertiary-fixed border-2 border-surface-container-lowest animate-pulse"></div>
+<h4 class="font-label-md text-label-md text-on-background">2. Legal Review</h4>
+<p class="font-caption text-caption text-on-surface-variant">Our team cross-references with state registries (1-2 business days).</p>
+</div>
+<div class="relative opacity-50">
+<div class="absolute -left-[21px] top-1 w-3 h-3 rounded-full bg-surface-variant border-2 border-surface-container-lowest"></div>
+<h4 class="font-label-md text-label-md text-on-background">3. Badge Awarded</h4>
+<p class="font-caption text-caption text-on-surface-variant">Your property listing receives the 'Verified' shield.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column: Main Workspace -->
+<div class="lg:col-span-8">
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-margin-mobile md:p-margin-desktop shadow-[0_4px_20px_rgba(18,55,42,0.08)]">
+<div class="mb-stack-lg border-b border-outline-variant pb-6">
+<h2 class="font-headline-md text-headline-md text-on-background mb-2">Property Ownership Verification</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">
+                            Uploading documents for: <span class="font-bold text-on-background">Modern 3-Bed Terrace, Lekki Phase 1</span>
+</p>
+</div>
+<form class="space-y-stack-lg">
+<!-- Document Type Selection -->
+<div>
+<label class="block font-label-md text-label-md text-on-background mb-2">Primary Ownership Document</label>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<label class="cursor-pointer">
+<input checked="" class="peer sr-only" name="docType" type="radio"/>
+<div class="p-4 border border-outline-variant rounded-lg peer-checked:border-primary peer-checked:bg-primary/5 transition-all">
+<div class="flex items-center justify-between mb-1">
+<span class="font-label-md text-label-md text-on-background">C of O</span>
+<span class="material-symbols-outlined text-primary opacity-0 peer-checked:opacity-100 transition-opacity" data-icon="check_circle">check_circle</span>
+</div>
+<p class="font-caption text-caption text-on-surface-variant">Certificate of Occupancy</p>
+</div>
+</label>
+<label class="cursor-pointer">
+<input class="peer sr-only" name="docType" type="radio"/>
+<div class="p-4 border border-outline-variant rounded-lg peer-checked:border-primary peer-checked:bg-primary/5 transition-all">
+<div class="flex items-center justify-between mb-1">
+<span class="font-label-md text-label-md text-on-background">Governor's Consent</span>
+<span class="material-symbols-outlined text-primary opacity-0 peer-checked:opacity-100 transition-opacity" data-icon="check_circle">check_circle</span>
+</div>
+<p class="font-caption text-caption text-on-surface-variant">Registered Deed of Assignment</p>
+</div>
+</label>
+</div>
+</div>
+<!-- Upload Zone -->
+<div>
+<label class="block font-label-md text-label-md text-on-background mb-2">Upload Documents</label>
+<p class="font-caption text-caption text-on-surface-variant mb-4">Please upload clear, legible copies of the selected document and a recent utility bill.</p>
+<div class="border-2 border-dashed border-outline-variant rounded-xl p-10 flex flex-col items-center justify-center text-center hover:border-primary hover:bg-surface-container-low transition-colors cursor-pointer group">
+<div class="w-16 h-16 rounded-full bg-surface-variant group-hover:bg-primary/10 flex items-center justify-center mb-4 transition-colors">
+<span class="material-symbols-outlined text-outline group-hover:text-primary text-[32px] transition-colors" data-icon="upload_file">upload_file</span>
+</div>
+<h4 class="font-label-md text-label-md text-on-background mb-1">Drag and drop files here</h4>
+<p class="font-caption text-caption text-on-surface-variant mb-4">or click to browse from your device</p>
+<span class="text-xs text-outline">Supported formats: PDF, JPG, PNG (Max 10MB)</span>
+</div>
+</div>
+<!-- Supporting Documents -->
+<div>
+<label class="block font-label-md text-label-md text-on-background mb-2">Supporting Utility Bill</label>
+<div class="flex items-center gap-4 p-4 border border-outline-variant rounded-lg bg-surface-container-low">
+<span class="material-symbols-outlined text-outline" data-icon="receipt_long">receipt_long</span>
+<div class="flex-grow">
+<p class="font-body-md text-body-md text-on-background">Utility Bill (EKEDC / Water)</p>
+<p class="font-caption text-caption text-on-surface-variant">Must be dated within the last 3 months</p>
+</div>
+<button class="text-primary font-label-md text-label-md hover:underline" type="button">Browse</button>
+</div>
+</div>
+<!-- Actions -->
+<div class="flex justify-end gap-4 pt-6 border-t border-outline-variant">
+<button class="px-6 py-2 rounded-lg font-label-md text-label-md text-on-surface-variant border border-outline-variant hover:bg-surface-variant transition-colors" type="button">Save Draft</button>
+<button class="px-6 py-2 rounded-lg font-label-md text-label-md bg-primary text-on-primary hover:bg-primary-container hover:text-on-primary-container transition-colors shadow-sm" type="button">Submit for Review</button>
+</div>
+</form>
+</div>
+</div>
+</div>
+</main>
+</body></html>

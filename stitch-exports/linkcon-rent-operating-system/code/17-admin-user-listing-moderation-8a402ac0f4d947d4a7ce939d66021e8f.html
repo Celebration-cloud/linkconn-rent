@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Linkcon Rent - Admin Moderation</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind Config -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary-fixed-dim": "#84d7ae",
+                    "surface-container-high": "#ece8df",
+                    "primary-container": "#237a57",
+                    "error-container": "#ffdad6",
+                    "error": "#ba1a1a",
+                    "on-tertiary-fixed-variant": "#354e00",
+                    "surface-variant": "#e6e2d9",
+                    "tertiary-fixed-dim": "#aad461",
+                    "on-tertiary": "#ffffff",
+                    "on-primary-fixed": "#002113",
+                    "on-background": "#1c1c16",
+                    "surface-container-low": "#f7f3ea",
+                    "on-error": "#ffffff",
+                    "inverse-surface": "#31302b",
+                    "tertiary": "#3f5d00",
+                    "secondary-fixed": "#c3ebd8",
+                    "on-error-container": "#93000a",
+                    "on-surface": "#1c1c16",
+                    "inverse-primary": "#84d7ae",
+                    "surface-container-lowest": "#ffffff",
+                    "on-secondary-fixed": "#002116",
+                    "surface-dim": "#dddad1",
+                    "secondary": "#416656",
+                    "secondary-container": "#c1e9d5",
+                    "inverse-on-surface": "#f4f0e7",
+                    "surface-bright": "#fdf9f0",
+                    "on-primary-fixed-variant": "#005236",
+                    "surface": "#fdf9f0",
+                    "primary-fixed": "#a0f4c9",
+                    "on-surface-variant": "#3f4943",
+                    "tertiary-container": "#537707",
+                    "outline": "#6f7a72",
+                    "on-secondary-container": "#466a5b",
+                    "tertiary-fixed": "#c5f17a",
+                    "on-tertiary-container": "#d2fe85",
+                    "background": "#fdf9f0",
+                    "surface-container-highest": "#e6e2d9",
+                    "on-secondary-fixed-variant": "#2a4e3f",
+                    "surface-tint": "#0c6c4a",
+                    "primary": "#006041",
+                    "on-secondary": "#ffffff",
+                    "on-primary": "#ffffff",
+                    "surface-container": "#f1eee5",
+                    "on-tertiary-fixed": "#131f00",
+                    "outline-variant": "#bec9c1",
+                    "on-primary-container": "#b1ffd6",
+                    "secondary-fixed-dim": "#a8cfbd"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "stack-md": "16px",
+                    "stack-lg": "32px",
+                    "gutter": "24px",
+                    "container-max": "1280px",
+                    "unit": "8px",
+                    "margin-desktop": "40px",
+                    "stack-sm": "8px",
+                    "margin-mobile": "20px"
+            },
+            "fontFamily": {
+                    "body-md": ["Manrope"],
+                    "display-lg": ["Manrope"],
+                    "caption": ["Manrope"],
+                    "price-display": ["Manrope"],
+                    "headline-lg-mobile": ["Manrope"],
+                    "label-md": ["Manrope"],
+                    "headline-lg": ["Manrope"],
+                    "headline-md": ["Manrope"],
+                    "body-lg": ["Manrope"]
+            },
+            "fontSize": {
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                    "caption": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                    "price-display": ["20px", {"lineHeight": "28px", "fontWeight": "800"}],
+                    "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.filled {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md text-body-md min-h-screen antialiased selection:bg-primary-container selection:text-on-primary-container">
+<nav class="hidden md:flex fixed left-0 top-0 h-full w-64 bg-surface border-r border-outline-variant flex-col p-stack-md z-40">
+<div class="flex items-center gap-3 mb-8 px-2">
+<div class="w-8 h-8 rounded bg-primary flex items-center justify-center text-on-primary font-headline-md font-bold">L</div>
+<div>
+<h1 class="font-headline-md text-headline-md font-bold text-primary">Linkcon Rent</h1>
+<p class="font-caption text-caption text-on-surface-variant">Landlord Portal</p>
+</div>
+</div>
+<button class="mb-8 w-full bg-primary hover:bg-primary/90 text-on-primary font-label-md text-label-md py-3 rounded-lg flex items-center justify-center gap-2 transition-colors duration-200 shadow-[0_4px_20px_rgba(18,55,42,0.08)]">
+<span class="material-symbols-outlined">add</span>
+            Add New Property
+        </button>
+<ul class="flex flex-col gap-2 flex-grow">
+<li>
+<a class="flex items-center gap-3 px-3 py-3 bg-secondary-container text-on-secondary-container font-label-md text-label-md font-bold rounded-lg transition-transform duration-200 hover:bg-surface-container-low active:scale-95" href="#">
+<span class="material-symbols-outlined filled">dashboard</span>
+                    Dashboard
+                </a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-3 py-3 text-on-surface-variant hover:text-primary font-label-md text-label-md rounded-lg transition-colors duration-200 hover:bg-surface-container-low active:scale-95" href="#">
+<span class="material-symbols-outlined">domain</span>
+                    My Properties
+                </a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-3 py-3 text-on-surface-variant hover:text-primary font-label-md text-label-md rounded-lg transition-colors duration-200 hover:bg-surface-container-low active:scale-95" href="#">
+<span class="material-symbols-outlined">calendar_month</span>
+                    Viewings
+                </a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-3 py-3 text-on-surface-variant hover:text-primary font-label-md text-label-md rounded-lg transition-colors duration-200 hover:bg-surface-container-low active:scale-95" href="#">
+<span class="material-symbols-outlined">group</span>
+                    Applicants
+                </a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-3 py-3 text-on-surface-variant hover:text-primary font-label-md text-label-md rounded-lg transition-colors duration-200 hover:bg-surface-container-low active:scale-95" href="#">
+<span class="material-symbols-outlined">verified_user</span>
+                    Verification
+                </a>
+</li>
+</ul>
+<ul class="flex flex-col gap-2 mt-auto border-t border-outline-variant pt-4">
+<li>
+<a class="flex items-center gap-3 px-3 py-3 text-on-surface-variant hover:text-primary font-label-md text-label-md rounded-lg transition-colors duration-200 hover:bg-surface-container-low active:scale-95" href="#">
+<span class="material-symbols-outlined">settings</span>
+                    Settings
+                </a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-3 py-3 text-on-surface-variant hover:text-primary font-label-md text-label-md rounded-lg transition-colors duration-200 hover:bg-surface-container-low active:scale-95" href="#">
+<span class="material-symbols-outlined">logout</span>
+                    Log Out
+                </a>
+</li>
+</ul>
+</nav>
+<header class="md:hidden fixed top-0 w-full z-50 bg-background border-b border-outline-variant flex justify-between items-center px-margin-mobile py-4 transition-colors duration-200">
+<div class="flex items-center gap-2">
+<button class="text-on-surface-variant hover:text-primary">
+<span class="material-symbols-outlined text-[28px]">menu</span>
+</button>
+<h1 class="font-headline-md text-headline-md font-extrabold text-primary">Linkcon Rent</h1>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">help</span>
+</button>
+</div>
+</header>
+<main class="md:ml-64 pt-24 md:pt-stack-lg px-margin-mobile md:px-margin-desktop pb-stack-lg min-h-screen flex flex-col gap-stack-lg max-w-container-max mx-auto w-full">
+<div class="flex flex-col xl:flex-row justify-between items-start xl:items-end gap-stack-md w-full">
+<div>
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg font-bold text-on-background tracking-tight">Platform Moderation</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant mt-1 max-w-2xl">Monitor flagged activity, verify listings, and ensure institutional trust across the ecosystem.</p>
+</div>
+<div class="w-full xl:w-[480px] relative group">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary transition-colors">search</span>
+<input class="w-full pl-12 pr-4 py-3.5 bg-surface-container-lowest border border-outline-variant rounded-xl font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all shadow-sm" placeholder="Search by name, email, or property ID..." type="text"/>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-gutter">
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-stack-md flex flex-col justify-between min-h-[120px] relative overflow-hidden group">
+<div class="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+<div class="flex items-center justify-between relative z-10">
+<p class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Active Listings</p>
+<span class="material-symbols-outlined text-outline">real_estate_agent</span>
+</div>
+<div class="relative z-10 flex items-end gap-3">
+<p class="font-display-lg text-display-lg text-on-background">12,450</p>
+<p class="font-caption text-caption text-primary flex items-center mb-2 bg-primary/10 px-2 py-0.5 rounded-full">
+<span class="material-symbols-outlined text-[14px]">trending_up</span> 4.2%
+                    </p>
+</div>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-stack-md flex flex-col justify-between min-h-[120px] relative overflow-hidden group">
+<div class="absolute inset-0 bg-gradient-to-br from-secondary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+<div class="flex items-center justify-between relative z-10">
+<p class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Verified User Ratio</p>
+<span class="material-symbols-outlined text-outline">shield_person</span>
+</div>
+<div class="relative z-10">
+<div class="flex justify-between items-end mb-2">
+<p class="font-display-lg text-display-lg text-on-background">84%</p>
+<p class="font-caption text-caption text-on-surface-variant mb-2">Target: 90%</p>
+</div>
+<div class="w-full bg-surface-container-highest rounded-full h-1.5">
+<div class="bg-primary h-1.5 rounded-full" style="width: 84%"></div>
+</div>
+</div>
+</div>
+<div class="bg-error-container border border-error/20 rounded-xl p-stack-md flex flex-col justify-between min-h-[120px]">
+<div class="flex items-center justify-between">
+<p class="font-label-md text-label-md text-on-error-container uppercase tracking-wider">Requires Attention</p>
+<span class="material-symbols-outlined text-error">flag</span>
+</div>
+<div class="flex items-end gap-3">
+<p class="font-display-lg text-display-lg text-on-error-container">42</p>
+<p class="font-caption text-caption text-error flex items-center mb-2">
+<span class="material-symbols-outlined text-[14px]">warning</span> Critical
+                    </p>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-gutter items-start">
+<div class="lg:col-span-2 flex flex-col gap-stack-md">
+<div class="flex items-center justify-between border-b border-outline-variant pb-4">
+<h3 class="font-headline-md text-headline-md font-bold text-on-background">Flagged Content</h3>
+<button class="font-label-md text-label-md text-primary hover:text-primary-container flex items-center gap-1 transition-colors">
+                        Filter <span class="material-symbols-outlined text-[18px]">filter_list</span>
+</button>
+</div>
+<div class="flex flex-col gap-4">
+<div class="bg-surface-container-lowest border border-error/30 rounded-xl p-stack-md flex flex-col sm:flex-row gap-stack-md relative overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-error"></div>
+<div class="w-full sm:w-40 h-28 shrink-0 rounded-lg overflow-hidden bg-surface-container-high">
+<img class="w-full h-full object-cover" data-alt="A bright, modern apartment interior in Lagos, Nigeria. Sunlight streaming through large windows onto minimalist furniture. High-quality real estate photography. Light mode aesthetic, warm sand and crisp white tones. The mood is welcoming but sophisticated." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAk3SUkFt1M5WQdZ3J_7iywJv78e45y4jrsBo2SgOVvGbWRbS-iBolhmhQXFmcscOepGL1Idf53eu1JMYjwIo6G3cfbCF2eAefzVIec49jLMSCDwkt1aZkE80WlLH7h0zSG0SpHMb30jWambYyi0O_k4QcT214o4LQWqlhJ3z0wa6WZtnrP2fK5r8dFBkuJgVGuCK0aBorcJxGhb37xcBJFOv00U1s0vTaKzqbJMiF-vdInWNaVXkUgVw"/>
+</div>
+<div class="flex flex-col flex-grow justify-between py-1">
+<div>
+<div class="flex justify-between items-start">
+<div>
+<h4 class="font-headline-md text-[20px] font-bold text-on-background line-clamp-1">4-Bed Duplex in Lekki Phase 1</h4>
+<p class="font-body-md text-body-md text-on-surface-variant flex items-center gap-1 mt-0.5">
+                                            ID: PR-8920-LKK <span class="w-1 h-1 rounded-full bg-outline mx-1"></span> Landlord: Adeyemi O.
+                                        </p>
+</div>
+<div class="flex gap-1 bg-error-container text-on-error-container px-2.5 py-1 rounded-full items-center">
+<span class="material-symbols-outlined text-[14px] filled">flag</span>
+<span class="font-caption text-caption">Misleading Price</span>
+</div>
+</div>
+<div class="flex items-center gap-4 mt-4">
+<div class="flex flex-col">
+<span class="font-caption text-caption text-outline">Verification Status</span>
+<div class="flex items-center gap-1 text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px]">cancel</span> Unverified
+                                        </div>
+</div>
+<div class="w-px h-8 bg-outline-variant"></div>
+<div class="flex flex-col">
+<span class="font-caption text-caption text-outline">Warnings</span>
+<div class="flex items-center gap-1 text-error font-medium">
+<span class="material-symbols-outlined text-[16px]">warning</span> 2 Active
+                                        </div>
+</div>
+<div class="w-px h-8 bg-outline-variant hidden sm:block"></div>
+<div class="flex flex-col hidden sm:flex">
+<span class="font-caption text-caption text-outline">Account Health</span>
+<div class="flex items-center gap-2 mt-1">
+<div class="w-16 h-1.5 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="w-1/3 h-full bg-error rounded-full"></div>
+</div>
+<span class="font-caption text-caption text-error">Poor</span>
+</div>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-3 mt-4 sm:mt-0 pt-4 sm:pt-0 border-t sm:border-t-0 border-outline-variant">
+<button class="flex-1 sm:flex-none px-4 py-2 bg-surface border border-outline hover:bg-surface-container text-on-surface font-label-md text-label-md rounded-lg transition-colors">Request Reverification</button>
+<button class="flex-1 sm:flex-none px-4 py-2 bg-error hover:bg-on-error-container text-on-error font-label-md text-label-md rounded-lg transition-colors">Remove Listing</button>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant hover:border-outline transition-colors rounded-xl p-stack-md flex flex-col sm:flex-row gap-stack-md relative overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-surface-tint"></div>
+<div class="w-16 h-16 sm:w-20 sm:h-20 shrink-0 rounded-full overflow-hidden bg-surface-container-high border-2 border-surface">
+<img class="w-full h-full object-cover" data-alt="A professional headshot of a Nigerian individual in a modern office setting. Warm lighting, friendly yet professional demeanor. High resolution, shallow depth of field. Light mode aesthetic, conveying institutional trust." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBhqPR1nuheRy38_tfM1UI4lcNgJPPtQBq9TMJ9tfvWMLW_8ygBCXnpLHzDSACkoEsUk8ODhn1DvxUe_v8kSu5yzmx76urHogHMZmHQ-J2wZqeu4-fFvgiY-qqrOn8sn-IdAQbtsfPw6HqVGhDfTHVDMHG8lSCXiYfClAaWj_xab6mdQl6hP67j_rUnIIi93P7zhQGgGZOIasCehHjzu5NWYTR-6Y_ODo2uC3pH8AnJpFgNpf-zewE7wA"/>
+</div>
+<div class="flex flex-col flex-grow justify-between py-1">
+<div>
+<div class="flex justify-between items-start">
+<div>
+<h4 class="font-headline-md text-[20px] font-bold text-on-background">Chidi Nwosu</h4>
+<p class="font-body-md text-body-md text-on-surface-variant mt-0.5">
+                                            User ID: USR-1049-ABJ <span class="w-1 h-1 inline-block rounded-full bg-outline mx-1 align-middle"></span> chidi.n@example.com
+                                        </p>
+</div>
+<div class="flex gap-1 bg-surface-container text-on-surface-variant px-2.5 py-1 rounded-full items-center">
+<span class="material-symbols-outlined text-[14px]">report</span>
+<span class="font-caption text-caption">Spam Messages</span>
+</div>
+</div>
+<div class="flex items-center gap-4 mt-4">
+<div class="flex flex-col">
+<span class="font-caption text-caption text-outline">Verification Status</span>
+<div class="flex items-center gap-1 text-primary bg-primary/10 px-2 py-0.5 rounded-full mt-1 w-max">
+<span class="material-symbols-outlined text-[14px] filled">check_circle</span> Verified
+                                        </div>
+</div>
+<div class="w-px h-8 bg-outline-variant"></div>
+<div class="flex flex-col">
+<span class="font-caption text-caption text-outline">Warnings</span>
+<div class="flex items-center gap-1 text-on-surface-variant font-medium mt-1">
+<span class="material-symbols-outlined text-[16px]">info</span> 1 Minor
+                                        </div>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-3 mt-4 sm:mt-0 pt-4 sm:pt-0 border-t sm:border-t-0 border-outline-variant">
+<button class="flex-1 sm:flex-none px-4 py-2 bg-surface border border-outline hover:bg-surface-container text-on-surface font-label-md text-label-md rounded-lg transition-colors">Review Activity</button>
+<button class="flex-1 sm:flex-none px-4 py-2 bg-surface-container-highest hover:bg-surface-dim text-error font-label-md text-label-md rounded-lg transition-colors flex items-center justify-center gap-1">
+<span class="material-symbols-outlined text-[18px]">block</span> Suspend
+                                </button>
+</div>
+</div>
+</div>
+</div>
+<div class="flex justify-center mt-4">
+<button class="font-label-md text-label-md text-primary hover:text-primary-container px-4 py-2 border border-outline-variant rounded-lg transition-colors flex items-center gap-2">
+                        Load More <span class="material-symbols-outlined text-[18px]">expand_more</span>
+</button>
+</div>
+</div>
+<div class="flex flex-col gap-stack-md sticky top-32">
+<div class="bg-surface-container-low border border-outline-variant rounded-xl p-stack-md">
+<h3 class="font-headline-md text-[20px] font-bold text-on-background mb-4">Quick Actions</h3>
+<div class="flex flex-col gap-3">
+<button class="w-full text-left px-4 py-3 bg-surface-container-lowest border border-outline-variant rounded-lg hover:border-primary hover:shadow-sm transition-all flex items-center gap-3 group">
+<div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-on-primary transition-colors">
+<span class="material-symbols-outlined text-[18px]">gavel</span>
+</div>
+<div>
+<p class="font-label-md text-label-md text-on-background">Review Appeal Queue</p>
+<p class="font-caption text-caption text-on-surface-variant">12 items waiting</p>
+</div>
+</button>
+<button class="w-full text-left px-4 py-3 bg-surface-container-lowest border border-outline-variant rounded-lg hover:border-primary hover:shadow-sm transition-all flex items-center gap-3 group">
+<div class="w-8 h-8 rounded-full bg-surface-variant flex items-center justify-center text-on-surface-variant group-hover:bg-primary group-hover:text-on-primary transition-colors">
+<span class="material-symbols-outlined text-[18px]">policy</span>
+</div>
+<div>
+<p class="font-label-md text-label-md text-on-background">Update Auto-Flag Rules</p>
+<p class="font-caption text-caption text-on-surface-variant">System settings</p>
+</div>
+</button>
+</div>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-stack-md">
+<h3 class="font-label-md text-label-md text-outline uppercase tracking-wider mb-4">Recent Audit Log</h3>
+<ul class="flex flex-col gap-4 relative before:absolute before:left-1.5 before:top-2 before:bottom-2 before:w-px before:bg-outline-variant">
+<li class="relative pl-6">
+<div class="absolute left-0 top-1 w-3 h-3 rounded-full bg-primary border-2 border-surface-container-lowest"></div>
+<p class="font-body-md text-[14px] text-on-background leading-tight">Listing <span class="font-medium">PR-102</span> removed manually.</p>
+<p class="font-caption text-caption text-on-surface-variant mt-1">2 mins ago by Admin You</p>
+</li>
+<li class="relative pl-6">
+<div class="absolute left-0 top-1 w-3 h-3 rounded-full bg-surface-variant border-2 border-surface-container-lowest"></div>
+<p class="font-body-md text-[14px] text-on-background leading-tight">User <span class="font-medium">USR-551</span> reverification requested.</p>
+<p class="font-caption text-caption text-on-surface-variant mt-1">45 mins ago by System</p>
+</li>
+<li class="relative pl-6">
+<div class="absolute left-0 top-1 w-3 h-3 rounded-full bg-surface-variant border-2 border-surface-container-lowest"></div>
+<p class="font-body-md text-[14px] text-on-background leading-tight">Auto-flag triggered on 5 new listings.</p>
+<p class="font-caption text-caption text-on-surface-variant mt-1">1 hour ago by System</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</main>
+</body></html>

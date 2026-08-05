@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Linkcon Rent - Add Property: Rent &amp; Fees</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary-container": "#b1ffd6",
+                        "tertiary": "#3f5d00",
+                        "on-surface-variant": "#3f4943",
+                        "surface-variant": "#e6e2d9",
+                        "surface-container-high": "#ece8df",
+                        "secondary-container": "#c1e9d5",
+                        "on-primary": "#ffffff",
+                        "on-secondary-fixed-variant": "#2a4e3f",
+                        "secondary-fixed-dim": "#a8cfbd",
+                        "on-background": "#1c1c16",
+                        "primary-fixed-dim": "#84d7ae",
+                        "tertiary-fixed-dim": "#aad461",
+                        "tertiary-fixed": "#c5f17a",
+                        "on-error-container": "#93000a",
+                        "on-tertiary": "#ffffff",
+                        "outline-variant": "#bec9c1",
+                        "outline": "#6f7a72",
+                        "on-error": "#ffffff",
+                        "on-tertiary-fixed": "#131f00",
+                        "on-secondary-container": "#466a5b",
+                        "surface-container": "#f1eee5",
+                        "primary": "#006041",
+                        "tertiary-container": "#537707",
+                        "surface-container-highest": "#e6e2d9",
+                        "on-tertiary-container": "#d2fe85",
+                        "on-surface": "#1c1c16",
+                        "on-primary-fixed": "#002113",
+                        "surface-container-lowest": "#ffffff",
+                        "error": "#ba1a1a",
+                        "on-secondary-fixed": "#002116",
+                        "surface-tint": "#0c6c4a",
+                        "primary-container": "#237a57",
+                        "background": "#fdf9f0",
+                        "secondary-fixed": "#c3ebd8",
+                        "surface-bright": "#fdf9f0",
+                        "primary-fixed": "#a0f4c9",
+                        "surface-dim": "#dddad1",
+                        "inverse-on-surface": "#f4f0e7",
+                        "surface-container-low": "#f7f3ea",
+                        "secondary": "#416656",
+                        "on-tertiary-fixed-variant": "#354e00",
+                        "on-primary-fixed-variant": "#005236",
+                        "surface": "#fdf9f0",
+                        "inverse-surface": "#31302b",
+                        "on-secondary": "#ffffff",
+                        "inverse-primary": "#84d7ae",
+                        "error-container": "#ffdad6"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-lg": "32px",
+                        "unit": "8px",
+                        "margin-mobile": "20px",
+                        "gutter": "24px",
+                        "container-max": "1280px",
+                        "stack-sm": "8px",
+                        "stack-md": "16px",
+                        "margin-desktop": "40px"
+                    },
+                    "fontFamily": {
+                        "label-md": ["Manrope"],
+                        "display-lg": ["Manrope"],
+                        "headline-md": ["Manrope"],
+                        "headline-lg": ["Manrope"],
+                        "price-display": ["Manrope"],
+                        "headline-lg-mobile": ["Manrope"],
+                        "caption": ["Manrope"],
+                        "body-md": ["Manrope"],
+                        "body-lg": ["Manrope"]
+                    },
+                    "fontSize": {
+                        "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+                        "price-display": ["20px", { "lineHeight": "28px", "fontWeight": "800" }],
+                        "headline-lg-mobile": ["28px", { "lineHeight": "36px", "fontWeight": "700" }],
+                        "caption": ["12px", { "lineHeight": "16px", "fontWeight": "500" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.fill {
+            font-variation-settings: 'FILL' 1;
+        }
+        
+        /* Custom Input Styles */
+        .currency-input-wrapper:focus-within {
+            border-color: theme('colors.primary');
+            box-shadow: 0 0 0 1px theme('colors.primary');
+        }
+        
+        .currency-input {
+            outline: none;
+            box-shadow: none;
+        }
+        .currency-input:focus {
+            outline: none;
+            box-shadow: none;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md h-full flex flex-col antialiased">
+<!-- Top Navigation (Shell suppressed due to focused transactional journey, rendering simplified header) -->
+<header class="bg-surface border-b border-outline-variant py-4 px-margin-mobile md:px-margin-desktop flex justify-between items-center z-10 sticky top-0">
+<div class="flex items-center gap-2">
+<span class="font-headline-md text-headline-md font-extrabold text-primary">Linkcon Rent</span>
+<span class="bg-secondary-container text-on-secondary-container px-2 py-1 rounded-full font-caption text-caption ml-2">Landlord Portal</span>
+</div>
+<button aria-label="Save and Exit" class="text-on-surface-variant hover:bg-surface-container rounded-full p-2 transition-colors flex items-center gap-2">
+<span class="font-label-md text-label-md hidden md:block">Save &amp; Exit</span>
+<span class="material-symbols-outlined">close</span>
+</button>
+</header>
+<main class="flex-1 flex flex-col items-center py-stack-lg px-margin-mobile md:px-margin-desktop overflow-y-auto">
+<div class="w-full max-w-container-max flex flex-col lg:flex-row gap-gutter">
+<!-- Main Form Column -->
+<div class="flex-1 max-w-3xl flex flex-col gap-stack-lg">
+<!-- Progress Stepper (Step 4 of 8) -->
+<div class="w-full">
+<div class="flex justify-between items-end mb-2">
+<div>
+<p class="font-caption text-caption text-on-surface-variant uppercase tracking-wider mb-1">Step 4 of 8</p>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg text-on-surface">Rent &amp; Fees</h1>
+</div>
+<span class="font-label-md text-label-md text-primary">50% Completed</span>
+</div>
+<div class="w-full h-2 bg-surface-container-high rounded-full overflow-hidden flex">
+<div class="h-full bg-primary w-1/8 border-r border-background"></div>
+<div class="h-full bg-primary w-1/8 border-r border-background"></div>
+<div class="h-full bg-primary w-1/8 border-r border-background"></div>
+<div class="h-full bg-primary w-1/8 relative">
+<!-- Pulse indicator for active step -->
+<div class="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-4 h-4 bg-tertiary-fixed rounded-full shadow-[0_0_8px_rgba(197,241,122,0.6)] animate-pulse border-2 border-primary"></div>
+</div>
+<div class="h-full bg-transparent w-1/8"></div>
+<div class="h-full bg-transparent w-1/8"></div>
+<div class="h-full bg-transparent w-1/8"></div>
+<div class="h-full bg-transparent w-1/8"></div>
+</div>
+</div>
+<!-- Intro Text -->
+<div class="bg-surface-container-low border border-outline-variant p-stack-md rounded-xl flex gap-stack-md items-start">
+<div class="bg-primary-container text-on-primary-container p-2 rounded-full shrink-0">
+<span class="material-symbols-outlined fill">info</span>
+</div>
+<div>
+<h3 class="font-label-md text-label-md text-on-surface mb-1">Why detailed fees matter</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Properties with complete fee breakdowns receive 3x more qualified viewing requests. Transparency builds immediate trust with potential tenants in the Nigerian market.</p>
+</div>
+</div>
+<!-- Form Fields -->
+<form class="flex flex-col gap-stack-md" id="feesForm">
+<!-- Annual Rent -->
+<div class="flex flex-col gap-2">
+<label class="font-label-md text-label-md text-on-surface" for="annualRent">Annual Rent</label>
+<div class="currency-input-wrapper flex items-center border border-outline-variant rounded-lg bg-surface overflow-hidden transition-shadow">
+<div class="bg-surface-container-high px-4 py-3 border-r border-outline-variant flex items-center justify-center">
+<span class="font-price-display text-price-display text-on-surface">₦</span>
+</div>
+<input class="currency-input flex-1 bg-transparent border-none px-4 py-3 font-body-lg text-body-lg text-on-surface placeholder:text-outline w-full" id="annualRent" name="annualRent" oninput="calculateTotal()" placeholder="0.00" type="number" value="2500000"/>
+</div>
+<p class="font-caption text-caption text-on-surface-variant">Base rent per annum.</p>
+</div>
+<!-- Security/Caution Deposit -->
+<div class="flex flex-col gap-2">
+<div class="flex items-center gap-2">
+<label class="font-label-md text-label-md text-on-surface" for="cautionDeposit">Caution/Security Deposit</label>
+<div class="group relative flex items-center cursor-help">
+<span class="material-symbols-outlined text-outline text-[18px]">help</span>
+<div class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block w-64 bg-inverse-surface text-inverse-on-surface p-3 rounded-lg shadow-lg font-caption text-caption z-20">
+                                    Refundable deposit held against damages. Usually 10% of annual rent.
+                                    <div class="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-inverse-surface"></div>
+</div>
+</div>
+</div>
+<div class="currency-input-wrapper flex items-center border border-outline-variant rounded-lg bg-surface overflow-hidden transition-shadow">
+<div class="bg-surface-container-high px-4 py-3 border-r border-outline-variant flex items-center justify-center">
+<span class="font-price-display text-price-display text-on-surface">₦</span>
+</div>
+<input class="currency-input flex-1 bg-transparent border-none px-4 py-3 font-body-lg text-body-lg text-on-surface placeholder:text-outline w-full" id="cautionDeposit" name="cautionDeposit" oninput="calculateTotal()" placeholder="0.00" type="number" value="250000"/>
+</div>
+</div>
+<!-- Grid for smaller fees -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-stack-md">
+<!-- Legal/Agreement Fee -->
+<div class="flex flex-col gap-2">
+<label class="font-label-md text-label-md text-on-surface" for="legalFee">Legal/Agreement Fee</label>
+<div class="currency-input-wrapper flex items-center border border-outline-variant rounded-lg bg-surface overflow-hidden transition-shadow">
+<div class="bg-surface-container-high px-4 py-3 border-r border-outline-variant flex items-center justify-center">
+<span class="font-price-display text-price-display text-on-surface">₦</span>
+</div>
+<input class="currency-input flex-1 bg-transparent border-none px-4 py-3 font-body-lg text-body-lg text-on-surface placeholder:text-outline w-full" id="legalFee" name="legalFee" oninput="calculateTotal()" placeholder="0.00" type="number" value="125000"/>
+</div>
+<p class="font-caption text-caption text-on-surface-variant">Typically 5-10%</p>
+</div>
+<!-- Agency Fee -->
+<div class="flex flex-col gap-2">
+<label class="font-label-md text-label-md text-on-surface" for="agencyFee">Agency Fee</label>
+<div class="currency-input-wrapper flex items-center border border-outline-variant rounded-lg bg-surface overflow-hidden transition-shadow">
+<div class="bg-surface-container-high px-4 py-3 border-r border-outline-variant flex items-center justify-center">
+<span class="font-price-display text-price-display text-on-surface">₦</span>
+</div>
+<input class="currency-input flex-1 bg-transparent border-none px-4 py-3 font-body-lg text-body-lg text-on-surface placeholder:text-outline w-full" id="agencyFee" name="agencyFee" oninput="calculateTotal()" placeholder="0.00" type="number" value="125000"/>
+</div>
+<p class="font-caption text-caption text-on-surface-variant">Typically 5-10%</p>
+</div>
+</div>
+<!-- Service Charge -->
+<div class="flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<label class="font-label-md text-label-md text-on-surface" for="serviceCharge">Service Charge (Optional)</label>
+</div>
+<div class="currency-input-wrapper flex items-center border border-outline-variant rounded-lg bg-surface overflow-hidden transition-shadow">
+<div class="bg-surface-container-high px-4 py-3 border-r border-outline-variant flex items-center justify-center">
+<span class="font-price-display text-price-display text-on-surface">₦</span>
+</div>
+<input class="currency-input flex-1 bg-transparent border-none px-4 py-3 font-body-lg text-body-lg text-on-surface placeholder:text-outline w-full" id="serviceCharge" name="serviceCharge" oninput="calculateTotal()" placeholder="0.00" type="number"/>
+<div class="border-l border-outline-variant px-3 py-2 bg-surface-container-lowest">
+<select class="bg-transparent border-none font-body-md text-body-md text-on-surface focus:ring-0 cursor-pointer">
+<option>Per Annum</option>
+<option>Per Month</option>
+</select>
+</div>
+</div>
+</div>
+</form>
+<!-- Action Buttons (Mobile: Fixed bottom, Desktop: Inline) -->
+<div class="mt-stack-lg flex flex-col-reverse md:flex-row justify-between items-center gap-stack-md pt-stack-md border-t border-outline-variant pb-margin-mobile md:pb-0">
+<button class="w-full md:w-auto px-6 py-3 rounded-lg border border-outline font-label-md text-label-md text-on-surface hover:bg-surface-container-low transition-colors">
+                        Back
+                    </button>
+<button class="w-full md:w-auto px-6 py-3 rounded-lg bg-primary font-label-md text-label-md text-on-primary hover:bg-primary-container hover:text-on-primary-container transition-colors shadow-[0_4px_20px_rgba(0,96,65,0.15)] flex items-center justify-center gap-2">
+                        Continue to Media
+                        <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- Sticky Right Column: Total Cost Calculator -->
+<div class="w-full lg:w-[400px] shrink-0 mt-stack-lg lg:mt-0 relative">
+<div class="sticky top-24 bg-surface border border-outline-variant rounded-xl overflow-hidden shadow-[0_4px_20px_rgba(18,55,42,0.08)]">
+<div class="p-stack-md border-b border-outline-variant bg-surface-container-lowest">
+<h2 class="font-headline-md text-headline-md text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-primary fill">calculate</span>
+                            Move-in Breakdown
+                        </h2>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">What the tenant will see.</p>
+</div>
+<div class="p-stack-md flex flex-col gap-3">
+<div class="flex justify-between items-center py-2 border-b border-surface-variant">
+<span class="font-body-md text-body-md text-on-surface-variant">Rent (1 Year)</span>
+<span class="font-label-md text-label-md text-on-surface" id="calcRent">₦2,500,000</span>
+</div>
+<div class="flex justify-between items-center py-2 border-b border-surface-variant">
+<span class="font-body-md text-body-md text-on-surface-variant">Caution Fee</span>
+<span class="font-label-md text-label-md text-on-surface" id="calcCaution">₦250,000</span>
+</div>
+<div class="flex justify-between items-center py-2 border-b border-surface-variant">
+<span class="font-body-md text-body-md text-on-surface-variant">Legal/Agreement</span>
+<span class="font-label-md text-label-md text-on-surface" id="calcLegal">₦125,000</span>
+</div>
+<div class="flex justify-between items-center py-2 border-b border-surface-variant">
+<span class="font-body-md text-body-md text-on-surface-variant">Agency Fee</span>
+<span class="font-label-md text-label-md text-on-surface" id="calcAgency">₦125,000</span>
+</div>
+<div class="flex justify-between items-center py-2 border-b border-surface-variant hidden" id="serviceChargeRow">
+<span class="font-body-md text-body-md text-on-surface-variant">Service Charge</span>
+<span class="font-label-md text-label-md text-on-surface" id="calcService">₦0</span>
+</div>
+</div>
+<!-- Total Block -->
+<div class="bg-primary p-stack-md text-on-primary">
+<div class="flex justify-between items-end">
+<div>
+<span class="font-label-md text-label-md block opacity-90">Total Move-in Cost</span>
+<span class="font-caption text-caption opacity-75">Estimated</span>
+</div>
+<span class="font-price-display text-price-display text-on-primary" id="calcTotal">₦3,000,000</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<script>
+        function formatNaira(amount) {
+            if (isNaN(amount) || amount === 0) return '₦0';
+            return '₦' + amount.toLocaleString('en-NG');
+        }
+
+        function calculateTotal() {
+            const rent = parseFloat(document.getElementById('annualRent').value) || 0;
+            const caution = parseFloat(document.getElementById('cautionDeposit').value) || 0;
+            const legal = parseFloat(document.getElementById('legalFee').value) || 0;
+            const agency = parseFloat(document.getElementById('agencyFee').value) || 0;
+            const service = parseFloat(document.getElementById('serviceCharge').value) || 0;
+
+            document.getElementById('calcRent').textContent = formatNaira(rent);
+            document.getElementById('calcCaution').textContent = formatNaira(caution);
+            document.getElementById('calcLegal').textContent = formatNaira(legal);
+            document.getElementById('calcAgency').textContent = formatNaira(agency);
+            
+            const serviceRow = document.getElementById('serviceChargeRow');
+            if(service > 0) {
+                serviceRow.classList.remove('hidden');
+                serviceRow.classList.add('flex');
+                document.getElementById('calcService').textContent = formatNaira(service);
+            } else {
+                serviceRow.classList.add('hidden');
+                serviceRow.classList.remove('flex');
+            }
+
+            const total = rent + caution + legal + agency + service;
+            document.getElementById('calcTotal').textContent = formatNaira(total);
+        }
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', calculateTotal);
+    </script>
+</body></html>

@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Search Results - Linkcon Rent</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "outline": "#6f7a72",
+                        "surface-container-high": "#ece8df",
+                        "on-secondary": "#ffffff",
+                        "on-primary-fixed-variant": "#005236",
+                        "on-tertiary-fixed-variant": "#354e00",
+                        "primary-fixed": "#a0f4c9",
+                        "secondary-container": "#c1e9d5",
+                        "surface-container-highest": "#e6e2d9",
+                        "secondary-fixed": "#c3ebd8",
+                        "on-secondary-fixed": "#002116",
+                        "surface-container": "#f1eee5",
+                        "on-tertiary-fixed": "#131f00",
+                        "background": "#fdf9f0",
+                        "tertiary-container": "#537707",
+                        "primary-container": "#237a57",
+                        "surface-variant": "#e6e2d9",
+                        "tertiary": "#3f5d00",
+                        "on-tertiary": "#ffffff",
+                        "on-tertiary-container": "#d2fe85",
+                        "on-surface-variant": "#3f4943",
+                        "on-primary-container": "#b1ffd6",
+                        "on-primary-fixed": "#002113",
+                        "primary-fixed-dim": "#84d7ae",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "on-secondary-fixed-variant": "#2a4e3f",
+                        "surface-container-low": "#f7f3ea",
+                        "on-error": "#ffffff",
+                        "inverse-primary": "#84d7ae",
+                        "on-error-container": "#93000a",
+                        "tertiary-fixed": "#c5f17a",
+                        "tertiary-fixed-dim": "#aad461",
+                        "surface-dim": "#dddad1",
+                        "on-secondary-container": "#466a5b",
+                        "error-container": "#ffdad6",
+                        "outline-variant": "#bec9c1",
+                        "surface": "#fdf9f0",
+                        "surface-tint": "#0c6c4a",
+                        "error": "#ba1a1a",
+                        "secondary-fixed-dim": "#a8cfbd",
+                        "inverse-on-surface": "#f4f0e7",
+                        "on-surface": "#1c1c16",
+                        "surface-bright": "#fdf9f0",
+                        "on-background": "#1c1c16",
+                        "secondary": "#416656",
+                        "inverse-surface": "#31302b",
+                        "primary": "#006041"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-sm": "8px",
+                        "stack-md": "16px",
+                        "stack-lg": "32px",
+                        "unit": "8px",
+                        "margin-mobile": "20px",
+                        "margin-desktop": "40px",
+                        "gutter": "24px",
+                        "container-max": "1280px"
+                    },
+                    "fontFamily": {
+                        "label-md": ["Manrope"],
+                        "display-lg": ["Manrope"],
+                        "headline-lg-mobile": ["Manrope"],
+                        "headline-md": ["Manrope"],
+                        "body-md": ["Manrope"],
+                        "price-display": ["Manrope"],
+                        "headline-lg": ["Manrope"],
+                        "caption": ["Manrope"],
+                        "body-lg": ["Manrope"]
+                    },
+                    "fontSize": {
+                        "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+                        "headline-lg-mobile": ["28px", { "lineHeight": "36px", "fontWeight": "700" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "price-display": ["20px", { "lineHeight": "28px", "fontWeight": "800" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+                        "caption": ["12px", { "lineHeight": "16px", "fontWeight": "500" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { background-color: theme('colors.background'); }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .icon-fill { font-variation-settings: 'FILL' 1; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="text-on-background font-body-md min-h-screen flex flex-col antialiased pb-24">
+<!-- Sticky Top Search Bar & Filters -->
+<header class="sticky top-0 z-50 bg-surface/90 backdrop-blur-md border-b border-outline-variant pt-safe-top">
+<div class="px-margin-mobile py-stack-md flex flex-col gap-stack-sm">
+<!-- Search Input -->
+<div class="relative w-full flex items-center">
+<span class="material-symbols-outlined absolute left-3 text-on-surface-variant z-10" data-icon="search">search</span>
+<input class="w-full bg-surface-container-highest border border-outline-variant rounded-full py-3 pl-10 pr-12 text-body-md font-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary shadow-sm transition-shadow" placeholder="Search location..." type="text" value="Lekki Phase 1, Lagos"/>
+<button class="absolute right-3 text-on-surface-variant hover:text-primary transition-colors flex items-center justify-center p-1 rounded-full hover:bg-surface-variant">
+<span class="material-symbols-outlined" data-icon="close">close</span>
+</button>
+</div>
+<!-- Quick Filters Scroll -->
+<div class="flex overflow-x-auto no-scrollbar gap-stack-sm py-1 pb-2">
+<button class="flex-shrink-0 flex items-center gap-2 bg-surface-container border border-outline-variant rounded-full px-4 py-2 font-label-md text-label-md text-on-surface hover:bg-surface-variant transition-colors">
+<span class="material-symbols-outlined text-[18px]" data-icon="tune">tune</span>
+                    Filters
+                </button>
+<button class="flex-shrink-0 bg-primary-container text-on-primary-container border border-primary-container rounded-full px-4 py-2 font-label-md text-label-md transition-colors">
+                    Rentals
+                </button>
+<button class="flex-shrink-0 bg-surface-container border border-outline-variant rounded-full px-4 py-2 font-label-md text-label-md text-on-surface hover:bg-surface-variant transition-colors">
+                    2+ Beds
+                </button>
+<button class="flex-shrink-0 bg-surface-container border border-outline-variant rounded-full px-4 py-2 font-label-md text-label-md text-on-surface hover:bg-surface-variant transition-colors">
+                    Under ₦5M
+                </button>
+<button class="flex-shrink-0 bg-surface-container border border-outline-variant rounded-full px-4 py-2 font-label-md text-label-md text-on-surface hover:bg-surface-variant transition-colors">
+                    Furnished
+                </button>
+</div>
+<div class="flex justify-between items-center px-1 pt-1">
+<span class="font-body-md text-body-md text-on-surface-variant">24 Properties found</span>
+<div class="flex items-center gap-1 text-primary">
+<span class="font-label-md text-label-md">Sort by: Recommended</span>
+<span class="material-symbols-outlined text-[18px]" data-icon="keyboard_arrow_down">keyboard_arrow_down</span>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-1 px-margin-mobile py-stack-md flex flex-col gap-stack-lg relative">
+<!-- Property List -->
+<div class="flex flex-col gap-stack-lg">
+<!-- Property Card 1 -->
+<article class="bg-surface-container-lowest border border-outline-variant rounded-[16px] overflow-hidden flex flex-col relative">
+<div class="relative w-full h-48 sm:h-64">
+<img class="w-full h-full object-cover" data-alt="A modern, luxurious apartment exterior in Lekki Phase 1, Nigeria. Warm sunlight hits the sleek architectural lines, showcasing a premium residential building with subtle green landscaping. The scene is shot from a slightly low angle, emphasizing the building's height and premium finish. Light mode aesthetic with natural, earthy tones and crisp white contrasts." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCrYMY5PmQxhDjevwXpkxY5-XTV7Fbgvz85MILsw890ZQsrbQf9arv51N-d-YDw4VqYzQ6F2ZpYrokDLT8pHhTNfwVJP5-hboi-iCdHDgBPiT0XX8WEPd-HonVmbAnpB6NPfr7tlLL0abJ6KtGOTSoo03HJqCYdGAfs9NvXzznmiItAWYdyHQVkld_2TwMU8v0ycmHUh2MQm5SvGb0QE1OCk550TxmSo5RsKxZVRY5gMs5JPrzus5WnWA"/>
+<!-- Badges overlaid -->
+<div class="absolute top-3 left-3 flex flex-col gap-2">
+<div class="bg-primary/90 backdrop-blur text-on-primary font-caption text-caption px-2 py-1 rounded-full flex items-center gap-1 shadow-sm">
+<span class="material-symbols-outlined text-[14px]" data-icon="verified">verified</span>
+                            Verified Property
+                        </div>
+</div>
+<!-- Favorite Button -->
+<button class="absolute top-3 right-3 w-8 h-8 bg-surface-container-lowest/80 backdrop-blur rounded-full flex items-center justify-center text-on-surface hover:text-error transition-colors">
+<span class="material-symbols-outlined text-[20px]" data-icon="favorite_border">favorite_border</span>
+</button>
+<!-- Image Indicator -->
+<div class="absolute bottom-3 right-3 bg-surface-container-lowest/80 backdrop-blur px-2 py-1 rounded-md font-caption text-caption text-on-surface flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]" data-icon="photo_library">photo_library</span>
+                        1/8
+                    </div>
+</div>
+<div class="p-stack-md flex flex-col gap-stack-sm">
+<div class="flex justify-between items-start">
+<div>
+<h2 class="font-headline-md text-headline-md text-on-surface truncate">Contemporary 3 Bed Terraced Duplex</h2>
+<p class="font-body-md text-body-md text-on-surface-variant flex items-center gap-1 mt-1">
+<span class="material-symbols-outlined text-[16px]" data-icon="location_on">location_on</span>
+                                Admiralty Way, Lekki Phase 1
+                            </p>
+</div>
+</div>
+<div class="flex items-center gap-4 mt-2 font-body-md text-body-md text-on-surface-variant">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[18px]" data-icon="bed">bed</span> 3 Beds</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[18px]" data-icon="bathtub">bathtub</span> 4 Baths</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[18px]" data-icon="square_foot">square_foot</span> 250 sqm</span>
+</div>
+<div class="mt-2 pt-stack-sm border-t border-surface-variant flex justify-between items-end">
+<div>
+<p class="font-caption text-caption text-on-surface-variant mb-1">Total Move-in from</p>
+<p class="font-price-display text-price-display text-primary font-bold">₦ 4,500,000 <span class="font-body-md text-body-md font-normal text-on-surface-variant">/ yr</span></p>
+</div>
+<span class="font-caption text-caption text-on-surface-variant bg-surface-container rounded px-2 py-1">Replies in &lt; 1 hr</span>
+</div>
+</div>
+</article>
+<!-- Property Card 2 -->
+<article class="bg-surface-container-lowest border border-outline-variant rounded-[16px] overflow-hidden flex flex-col relative">
+<div class="relative w-full h-48 sm:h-64">
+<img class="w-full h-full object-cover" data-alt="A bright, airy living room interior in a modern apartment in Victoria Island, Lagos. Sunlight streams through large floor-to-ceiling windows, illuminating light hardwood floors and minimalist beige furniture. The decor is subtle, featuring warm sand tones and small green potted plants. High-end real estate photography style, emphasizing clean lines and openness." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCBsvl3a6v9v0saacnmBrb30KIe-3Qv8FyChVUgYqVzfZUZObPQ41nHWHIar18MAsIphrGE9jWy6yPXgAEMRrmFvgk3j3RZiR5Gl__av_dnAl5CHgGrs6K8t3QXwykY_L0WkMQuxV0hO7kx7h9CMU6ymAiZcGa_JzGqjXSWoBx0iCjhkzTvxHBvM4nmJORDnooODA8uOvIcDgcegBUrBEe8kxTN4itKWERvYcF7F2LTjvT-lHnoU4sB-w"/>
+<!-- Badges overlaid -->
+<div class="absolute top-3 left-3 flex flex-col gap-2">
+<div class="bg-surface-container-lowest/90 backdrop-blur text-primary font-caption text-caption px-2 py-1 rounded-full flex items-center gap-1 border border-primary/20 shadow-sm">
+<span class="material-symbols-outlined text-[14px]" data-icon="flash_on">flash_on</span>
+                            Instant Book
+                        </div>
+</div>
+<!-- Favorite Button -->
+<button class="absolute top-3 right-3 w-8 h-8 bg-surface-container-lowest/80 backdrop-blur rounded-full flex items-center justify-center text-on-surface hover:text-error transition-colors">
+<span class="material-symbols-outlined text-[20px]" data-icon="favorite_border">favorite_border</span>
+</button>
+<!-- Image Indicator -->
+<div class="absolute bottom-3 right-3 bg-surface-container-lowest/80 backdrop-blur px-2 py-1 rounded-md font-caption text-caption text-on-surface flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]" data-icon="photo_library">photo_library</span>
+                        1/5
+                    </div>
+</div>
+<div class="p-stack-md flex flex-col gap-stack-sm">
+<div class="flex justify-between items-start">
+<div>
+<h2 class="font-headline-md text-headline-md text-on-surface truncate">Luxury 2 Bed Serviced Apartment</h2>
+<p class="font-body-md text-body-md text-on-surface-variant flex items-center gap-1 mt-1">
+<span class="material-symbols-outlined text-[16px]" data-icon="location_on">location_on</span>
+                                Freedom Way, Lekki Phase 1
+                            </p>
+</div>
+</div>
+<div class="flex items-center gap-4 mt-2 font-body-md text-body-md text-on-surface-variant">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[18px]" data-icon="bed">bed</span> 2 Beds</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[18px]" data-icon="bathtub">bathtub</span> 2.5 Baths</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[18px]" data-icon="wifi">wifi</span> Included</span>
+</div>
+<div class="mt-2 pt-stack-sm border-t border-surface-variant flex justify-between items-end">
+<div>
+<p class="font-caption text-caption text-on-surface-variant mb-1">Total Move-in from</p>
+<p class="font-price-display text-price-display text-primary font-bold">₦ 3,200,000 <span class="font-body-md text-body-md font-normal text-on-surface-variant">/ yr</span></p>
+</div>
+<span class="font-caption text-caption text-on-surface-variant bg-surface-container rounded px-2 py-1">Replies in ~ 2 hrs</span>
+</div>
+</div>
+</article>
+<!-- Loading Skeleton Example -->
+<article class="bg-surface-container-lowest border border-outline-variant rounded-[16px] overflow-hidden flex flex-col animate-pulse">
+<div class="w-full h-48 sm:h-64 bg-surface-variant"></div>
+<div class="p-stack-md flex flex-col gap-stack-sm">
+<div class="h-6 bg-surface-variant rounded w-3/4 mb-2"></div>
+<div class="h-4 bg-surface-variant rounded w-1/2 mb-4"></div>
+<div class="flex gap-4">
+<div class="h-4 bg-surface-variant rounded w-16"></div>
+<div class="h-4 bg-surface-variant rounded w-16"></div>
+<div class="h-4 bg-surface-variant rounded w-16"></div>
+</div>
+<div class="mt-4 pt-stack-sm border-t border-surface-variant flex justify-between items-end">
+<div class="flex flex-col gap-1 w-1/2">
+<div class="h-3 bg-surface-variant rounded w-1/2"></div>
+<div class="h-6 bg-surface-variant rounded w-3/4"></div>
+</div>
+<div class="h-6 bg-surface-variant rounded w-24"></div>
+</div>
+</div>
+</article>
+</div>
+</main>
+<!-- Floating Action Button: Show Map -->
+<div class="fixed bottom-6 left-1/2 -translate-x-1/2 z-40">
+<button class="bg-primary text-on-primary rounded-full px-6 py-3 flex items-center gap-2 shadow-[0px_4px_20px_rgba(18,55,42,0.2)] hover:bg-on-primary-fixed-variant transition-colors font-label-md text-label-md">
+<span class="material-symbols-outlined" data-icon="map">map</span>
+            Show Map
+        </button>
+</div>
+</body></html>
