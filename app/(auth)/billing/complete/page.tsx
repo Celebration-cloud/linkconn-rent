@@ -2,10 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { Loader2, ShieldCheck, TriangleAlert } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAuthFlowStore } from "@/stores/auth-flow-store";
 import { toastError, toastSuccess } from "@/stores/toast-store";
+import { Logo } from "@/components/shared/icons";
 
 export default function BillingCompletePage() {
   const router = useRouter();
@@ -55,6 +57,7 @@ export default function BillingCompletePage() {
           animate={{ opacity: 1, y: 0 }}
           className="w-full rounded-[2rem] border border-white/80 bg-white/95 p-6 text-center shadow-[0_24px_80px_rgba(18,55,42,0.12)]"
         >
+          <Link href="/" className="mx-auto mb-6 inline-flex items-center" aria-label="LinkConn Rent home"><Logo variant="lockup" priority className="h-14 w-auto" sizes="118px" /></Link>
           {error ? (
             <div className="space-y-4">
               <TriangleAlert className="mx-auto h-12 w-12 text-red-500" />

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { ArrowLeft, CheckCircle2, Clock3, Plus, Wrench } from "lucide-react";
 import Link from "next/link";
+import { Logo } from "@/components/shared/icons";
 import { toastError, toastSuccess } from "@/stores/toast-store";
 
 interface MaintenanceItem {
@@ -28,7 +29,7 @@ export function MaintenanceCenter() {
   }
   return (
     <main id="main-content" className="min-h-[100dvh] bg-sand-50 pb-24">
-      <header className="sticky top-0 z-20 flex h-16 items-center border-b border-line bg-sand-50 px-4"><Link href="/dashboard" className="grid h-11 w-11 place-items-center rounded-full hover:bg-sand-200" aria-label="Back"><ArrowLeft className="h-5 w-5" /></Link><h1 className="mx-auto pr-11 text-lg font-extrabold">Maintenance</h1></header>
+      <header className="sticky top-0 z-20 flex h-16 items-center border-b border-line bg-sand-50 px-4"><Link href="/dashboard" className="grid h-11 w-11 place-items-center rounded-full hover:bg-sand-200" aria-label="Back"><ArrowLeft className="h-5 w-5" /></Link><h1 className="mx-auto text-lg font-extrabold">Maintenance</h1><Link href="/" className="grid size-11 place-items-center rounded-lg hover:bg-sand-100" aria-label="LinkConn Rent home"><Logo variant="mark" priority className="size-9" sizes="36px" /></Link></header>
       <div className="mx-auto max-w-3xl p-4">
         <div className="flex items-center justify-between"><h2 className="text-xl font-extrabold">Maintenance center</h2><span className="rounded-full bg-forest-100 px-3 py-1 text-xs font-bold text-forest-800">{filtered.length} open</span></div>
         <div className="mt-5 grid grid-cols-2 rounded-lg bg-sand-200 p-1"><button onClick={() => setStatus("active")} className={`min-h-11 rounded-md text-sm font-bold ${status === "active" ? "bg-white text-forest-800 shadow-sm" : "text-muted"}`}>Active requests</button><button onClick={() => setStatus("past")} className={`min-h-11 rounded-md text-sm font-bold ${status === "past" ? "bg-white text-forest-800 shadow-sm" : "text-muted"}`}>Past requests</button></div>
@@ -38,4 +39,3 @@ export function MaintenanceCenter() {
     </main>
   );
 }
-

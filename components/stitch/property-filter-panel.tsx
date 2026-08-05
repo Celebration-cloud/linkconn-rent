@@ -1,6 +1,6 @@
 "use client";
 
-import { RotateCcw } from "lucide-react";
+import { LoaderCircle, RotateCcw } from "lucide-react";
 import { Checkbox, Input, Select } from "@/components/ui/form-controls";
 
 export const PROPERTY_TYPES = [
@@ -36,6 +36,11 @@ type PropertyFilterPanelProps = {
   onChange: (draft: AdvancedFilterDraft) => void;
   onApply: () => void;
   onReset: () => void;
+  onCancel: () => void;
+  onRetryCount: () => void;
+  resultCount: number | null;
+  counting: boolean;
+  countError: string | null;
   idPrefix: string;
 };
 /* eslint-enable no-unused-vars */
@@ -51,12 +56,16 @@ export function PropertyFilterPanel({
   onChange,
   onApply,
   onReset,
+  onCancel,
+  onRetryCount,
+  resultCount,
+  counting,
+  countError,
   idPrefix,
 }: PropertyFilterPanelProps) {
   return (
     <div>
-      <div className="flex items-center justify-between gap-3">
-        <h2 className="text-lg font-extrabold text-ink">More filters</h2>
+      <div className="flex items-center justify-end gap-3">
         <button
           type="button"
           onClick={onReset}
@@ -137,9 +146,29 @@ export function PropertyFilterPanel({
           </div>
         </fieldset>
 
-        <button type="button" onClick={onApply} className="stitch-button w-full">
-          Show results
-        </button>
+        {countError ? (
+          <div className="rounded-lg border border-warning/30 bg-warning-muted p-3" role="alert">
+            <p className="text-xs leading-5 text-content">{countError}</p>
+            <button type="button" onClick={onRetryCount} className="mt-1 min-h-10 text-xs font-bold text-forest-700">
+              Retry count
+            </button>
+          </div>
+        ) : null}
+
+        <div className="grid grid-cols-2 gap-2">
+          <button type="button" onClick={onCancel} className="stitch-button stitch-button-secondary w-full">
+            Cancel
+          </button>
+          <button type="button" onClick={onApply} className="stitch-button w-full" disabled={counting}>
+            {counting ? (
+              <><LoaderCircle className="size-4 animate-spin" aria-hidden="true" /> Checking…</>
+            ) : resultCount === null ? (
+              "Show properties"
+            ) : (
+              `Show ${resultCount} ${resultCount === 1 ? "property" : "properties"}`
+            )}
+          </button>
+        </div>
       </div>
     </div>
   );

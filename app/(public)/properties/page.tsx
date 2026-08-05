@@ -23,7 +23,8 @@ function flattenSearchParams(params: Awaited<SearchParams>) {
 
 function parseSearchParams(params: Awaited<SearchParams>): PropertySearchInput {
   const result = propertySearchSchema.safeParse(flattenSearchParams(params));
-  return result.success ? result.data : propertySearchSchema.parse({});
+  const parsed = result.success ? result.data : propertySearchSchema.parse({});
+  return { ...parsed, pageSize: 12, mode: "list" };
 }
 
 export async function generateMetadata({

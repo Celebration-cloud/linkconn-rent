@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { ArrowLeft, CreditCard, Landmark, LockKeyhole, ShieldCheck, Smartphone } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { toastError, toastSuccess } from "@/stores/toast-store";
+import { Logo } from "@/components/shared/icons";
 import { formatNaira, getMoveInTotal } from "@/utils/map-property";
 
 interface PaymentDetails {
@@ -49,7 +50,7 @@ export function ProtectedPayment({ paymentId }: { paymentId: string }) {
   const total = getMoveInTotal(feeValues);
   return (
     <main id="main-content" className="min-h-[100dvh] bg-sand-50 pb-28">
-      <header className="flex h-16 items-center border-b border-line px-4"><Link href="/dashboard?tab=payments" className="grid h-11 w-11 place-items-center rounded-full hover:bg-sand-200" aria-label="Back"><ArrowLeft className="h-5 w-5" /></Link><h1 className="mx-auto pr-11 text-lg font-extrabold">Protected payment</h1></header>
+      <header className="flex h-16 items-center border-b border-line px-4"><Link href="/dashboard?tab=payments" className="grid h-11 w-11 place-items-center rounded-full hover:bg-sand-200" aria-label="Back"><ArrowLeft className="h-5 w-5" /></Link><h1 className="mx-auto text-lg font-extrabold">Protected payment</h1><Link href="/" className="grid size-11 place-items-center rounded-lg hover:bg-sand-100" aria-label="LinkConn Rent home"><Logo variant="mark" priority className="size-9" sizes="36px" /></Link></header>
       <div className="mx-auto max-w-lg p-4">
         <section className="flex gap-3 rounded-xl border border-forest-100 bg-forest-50 p-4"><ShieldCheck className="h-5 w-5 shrink-0 text-forest-700" /><div><p className="text-sm font-extrabold text-forest-900">Funds protected</p><p className="mt-1 text-xs leading-5 text-forest-800">Paystack verifies the transaction reference and exact amount before LinkConn Rent marks your payment paid.</p></div></section>
         <section className="mt-4 overflow-hidden rounded-xl border border-line bg-white"><div className="bg-sand-100 p-4"><p className="text-[10px] font-bold uppercase tracking-wider text-muted">Move-in breakdown</p><h2 className="mt-1 text-sm font-extrabold">{payment?.property.title || "Loading property..."}</h2></div><dl className="divide-y divide-line">{[["Rent", feeValues.price], ["Caution fee", feeValues.cautionFee], ["Legal fee", feeValues.legalFee], ["Agency fee", feeValues.agencyFee], ["Service charge", feeValues.serviceCharge]].map(([label, amount]) => <div key={label} className="flex justify-between p-4 text-sm"><dt className="text-muted">{label}</dt><dd className="font-bold">{formatNaira(Number(amount))}</dd></div>)}</dl><div className="flex items-center justify-between bg-forest-800 p-4 text-white"><span className="text-xs font-bold uppercase">Total to pay</span><strong className="text-lg">{formatNaira(total)}</strong></div></section>

@@ -93,9 +93,8 @@ export default function OnboardingPage() {
     <main id="main-content" className="min-h-[100dvh] bg-sand-50">
       <header className="border-b border-line bg-white">
         <div className="stitch-container flex h-16 items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <Logo className="h-9 w-9" />
-            <span className="font-extrabold tracking-tight text-forest-900">LinkConn Rent</span>
+          <Link href="/" className="flex items-center" aria-label="LinkConn Rent home">
+            <Logo variant="lockup" priority className="h-12 w-auto" sizes="102px" />
           </Link>
           <button
             type="submit"

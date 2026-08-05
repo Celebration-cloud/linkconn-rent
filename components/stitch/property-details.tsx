@@ -18,7 +18,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import type { Property } from "@/domain/types/property";
-import { formatNaira, getMoveInTotal } from "@/utils/map-property";
+import { formatNaira, getMoveInEstimate } from "@/utils/map-property";
 import { toastError, toastSuccess } from "@/stores/toast-store";
 import { StitchPropertyCard } from "./property-card";
 
@@ -29,9 +29,11 @@ async function readJson(response: Response) {
 export function PropertyDetails({
   property,
   relatedProperties,
+  returnTo = "/properties",
 }: {
   property: Property;
   relatedProperties: Property[];
+  returnTo?: string;
 }) {
   const router = useRouter();
   const [saved, setSaved] = useState(false);
@@ -64,19 +66,22 @@ export function PropertyDetails({
     }
   };
 
-  const moveInRows = [
-    ["Annual rent", property.price],
-    ["Caution deposit", property.cautionFee || 0],
-    ["Legal fee", property.legalFee || 0],
-    ["Agency fee", property.agencyFee || 0],
-    ["Service charge", property.serviceCharge || 0],
-  ] as const;
+  const moveInEstimate = getMoveInEstimate(property);
+  const moveInRows = moveInEstimate === null
+    ? []
+    : [
+        [property.period === "month" ? "Monthly rent" : "Annual rent", property.price],
+        ["Caution deposit", property.cautionFee as number],
+        ["Legal fee", property.legalFee as number],
+        ["Agency fee", property.agencyFee as number],
+        ["Service charge", property.serviceCharge as number],
+      ] as const;
 
   return (
     <main id="main-content" className="min-h-screen bg-sand-50 pb-20 pt-20">
       <div className="stitch-container">
         <nav className="py-5 text-xs font-semibold text-muted">
-          <Link href="/properties" className="hover:text-forest-800">Properties</Link>
+          <Link href={returnTo} className="hover:text-forest-800">Properties</Link>
           <span className="mx-2">/</span>
           <span>{property.location}</span>
         </nav>
@@ -207,7 +212,11 @@ export function PropertyDetails({
             <div className="mt-5 overflow-hidden rounded-xl border border-line bg-white">
               <div className="bg-forest-900 px-5 py-4 text-white">
                 <p className="text-xs font-bold uppercase tracking-[0.15em] text-forest-200">Move-in breakdown</p>
-                <p className="mt-2 text-2xl font-extrabold">{formatNaira(getMoveInTotal(property))}</p>
+                <p className="mt-2 text-2xl font-extrabold">
+                  {moveInEstimate === null
+                    ? "Fee estimate unavailable"
+                    : formatNaira(moveInEstimate)}
+                </p>
               </div>
               <dl className="p-5">
                 {moveInRows.map(([label, value]) => (
@@ -216,6 +225,11 @@ export function PropertyDetails({
                     <dd className="font-bold tabular-nums text-ink">{formatNaira(value)}</dd>
                   </div>
                 ))}
+                {moveInEstimate === null ? (
+                  <p className="py-3 text-sm leading-6 text-muted">
+                    The listing does not yet contain a complete, valid fee breakdown.
+                  </p>
+                ) : null}
               </dl>
             </div>
           </aside>

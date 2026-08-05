@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState, type SyntheticEvent } from "react";
 import Link from "next/link";
+import { Logo } from "@/components/shared/icons";
 import {
   ArrowLeft,
   Building2,
@@ -81,10 +82,11 @@ export function VerificationCenter() {
       <header className="border-b border-line bg-white">
         <div className="stitch-container flex min-h-20 items-center gap-4">
           <Link href="/dashboard" className="grid h-11 w-11 place-items-center rounded-full bg-sand-200" aria-label="Back to dashboard"><ArrowLeft className="h-5 w-5" /></Link>
-          <div>
+          <div className="flex-1">
             <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-forest-700">Trust & safety</p>
             <h1 className="text-xl font-extrabold text-ink">Verification center</h1>
           </div>
+          <Link href="/" className="grid size-11 place-items-center rounded-lg hover:bg-sand-100" aria-label="LinkConn Rent home"><Logo variant="mark" priority className="size-9" sizes="36px" /></Link>
         </div>
       </header>
 

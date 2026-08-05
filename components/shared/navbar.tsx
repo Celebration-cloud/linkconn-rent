@@ -79,13 +79,10 @@ export default function Navbar() {
       >
         <Link
           href="/"
-          className="flex shrink-0 items-center gap-2.5 rounded-lg"
+          className="flex shrink-0 items-center rounded-lg"
           aria-label="LinkConn Rent home"
         >
-          <Logo className="h-9 w-9" />
-          <span className="text-lg font-extrabold tracking-[-0.045em] text-forest-900">
-            LinkConn <span className="text-forest-600">Rent</span>
-          </span>
+          <Logo variant="lockup" priority className="h-11 w-auto sm:h-12" sizes="(max-width: 640px) 92px, 102px" />
         </Link>
 
         <div className="hidden min-w-0 items-center justify-center gap-0.5 xl:flex">

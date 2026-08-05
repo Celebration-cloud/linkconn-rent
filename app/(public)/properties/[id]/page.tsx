@@ -7,6 +7,7 @@ import { mapProperty } from "@/utils/map-property";
 
 type Props = {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ returnTo?: string | string[] }>;
 };
 
 // Generate dynamic metadata for SEO compliance
@@ -29,8 +30,16 @@ export async function generateMetadata({ params }: Props) {
   };
 }
 
-export default async function PropertyDetailPage({ params }: Props) {
+export default async function PropertyDetailPage({ params, searchParams }: Props) {
   const { id } = await params;
+  const query = await searchParams;
+  const requestedReturn = Array.isArray(query.returnTo)
+    ? query.returnTo[0]
+    : query.returnTo;
+  const returnTo =
+    requestedReturn === "/properties" || requestedReturn?.startsWith("/properties?")
+      ? requestedReturn
+      : "/properties";
   let property: Property | undefined = FALLBACK_PROPERTIES.find((p) => p.id === id);
   let allProperties: Property[] = FALLBACK_PROPERTIES;
 
@@ -59,5 +68,11 @@ export default async function PropertyDetailPage({ params }: Props) {
     (p) => p.id !== id && (p.city.toLowerCase() === property!.city.toLowerCase() || p.type.toLowerCase() === property!.type.toLowerCase())
   );
 
-  return <PropertyDetails property={property} relatedProperties={related} />;
+  return (
+    <PropertyDetails
+      property={property}
+      relatedProperties={related}
+      returnTo={returnTo}
+    />
+  );
 }

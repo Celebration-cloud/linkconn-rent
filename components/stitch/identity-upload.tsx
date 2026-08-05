@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Check, CloudUpload, FileText, ShieldAlert } from "lucide-react";
+import { Logo } from "@/components/shared/icons";
 import { toastError, toastSuccess } from "@/stores/toast-store";
 
 const documentTypes = ["NIN Slip", "Driver's License", "International Passport"] as const;
@@ -25,7 +26,7 @@ export function IdentityUpload() {
     <main id="main-content" className="min-h-[100dvh] bg-sand-50">
       <header className="flex h-16 items-center border-b border-line px-4">
         <Link href="/verification" className="grid h-11 w-11 place-items-center rounded-full hover:bg-sand-200" aria-label="Back to verification"><ArrowLeft className="h-5 w-5" /></Link>
-        <span className="mx-auto pr-11 text-lg font-extrabold text-forest-900">LinkConn Rent</span>
+        <Link href="/" className="mx-auto flex items-center pr-11" aria-label="LinkConn Rent home"><Logo variant="lockup" priority className="h-11 w-auto" sizes="94px" /></Link>
       </header>
       <div className="mx-auto max-w-lg px-4 py-6 pb-28">
         <ol className="flex items-center gap-2" aria-label="Verification progress">

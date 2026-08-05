@@ -15,6 +15,15 @@ export const metadata: Metadata = {
   description: "Rent properties in Nigeria direct from landlords. Discover verified listings, chat securely, and manage rent — all in one place.",
   keywords: ["renting", "landlords", "apartments in Nigeria", "no agents", "verified listings"],
   authors: [{ name: "LinkConn Rent" }],
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/icon.png", type: "image/png", sizes: "512x512" },
+    ],
+    shortcut: "/favicon.ico",
+    apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
+  },
+  manifest: "/manifest.webmanifest",
   openGraph: {
     title: "LinkConn Rent | direct verified properties in Nigeria",
     description: "Rent properties in Nigeria direct from landlords. Scam-free and verified.",

@@ -116,9 +116,8 @@ function DashboardContent() {
   return (
     <main id="main-content" className="min-h-[100dvh] bg-sand-50 md:grid md:grid-cols-[16rem_1fr]">
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-line bg-sand-50 p-4 md:flex">
-        <Link href="/" className="flex items-center gap-2 px-2 py-2">
-          <Logo className="h-9 w-9" />
-          <span className="font-extrabold tracking-tight text-forest-900">LinkConn Rent</span>
+        <Link href="/" className="flex items-center px-2 py-2" aria-label="LinkConn Rent home">
+          <Logo variant="lockup" priority className="h-14 w-auto" sizes="118px" />
         </Link>
 
         <nav className="mt-8 flex-1 space-y-1">
@@ -150,9 +149,12 @@ function DashboardContent() {
 
       <section className="min-w-0 md:col-start-2">
         <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-line bg-sand-50/95 px-4 backdrop-blur sm:px-7">
-          <div>
+          <div className="flex min-w-0 items-center gap-3">
+            <Link href="/" className="grid size-10 shrink-0 place-items-center rounded-lg hover:bg-sand-100 md:hidden" aria-label="LinkConn Rent home"><Logo variant="mark" priority className="size-8" sizes="32px" /></Link>
+            <div className="min-w-0">
             <h1 className="text-xl font-extrabold tracking-tight text-ink">{activeTab === "overview" ? "Overview" : activeTab[0].toUpperCase() + activeTab.slice(1)}</h1>
             <p className="hidden text-xs text-muted sm:block">Welcome back, {user.firstName}. Here is what needs your attention.</p>
+            </div>
           </div>
           <div className="flex items-center gap-2">
             <button className="relative grid h-10 w-10 place-items-center rounded-full bg-sand-200 text-forest-900" aria-label="Notifications">

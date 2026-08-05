@@ -29,9 +29,8 @@ export default function AuthPageShell({
       <section className="grid min-h-[calc(100dvh-4rem)] place-items-center px-4 py-10 sm:px-6">
         <div className={`w-full ${isSignup ? "max-w-3xl" : "max-w-md"}`}>
           <div className="mb-5 flex justify-center">
-            <Link href="/" className="flex items-center gap-2">
-              <Logo className="h-10 w-10" />
-              <span className="text-xl font-extrabold tracking-[-0.04em] text-forest-900">LinkConn Rent</span>
+            <Link href="/" className="flex items-center" aria-label="LinkConn Rent home">
+              <Logo variant="lockup" priority className="h-16 w-auto" sizes="134px" />
             </Link>
           </div>
           <div className="rounded-xl border border-line bg-white p-5 shadow-[0_8px_30px_rgba(18,55,42,0.08)] sm:p-7">

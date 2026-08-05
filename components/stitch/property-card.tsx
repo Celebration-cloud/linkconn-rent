@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Bath, BedDouble, Heart, MapPin, Scale, ShieldCheck } from "lucide-react";
 import type { Property } from "@/domain/types/property";
-import { formatNaira, getMoveInTotal } from "@/utils/map-property";
+import { formatNaira, getMoveInEstimate } from "@/utils/map-property";
 
 export function StitchPropertyCard({
   property,
@@ -13,6 +13,7 @@ export function StitchPropertyCard({
   onToggleSaved,
   onToggleCompare,
   onOpenDetails,
+  detailsHref,
 }: {
   property: Property;
   compact?: boolean;
@@ -22,7 +23,9 @@ export function StitchPropertyCard({
   onToggleSaved?: () => void;
   onToggleCompare?: () => void;
   onOpenDetails?: () => void;
+  detailsHref?: string;
 }) {
+  const moveInEstimate = getMoveInEstimate(property);
   return (
     <article className="group flex h-full flex-col overflow-hidden rounded-xl border border-line bg-sand-50 transition duration-200 hover:-translate-y-0.5 hover:border-forest-300 hover:shadow-[0_12px_30px_rgba(18,55,42,0.09)]">
       <div className={`relative overflow-hidden ${compact ? "aspect-[16/10]" : "aspect-[4/3]"}`}>
@@ -32,6 +35,7 @@ export function StitchPropertyCard({
           fill
           className="object-cover transition duration-500 group-hover:scale-[1.03]"
           sizes={compact ? "(max-width: 768px) 100vw, 360px" : "(max-width: 768px) 100vw, 33vw"}
+          loading="lazy"
         />
         {onToggleSaved ? (
           <button
@@ -75,9 +79,11 @@ export function StitchPropertyCard({
         </div>
 
         <div className="mt-3 flex items-center justify-between gap-3 rounded-lg bg-sand-100 px-3 py-2">
-          <span className="text-[11px] font-semibold text-muted">Complete move-in</span>
+          <span className="text-[11px] font-semibold text-muted">Estimated move-in</span>
           <span className="text-xs font-extrabold tabular-nums text-forest-900">
-            {formatNaira(getMoveInTotal(property))}
+            {moveInEstimate === null
+              ? "Fee estimate unavailable"
+              : formatNaira(moveInEstimate)}
           </span>
         </div>
 
@@ -98,7 +104,7 @@ export function StitchPropertyCard({
         ) : null}
 
         <Link
-          href={`/properties/${property.id}`}
+          href={detailsHref || `/properties/${property.id}`}
           onClick={onOpenDetails}
           className="mt-4 inline-flex min-h-11 items-center justify-center rounded-lg bg-forest-700 px-4 text-sm font-bold text-white transition hover:bg-forest-900"
         >

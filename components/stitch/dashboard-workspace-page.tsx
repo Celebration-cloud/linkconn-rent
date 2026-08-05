@@ -12,6 +12,7 @@ import {
   Plus,
 } from "lucide-react";
 import type { DashboardSnapshot } from "@/domain/types/operating-system";
+import { Logo } from "@/components/shared/icons";
 import {
   ApplicationsTab,
   PaymentsTab,
@@ -71,12 +72,15 @@ export function DashboardWorkspacePage({
     <main id="main-content" className="min-h-[100dvh] bg-sand-50 pb-24">
       <header className="border-b border-line bg-forest-950 text-white">
         <div className="stitch-container py-8">
-          <Link
-            href="/dashboard"
-            className="inline-flex items-center gap-2 text-xs font-bold text-forest-200 hover:text-white"
-          >
-            <ArrowLeft className="size-4" /> Dashboard
-          </Link>
+          <div className="flex items-center justify-between gap-4">
+            <Link
+              href="/dashboard"
+              className="inline-flex items-center gap-2 text-xs font-bold text-forest-200 hover:text-white"
+            >
+              <ArrowLeft className="size-4" /> Dashboard
+            </Link>
+            <Link href="/" className="rounded-lg bg-sand-50 px-2 py-1" aria-label="LinkConn Rent home"><Logo variant="lockup" priority className="h-10 w-auto" sizes="86px" /></Link>
+          </div>
           <h1 className="mt-5 text-4xl font-extrabold tracking-[-0.05em]">
             {title}
           </h1>

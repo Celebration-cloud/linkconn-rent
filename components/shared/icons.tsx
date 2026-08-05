@@ -26,15 +26,34 @@ import {
 
 type IconProps = { className?: string };
 
-export function Logo({ className = "h-8 w-8" }: IconProps) {
+type LogoProps = IconProps & {
+  variant?: "lockup" | "mark";
+  priority?: boolean;
+  alt?: string;
+  decorative?: boolean;
+  sizes?: string;
+};
+
+export function Logo({
+  className,
+  variant = "mark",
+  priority = false,
+  alt = "LinkConn Rent",
+  decorative = true,
+  sizes,
+}: LogoProps) {
+  const isLockup = variant === "lockup";
+
   return (
     <Image
-      src="/icons/linkconn-mark.svg"
-      alt=""
-      width={48}
-      height={48}
-      className={className}
-      aria-hidden="true"
+      src={isLockup ? "/icons/linkconn-logo.png" : "/icons/linkconn-symbol.png"}
+      alt={decorative ? "" : alt}
+      width={isLockup ? 1160 : 1008}
+      height={isLockup ? 557 : 1008}
+      className={className ?? (isLockup ? "h-10 w-auto" : "size-8")}
+      priority={priority}
+      sizes={sizes}
+      aria-hidden={decorative || undefined}
     />
   );
 }

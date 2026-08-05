@@ -63,4 +63,13 @@ describe("sitewide UI consistency", () => {
 
     expect(offenders).toEqual([]);
   });
+
+  it("uses the shared LinkConn logo assets instead of the legacy mark", () => {
+    const offenders = files.flatMap((file) => {
+      const source = readFileSync(file, "utf8");
+      return source.includes("linkconn-mark.svg") ? [normalized(file)] : [];
+    });
+
+    expect(offenders).toEqual([]);
+  });
 });

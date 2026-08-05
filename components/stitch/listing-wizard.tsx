@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { ReactNode } from "react";
 import Link from "next/link";
+import { Logo } from "@/components/shared/icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   useForm,
@@ -124,6 +125,7 @@ export function ListingWizard({ initialStep = 0 }: { initialStep?: number }) {
             <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-forest-700">List a property</p>
             <h1 className="text-xl font-extrabold text-ink">{STEPS[step].label}</h1>
           </div>
+          <Link href="/" className="hidden size-11 place-items-center rounded-lg hover:bg-sand-100 sm:grid" aria-label="LinkConn Rent home"><Logo variant="mark" priority className="size-9" sizes="36px" /></Link>
           <button disabled={saving} onClick={() => void persist(false)} className="stitch-button-secondary"><Save className="h-4 w-4" /><span className="hidden sm:inline">Save draft</span></button>
         </div>
       </header>

@@ -21,6 +21,7 @@ export type Property = {
   legalFee?: number;
   agencyFee?: number;
   serviceCharge?: number;
+  moveInEstimate?: number | null;
   verified: boolean;
   featured: boolean;
   landlord: string;

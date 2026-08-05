@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Check, Filter, MessageSquare, Search, X } from "lucide-react";
 import { Input, Select } from "@/components/ui/form-controls";
+import { Logo } from "@/components/shared/icons";
 import { toastError, toastSuccess } from "@/stores/toast-store";
 
 type Applicant = {
@@ -91,6 +92,7 @@ export function ApplicantManager() {
             <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-forest-700">Landlord workspace</p>
             <h1 className="text-xl font-extrabold text-ink">Manage applicants</h1>
           </div>
+          <Link href="/" className="hidden size-11 place-items-center rounded-lg hover:bg-sand-100 sm:grid" aria-label="LinkConn Rent home"><Logo variant="mark" priority className="size-9" sizes="36px" /></Link>
           <span className="hidden rounded-full bg-forest-100 px-3 py-1 text-xs font-bold text-forest-800 sm:block">{items.length} total</span>
         </div>
       </header>

@@ -4,6 +4,7 @@ import type { Property } from "@/domain/types/property";
 type PropertyWithOwner = PrismaProperty & { owner: Profile };
 
 export function mapProperty(record: PropertyWithOwner): Property {
+  const moveInEstimate = getMoveInEstimate(record);
   return {
     id: record.id,
     title: record.title,
@@ -28,6 +29,7 @@ export function mapProperty(record: PropertyWithOwner): Property {
     legalFee: record.legalFee,
     agencyFee: record.agencyFee,
     serviceCharge: record.serviceCharge,
+    moveInEstimate,
     verified: record.verified,
     featured: record.featured,
     landlord: `${record.owner.firstName} ${record.owner.lastName}`.trim(),
@@ -36,6 +38,30 @@ export function mapProperty(record: PropertyWithOwner): Property {
     status: record.status === "Rented" ? "Rented" : "Available",
     description: record.description,
   };
+}
+
+export function getMoveInEstimate(
+  property: Pick<
+    Property,
+    "price" | "cautionFee" | "legalFee" | "agencyFee" | "serviceCharge"
+  >,
+) {
+  const values = [
+    property.price,
+    property.cautionFee,
+    property.legalFee,
+    property.agencyFee,
+    property.serviceCharge,
+  ];
+  if (
+    values.some(
+      (value) =>
+        typeof value !== "number" || !Number.isFinite(value) || value < 0,
+    )
+  ) {
+    return null;
+  }
+  return values.reduce<number>((total, value) => total + (value as number), 0);
 }
 
 export function formatNaira(value: number) {

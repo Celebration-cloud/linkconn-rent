@@ -24,60 +24,66 @@ const profileCard = {
   },
 } satisfies Prisma.ProfileDefaultArgs;
 
-export class OperatingSystemRepository {
-  static async searchProperties(filters: PropertySearchInput) {
-    const types = getNormalizedTypes(filters);
-    const where: Prisma.PropertyWhereInput = {
-      status: "Available",
-      moderationStatus: "Approved",
-      ...(filters.q
-        ? {
-            OR: [
-              { title: { contains: filters.q, mode: "insensitive" } },
-              { description: { contains: filters.q, mode: "insensitive" } },
-              { location: { contains: filters.q, mode: "insensitive" } },
-              { city: { contains: filters.q, mode: "insensitive" } },
-            ],
-          }
-        : {}),
-      ...(filters.location
-        ? {
+function buildPropertyWhere(filters: PropertySearchInput): Prisma.PropertyWhereInput {
+  const types = getNormalizedTypes(filters);
+  return {
+    status: "Available",
+    moderationStatus: "Approved",
+    ...(filters.q
+      ? {
+          OR: [
+            { title: { contains: filters.q, mode: "insensitive" } },
+            { description: { contains: filters.q, mode: "insensitive" } },
+            { location: { contains: filters.q, mode: "insensitive" } },
+            { city: { contains: filters.q, mode: "insensitive" } },
+          ],
+        }
+      : {}),
+    ...(filters.location
+      ? {
+          AND: {
             OR: [
               { location: { contains: filters.location, mode: "insensitive" } },
               { city: { contains: filters.location, mode: "insensitive" } },
             ],
-          }
-        : {}),
-      ...(types.length ? { type: { in: types, mode: "insensitive" } } : {}),
-      ...(filters.period ? { period: filters.period } : {}),
-      ...(filters.amenities?.length
-        ? { amenities: { hasEvery: filters.amenities } }
-        : {}),
-      ...(filters.verified !== undefined ? { verified: filters.verified } : {}),
-      ...(filters.bedrooms !== undefined
-        ? { bedrooms: { gte: filters.bedrooms } }
-        : {}),
-      ...(filters.bathrooms !== undefined
-        ? { bathrooms: { gte: filters.bathrooms } }
-        : {}),
-      ...(filters.minPrice !== undefined || filters.maxPrice !== undefined
-        ? {
-            price: {
-              ...(filters.minPrice !== undefined ? { gte: filters.minPrice } : {}),
-              ...(filters.maxPrice !== undefined ? { lte: filters.maxPrice } : {}),
-            },
-          }
-        : {}),
-      ...(filters.north !== undefined &&
-      filters.south !== undefined &&
-      filters.east !== undefined &&
-      filters.west !== undefined
-        ? {
-            publicLatitude: { gte: filters.south, lte: filters.north },
-            publicLongitude: { gte: filters.west, lte: filters.east },
-          }
-        : {}),
-    };
+          },
+        }
+      : {}),
+    ...(types.length ? { type: { in: types, mode: "insensitive" } } : {}),
+    ...(filters.period ? { period: filters.period } : {}),
+    ...(filters.amenities?.length
+      ? { amenities: { hasEvery: filters.amenities } }
+      : {}),
+    ...(filters.verified !== undefined ? { verified: filters.verified } : {}),
+    ...(filters.bedrooms !== undefined
+      ? { bedrooms: { gte: filters.bedrooms } }
+      : {}),
+    ...(filters.bathrooms !== undefined
+      ? { bathrooms: { gte: filters.bathrooms } }
+      : {}),
+    ...(filters.minPrice !== undefined || filters.maxPrice !== undefined
+      ? {
+          price: {
+            ...(filters.minPrice !== undefined ? { gte: filters.minPrice } : {}),
+            ...(filters.maxPrice !== undefined ? { lte: filters.maxPrice } : {}),
+          },
+        }
+      : {}),
+    ...(filters.north !== undefined &&
+    filters.south !== undefined &&
+    filters.east !== undefined &&
+    filters.west !== undefined
+      ? {
+          publicLatitude: { gte: filters.south, lte: filters.north },
+          publicLongitude: { gte: filters.west, lte: filters.east },
+        }
+      : {}),
+  };
+}
+
+export class OperatingSystemRepository {
+  static async searchProperties(filters: PropertySearchInput) {
+    const where = buildPropertyWhere(filters);
 
     const orderBy: Prisma.PropertyOrderByWithRelationInput[] =
       filters.sort === "newest"
@@ -119,6 +125,10 @@ export class OperatingSystemRepository {
         },
       };
     });
+  }
+
+  static countProperties(filters: PropertySearchInput) {
+    return prisma.property.count({ where: buildPropertyWhere(filters) });
   }
 
   static async listSavedPropertyIds(profileId: string) {

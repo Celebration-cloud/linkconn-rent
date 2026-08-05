@@ -412,3 +412,4 @@
 [0805/140015.074:WARNING:net\spdy\spdy_session.cc:3161] Received HEADERS for invalid stream 11
 [0805/140015.074:WARNING:net\spdy\spdy_session.cc:3161] Received HEADERS for invalid stream 9
 [0805/140015.074:WARNING:net\spdy\spdy_session.cc:3161] Received HEADERS for invalid stream 13
+[0805/155131.925:ERROR:gpu\ipc\client\command_buffer_proxy_impl.cc:285] ContextResult::kTransientFailure: Failed to send GpuControl.CreateCommandBuffer.

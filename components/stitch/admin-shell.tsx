@@ -28,9 +28,8 @@ export function AdminShell({ children }: { children: ReactNode }) {
   return (
     <main id="main-content" className="min-h-[100dvh] bg-sand-50 md:grid md:grid-cols-[13rem_1fr]">
       <aside className="hidden border-r border-line bg-sand-50 p-4 md:flex md:min-h-screen md:flex-col">
-        <Link href="/" className="flex items-center gap-2 px-1 py-2">
-          <Logo className="h-8 w-8" />
-          <span className="text-sm font-extrabold text-forest-900">LinkConn Rent</span>
+        <Link href="/" className="flex items-center px-1 py-2" aria-label="LinkConn Rent home">
+          <Logo variant="lockup" priority className="h-12 w-auto" sizes="102px" />
         </Link>
         <span className="mt-1 w-fit rounded-full bg-sand-200 px-2 py-1 text-[9px] font-bold uppercase tracking-wider text-muted">Admin portal</span>
         <nav className="mt-8 flex-1 space-y-1">
@@ -49,7 +48,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
       </aside>
       <section className="min-w-0">
         <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-line bg-sand-50/95 px-4 backdrop-blur md:hidden">
-          <Link href="/" className="flex items-center gap-2 font-extrabold text-forest-900"><Logo className="h-7 w-7" /> LinkConn Rent</Link>
+          <Link href="/" className="flex items-center" aria-label="LinkConn Rent home"><Logo variant="mark" priority className="size-9" sizes="36px" /></Link>
           <Menu className="h-5 w-5" aria-hidden />
         </header>
         {children}

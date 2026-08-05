@@ -15,7 +15,7 @@ import {
   Trash2,
 } from "lucide-react";
 import type { Property } from "@/domain/types/property";
-import { formatNaira, getMoveInTotal } from "@/utils/map-property";
+import { formatNaira, getMoveInEstimate } from "@/utils/map-property";
 import { toastSuccess } from "@/stores/toast-store";
 
 export function PropertyComparison({
@@ -54,7 +54,10 @@ export function PropertyComparison({
     ["Rent", (property: Property) => formatNaira(property.price)],
     [
       "Total move-in",
-      (property: Property) => formatNaira(getMoveInTotal(property)),
+      (property: Property) => {
+        const estimate = getMoveInEstimate(property);
+        return estimate === null ? "Unavailable" : formatNaira(estimate);
+      },
     ],
     ["Location", (property: Property) => `${property.location}, ${property.city}`],
     ["Bedrooms", (property: Property) => String(property.bedrooms)],

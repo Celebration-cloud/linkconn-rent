@@ -88,11 +88,8 @@ export default function AccountReviewPage() {
       className="min-h-[100dvh] bg-[radial-gradient(circle_at_top_right,rgba(184,227,110,0.22),transparent_30%),linear-gradient(180deg,#fdf9f0_0%,#f1eee5_100%)] px-4 py-6 sm:px-6"
     >
       <header className="mx-auto flex max-w-5xl items-center justify-between">
-        <Link href="/" className="flex min-h-11 items-center gap-2">
-          <Logo className="size-9" />
-          <span className="font-extrabold tracking-tight text-forest-950">
-            LinkConn Rent
-          </span>
+        <Link href="/" className="flex min-h-11 items-center" aria-label="LinkConn Rent home">
+          <Logo variant="lockup" priority className="h-14 w-auto" sizes="118px" />
         </Link>
         <button
           type="button"

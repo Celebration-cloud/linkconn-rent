@@ -102,6 +102,14 @@ export function PropertyMap({ properties }: { properties: Property[] }) {
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const listHref = useMemo(() => {
+    const params = new URLSearchParams(searchParams.toString());
+    ["page", "mode", "north", "south", "east", "west"].forEach((key) =>
+      params.delete(key),
+    );
+    const query = params.toString();
+    return query ? `/properties?${query}` : "/properties";
+  }, [searchParams]);
   const reducedMotion = useReducedMotion();
   const canvasRef = useRef<MapCanvasHandle>(null);
   const requestController = useRef<AbortController | null>(null);
@@ -498,7 +506,7 @@ export function PropertyMap({ properties }: { properties: Property[] }) {
       <header className="absolute inset-x-0 top-16 z-30 border-b border-line bg-sand-50/95 px-3 py-3 backdrop-blur-xl md:left-[23rem]">
         <div className="mx-auto flex max-w-3xl items-center gap-2">
           <Link
-            href={`/properties?${searchParams.toString()}`}
+            href={listHref}
             className="grid size-11 shrink-0 place-items-center rounded-lg border border-line bg-white text-forest-900 transition hover:bg-sand-100"
             aria-label="Back to property list"
           >

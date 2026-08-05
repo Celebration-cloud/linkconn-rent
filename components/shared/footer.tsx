@@ -37,13 +37,10 @@ export default function Footer() {
           <div className="lg:col-span-5">
             <Link
               href="/"
-              className="inline-flex items-center gap-2.5 rounded-lg"
+              className="inline-flex items-center rounded-lg bg-sand-50 px-3 py-2"
               aria-label="LinkConn Rent home"
             >
-              <Logo className="h-10 w-10" />
-              <span className="text-xl font-extrabold tracking-[-0.045em] text-white">
-                LinkConn <span className="text-lime">Rent</span>
-              </span>
+              <Logo variant="lockup" className="h-16 w-auto" sizes="134px" />
             </Link>
             <p className="mt-5 max-w-md text-pretty text-sm leading-7 text-sand-300">
               Find verified homes, speak directly with landlords, and review

@@ -6,7 +6,7 @@ import {
   propertySearchSchema,
   verificationDraftSchema,
 } from "@/schemas/operating-system";
-import { getMoveInTotal } from "@/utils/map-property";
+import { getMoveInEstimate, getMoveInTotal } from "@/utils/map-property";
 
 describe("property bounds and fees", () => {
   it("accepts a valid Lagos viewport and coerces URL values", () => {
@@ -36,6 +36,37 @@ describe("property bounds and fees", () => {
       serviceCharge: 250_000,
     });
     expect(getMoveInTotal(fees)).toBe(5_250_000);
+    expect(getMoveInEstimate(fees)).toBe(5_250_000);
+  });
+
+  it("does not calculate estimates from incomplete or inconsistent fees", () => {
+    expect(
+      getMoveInEstimate({
+        price: 4_000_000,
+        cautionFee: undefined,
+        legalFee: 200_000,
+        agencyFee: 400_000,
+        serviceCharge: 250_000,
+      }),
+    ).toBeNull();
+    expect(
+      getMoveInEstimate({
+        price: 4_000_000,
+        cautionFee: -1,
+        legalFee: 200_000,
+        agencyFee: 400_000,
+        serviceCharge: 250_000,
+      }),
+    ).toBeNull();
+    expect(
+      getMoveInEstimate({
+        price: Number.NaN,
+        cautionFee: 0,
+        legalFee: 0,
+        agencyFee: 0,
+        serviceCharge: 0,
+      }),
+    ).toBeNull();
   });
 });
 

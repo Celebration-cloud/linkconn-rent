@@ -9,12 +9,15 @@ import {
   useRef,
   useState,
   type KeyboardEvent,
+  type MouseEvent,
 } from "react";
 import {
+  ArrowDownUp,
   ArrowUp,
   Check,
   ChevronLeft,
   ChevronRight,
+  List,
   Map,
   RotateCcw,
   Scale,
@@ -22,10 +25,9 @@ import {
   SlidersHorizontal,
   X,
 } from "lucide-react";
-import { Input, Select } from "@/components/ui/form-controls";
+import { Checkbox, Input, Select } from "@/components/ui/form-controls";
 import type { Property } from "@/domain/types/property";
 import type {
-  PropertyPagination,
   PropertySearchEnvelope,
   PropertySearchResult,
 } from "@/domain/types/property-search";
@@ -34,29 +36,39 @@ import { toastError, toastInfo } from "@/stores/toast-store";
 import { useAuth } from "@/providers/auth-provider";
 import { formatCompactNaira } from "@/utils/map-property";
 import {
-  PROPERTY_TYPES,
+  getPropertySearchStorageKey,
+  parsePropertySearchRestoration,
+  PROPERTY_SEARCH_RESTORE_TTL,
+  PROPERTY_SEARCH_RESTORE_VERSION,
+  type PropertyResultBatch,
+  type PropertySearchRestorationState,
+} from "@/utils/property-search-restoration";
+import {
   PropertyFilterPanel,
   type AdvancedFilterDraft,
 } from "./property-filter-panel";
 import { StitchPropertyCard } from "./property-card";
-
-const STORAGE_PREFIX = "linkconn.property-search.v1:";
-const CACHE_TTL = 30 * 60 * 1_000;
-
-type ResultBatch = { page: number; items: Property[] };
-type CachedSearchState = {
-  savedAt: number;
-  batches: ResultBatch[];
-  pagination: PropertyPagination;
-  compareIds: string[];
-  scrollY: number;
-};
 
 type FilterChip = {
   key: string;
   label: string;
   remove: Record<string, string | null>;
 };
+
+const EMPTY_ADVANCED_FILTERS: AdvancedFilterDraft = {
+  minPrice: "",
+  maxPrice: "",
+  bathrooms: "",
+  types: [],
+  amenities: [],
+};
+
+const SORT_OPTIONS = [
+  ["recommended", "Recommended"],
+  ["newest", "Newest"],
+  ["lowest-rent", "Rent: low to high"],
+  ["highest-rent", "Rent: high to low"],
+] as const;
 
 function createAdvancedDraft(filters: PropertySearchInput): AdvancedFilterDraft {
   return {
@@ -70,6 +82,10 @@ function createAdvancedDraft(filters: PropertySearchInput): AdvancedFilterDraft 
         : [],
     amenities: filters.amenities || [],
   };
+}
+
+function getBlockEndPage(firstPage: number, batchCount: number) {
+  return firstPage + Math.ceil(batchCount / 3) * 3 - 1;
 }
 
 function pageHref(baseQuery: string, page: number) {
@@ -104,31 +120,48 @@ export function PropertySearch({
   const searchParams = useSearchParams();
   const { user, isLoadingProfile } = useAuth();
   const requestController = useRef<AbortController | null>(null);
+  const countController = useRef<AbortController | null>(null);
   const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const countTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
-  const filterButtonRef = useRef<HTMLButtonElement>(null);
   const drawerRef = useRef<HTMLDivElement>(null);
+  const sortSheetRef = useRef<HTMLDivElement>(null);
+  const activeTriggerRef = useRef<HTMLButtonElement | null>(null);
   const scrollFrame = useRef<number | null>(null);
+  const waitingForSentinelExit = useRef(false);
 
   const baseQuery = useMemo(() => {
     const params = new URLSearchParams(searchParams.toString());
-    params.delete("page");
-    params.delete("mode");
+    ["page", "mode", "north", "south", "east", "west"].forEach((key) =>
+      params.delete(key),
+    );
     return params.toString();
   }, [searchParams]);
-  const storageKey = `${STORAGE_PREFIX}${baseQuery || "all"}`;
+  const storageKey = getPropertySearchStorageKey(baseQuery);
 
+  const initialBatch = {
+    page: initialResult.pagination.page,
+    items: initialResult.items,
+  };
   const [searchValue, setSearchValue] = useState(initialFilters.q || "");
-  const [draft, setDraft] = useState(() => createAdvancedDraft(initialFilters));
-  const [batches, setBatches] = useState<ResultBatch[]>([
-    { page: initialResult.pagination.page, items: initialResult.items },
-  ]);
+  const [draftFilters, setDraftFilters] = useState(() =>
+    createAdvancedDraft(initialFilters),
+  );
+  const [batches, setBatches] = useState<PropertyResultBatch[]>([initialBatch]);
   const [pagination, setPagination] = useState(initialResult.pagination);
   const [loadingNext, setLoadingNext] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [automaticLoads, setAutomaticLoads] = useState(2);
-  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [blockEndPage, setBlockEndPage] = useState(initialBatch.page + 2);
+  const [lastVisiblePage, setLastVisiblePage] = useState(initialBatch.page);
+  const [advancedOpen, setAdvancedOpen] = useState(false);
+  const [sortOpen, setSortOpen] = useState(false);
+  const [previewCount, setPreviewCount] = useState<number | null>(
+    initialResult.pagination.totalItems,
+  );
+  const [counting, setCounting] = useState(false);
+  const [countError, setCountError] = useState<string | null>(null);
+  const [countRetry, setCountRetry] = useState(0);
   const [compareIds, setCompareIds] = useState<string[]>([]);
   const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
   const [savingIds, setSavingIds] = useState<Set<string>>(new Set());
@@ -145,7 +178,12 @@ export function PropertySearch({
     );
   }, [batches]);
   const lastPage = Math.max(...batches.map((batch) => batch.page));
+  const isPaused = lastPage >= blockEndPage;
   const canShowSave = !isLoadingProfile && (!user || user.role === "Tenant");
+  const appliedAdvancedFilters = useMemo(
+    () => createAdvancedDraft(initialFilters),
+    [initialFilters],
+  );
 
   const replaceQuery = useCallback(
     (updates: Record<string, string | null>) => {
@@ -179,57 +217,55 @@ export function PropertySearch({
   }, [applySearch, initialFilters.q, searchValue]);
 
   useEffect(() => {
-    try {
-      const raw = sessionStorage.getItem(storageKey);
-      if (!raw) {
-        setRestored(true);
-        return;
-      }
-      const cached = JSON.parse(raw) as CachedSearchState;
-      if (
-        Date.now() - cached.savedAt > CACHE_TTL ||
-        !cached.batches.length ||
-        cached.batches.at(-1)!.page < initialResult.pagination.page
-      ) {
-        sessionStorage.removeItem(storageKey);
-        setRestored(true);
-        return;
-      }
-      setBatches(cached.batches);
-      setPagination(cached.pagination);
-      setCompareIds(cached.compareIds.slice(0, 4));
-      setAutomaticLoads(0);
-      requestAnimationFrame(() =>
-        requestAnimationFrame(() => window.scrollTo({ top: cached.scrollY })),
-      );
-    } catch {
-      sessionStorage.removeItem(storageKey);
-    } finally {
+    const raw = sessionStorage.getItem(storageKey);
+    if (!raw) {
       setRestored(true);
+      return;
     }
+    const cached = parsePropertySearchRestoration(raw);
+    if (
+      !cached ||
+      cached.batches.at(-1)!.page < initialResult.pagination.page
+    ) {
+      sessionStorage.removeItem(storageKey);
+      setRestored(true);
+      return;
+    }
+    setBatches(cached.batches);
+    setPagination(cached.pagination);
+    setCompareIds(cached.compareIds);
+    setLastVisiblePage(cached.lastVisiblePage);
+    setBlockEndPage(
+      getBlockEndPage(cached.batches[0].page, cached.batches.length),
+    );
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() => window.scrollTo({ top: cached.scrollY })),
+    );
+    setRestored(true);
   }, [initialResult.pagination.page, storageKey]);
 
   const persistState = useCallback(
     (scrollY = window.scrollY) => {
-      const next: CachedSearchState = {
-        savedAt: Date.now(),
+      const next: PropertySearchRestorationState = {
+        version: PROPERTY_SEARCH_RESTORE_VERSION,
+        expiresAt: Date.now() + PROPERTY_SEARCH_RESTORE_TTL,
         batches,
         pagination,
         compareIds,
+        lastVisiblePage,
         scrollY,
       };
       try {
         sessionStorage.setItem(storageKey, JSON.stringify(next));
       } catch {
-        // Browsing remains functional when storage is unavailable.
+        // Search remains usable when browser storage is unavailable.
       }
     },
-    [batches, compareIds, pagination, storageKey],
+    [batches, compareIds, lastVisiblePage, pagination, storageKey],
   );
 
   useEffect(() => {
-    if (!restored) return;
-    persistState();
+    if (restored) persistState();
   }, [persistState, restored]);
 
   useEffect(() => {
@@ -280,7 +316,6 @@ export function PropertySearch({
     params.set("pageSize", "12");
     setLoadingNext(true);
     setLoadError(null);
-
     try {
       const response = await fetch(`/api/properties?${params.toString()}`, {
         cache: "no-store",
@@ -290,12 +325,12 @@ export function PropertySearch({
       if (!response.ok || !result.success || !result.data) {
         throw new Error(result.message || "Unable to load more properties");
       }
-      setBatches((current) => [
-        ...current,
-        { page: result.data!.pagination.page, items: result.data!.items },
-      ]);
+      setBatches((current) =>
+        current.some((batch) => batch.page === result.data!.pagination.page)
+          ? current
+          : [...current, { page: result.data!.pagination.page, items: result.data!.items }],
+      );
       setPagination(result.data.pagination);
-      setAutomaticLoads((remaining) => Math.max(0, remaining - 1));
     } catch (error) {
       if (!(error instanceof DOMException && error.name === "AbortError")) {
         setLoadError(
@@ -309,16 +344,22 @@ export function PropertySearch({
 
   useEffect(() => {
     const sentinel = sentinelRef.current;
-    if (!sentinel || automaticLoads <= 0 || !pagination.hasNextPage) return;
+    if (!sentinel || isPaused || !pagination.hasNextPage) return;
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) void loadNextPage();
+        if (!entry.isIntersecting) {
+          waitingForSentinelExit.current = false;
+          return;
+        }
+        if (waitingForSentinelExit.current) return;
+        waitingForSentinelExit.current = true;
+        void loadNextPage();
       },
-      { rootMargin: "320px 0px" },
+      { rootMargin: "240px 0px" },
     );
     observer.observe(sentinel);
     return () => observer.disconnect();
-  }, [automaticLoads, loadNextPage, pagination.hasNextPage]);
+  }, [isPaused, loadNextPage, pagination.hasNextPage]);
 
   useEffect(() => {
     const root = resultsRef.current;
@@ -328,19 +369,35 @@ export function PropertySearch({
         const visible = entries
           .filter((entry) => entry.isIntersecting)
           .sort((first, second) => second.intersectionRatio - first.intersectionRatio)[0];
-        const page = Number((visible?.target as HTMLElement | undefined)?.dataset.propertyPage);
+        const page = Number(
+          (visible?.target as HTMLElement | undefined)?.dataset.propertyPage,
+        );
         if (!page) return;
-        const href = pageHref(baseQuery, page);
-        window.history.replaceState(window.history.state, "", href);
+        setLastVisiblePage(page);
+        window.history.replaceState(
+          window.history.state,
+          "",
+          pageHref(baseQuery, page),
+        );
       },
       { threshold: [0.35, 0.6] },
     );
-    root.querySelectorAll<HTMLElement>("[data-property-page]").forEach((batch) => observer.observe(batch));
+    root
+      .querySelectorAll<HTMLElement>("[data-property-page]")
+      .forEach((batch) => observer.observe(batch));
     return () => observer.disconnect();
   }, [baseQuery, batches]);
 
+  const closeAdvanced = useCallback(() => {
+    countController.current?.abort();
+    if (countTimer.current) clearTimeout(countTimer.current);
+    setDraftFilters(appliedAdvancedFilters);
+    setAdvancedOpen(false);
+    activeTriggerRef.current?.focus();
+  }, [appliedAdvancedFilters]);
+
   useEffect(() => {
-    if (!drawerOpen) return;
+    if (!advancedOpen) return;
     const drawer = drawerRef.current;
     const focusable = drawer?.querySelectorAll<HTMLElement>(
       "button:not([disabled]), input:not([disabled]), select:not([disabled])",
@@ -348,8 +405,7 @@ export function PropertySearch({
     focusable?.[0]?.focus();
     const onKeyDown = (event: globalThis.KeyboardEvent) => {
       if (event.key === "Escape") {
-        setDrawerOpen(false);
-        filterButtonRef.current?.focus();
+        closeAdvanced();
         return;
       }
       if (event.key !== "Tab" || !focusable?.length) return;
@@ -365,19 +421,114 @@ export function PropertySearch({
     };
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
-  }, [drawerOpen]);
+  }, [advancedOpen, closeAdvanced]);
 
-  useEffect(() => () => requestController.current?.abort(), []);
+  useEffect(() => {
+    if (!sortOpen) return;
+    const focusable = sortSheetRef.current?.querySelectorAll<HTMLElement>(
+      "button:not([disabled])",
+    );
+    focusable?.[0]?.focus();
+    const onKeyDown = (event: globalThis.KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setSortOpen(false);
+        activeTriggerRef.current?.focus();
+        return;
+      }
+      if (event.key !== "Tab" || !focusable?.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [sortOpen]);
+
+  const getAdvancedCount = useCallback(async () => {
+    countController.current?.abort();
+    const controller = new AbortController();
+    countController.current = controller;
+    const params = new URLSearchParams(baseQuery);
+    ["minPrice", "maxPrice", "bathrooms", "types", "type", "amenities", "page", "pageSize"].forEach(
+      (key) => params.delete(key),
+    );
+    if (draftFilters.minPrice) params.set("minPrice", draftFilters.minPrice);
+    if (draftFilters.maxPrice) params.set("maxPrice", draftFilters.maxPrice);
+    if (draftFilters.bathrooms) params.set("bathrooms", draftFilters.bathrooms);
+    if (draftFilters.types.length) params.set("types", draftFilters.types.join(","));
+    if (draftFilters.amenities.length) params.set("amenities", draftFilters.amenities.join(","));
+    setCounting(true);
+    setCountError(null);
+    try {
+      const response = await fetch(`/api/properties/count?${params.toString()}`, {
+        cache: "no-store",
+        signal: controller.signal,
+      });
+      const result = (await response.json()) as {
+        success: boolean;
+        data?: { totalItems: number };
+        message: string;
+      };
+      if (!response.ok || !result.success || !result.data) {
+        throw new Error(result.message || "Unable to preview this result count");
+      }
+      setPreviewCount(result.data.totalItems);
+    } catch (error) {
+      if (!(error instanceof DOMException && error.name === "AbortError")) {
+        setPreviewCount(null);
+        setCountError(
+          error instanceof Error
+            ? error.message
+            : "Unable to preview this result count",
+        );
+      }
+    } finally {
+      if (countController.current === controller) setCounting(false);
+    }
+  }, [baseQuery, draftFilters]);
+
+  useEffect(() => {
+    if (!advancedOpen) return;
+    if (countTimer.current) clearTimeout(countTimer.current);
+    countTimer.current = setTimeout(() => void getAdvancedCount(), 300);
+    return () => {
+      if (countTimer.current) clearTimeout(countTimer.current);
+    };
+  }, [advancedOpen, countRetry, getAdvancedCount]);
+
+  useEffect(
+    () => () => {
+      requestController.current?.abort();
+      countController.current?.abort();
+    },
+    [],
+  );
+
+  const openAdvanced = (event: MouseEvent<HTMLButtonElement>) => {
+    activeTriggerRef.current = event.currentTarget;
+    setDraftFilters(appliedAdvancedFilters);
+    setPreviewCount(pagination.totalItems);
+    setCountError(null);
+    setAdvancedOpen(true);
+  };
 
   const applyAdvanced = () => {
     replaceQuery({
-      minPrice: draft.minPrice || null,
-      maxPrice: draft.maxPrice || null,
-      bathrooms: draft.bathrooms || null,
-      types: draft.types.length ? draft.types.join(",") : null,
-      amenities: draft.amenities.length ? draft.amenities.join(",") : null,
+      minPrice: draftFilters.minPrice || null,
+      maxPrice: draftFilters.maxPrice || null,
+      bathrooms: draftFilters.bathrooms || null,
+      types: draftFilters.types.length ? draftFilters.types.join(",") : null,
+      amenities: draftFilters.amenities.length
+        ? draftFilters.amenities.join(",")
+        : null,
     });
-    setDrawerOpen(false);
+    setAdvancedOpen(false);
   };
 
   const toggleSaved = async (property: Property) => {
@@ -445,11 +596,7 @@ export function PropertySearch({
         : [];
     types.forEach((type) => {
       const remaining = types.filter((item) => item !== type);
-      chips.push({
-        key: `type-${type}`,
-        label: type,
-        remove: { types: remaining.length ? remaining.join(",") : null },
-      });
+      chips.push({ key: `type-${type}`, label: type, remove: { types: remaining.length ? remaining.join(",") : null } });
     });
     if (initialFilters.verified !== undefined) chips.push({ key: "verified", label: initialFilters.verified ? "Verified only" : "Unverified", remove: { verified: null } });
     if (initialFilters.period) chips.push({ key: "period", label: initialFilters.period === "month" ? "Monthly rent" : "Yearly rent", remove: { period: null } });
@@ -459,11 +606,7 @@ export function PropertySearch({
     if (initialFilters.maxPrice !== undefined) chips.push({ key: "maxPrice", label: `Up to ${formatCompactNaira(initialFilters.maxPrice)}`, remove: { maxPrice: null } });
     initialFilters.amenities?.forEach((amenity) => {
       const remaining = initialFilters.amenities!.filter((item) => item !== amenity);
-      chips.push({
-        key: `amenity-${amenity}`,
-        label: amenity,
-        remove: { amenities: remaining.length ? remaining.join(",") : null },
-      });
+      chips.push({ key: `amenity-${amenity}`, label: amenity, remove: { amenities: remaining.length ? remaining.join(",") : null } });
     });
     return chips;
   }, [initialFilters]);
@@ -473,168 +616,178 @@ export function PropertySearch({
   const mapHref = mapParams.toString()
     ? `/properties/map?${mapParams.toString()}`
     : "/properties/map";
+  const activeSort = initialFilters.sort || "recommended";
+  const activeSortLabel = SORT_OPTIONS.find(([value]) => value === activeSort)?.[1] || "Recommended";
 
   function onSearchKeyDown(event: KeyboardEvent<HTMLInputElement>) {
     if (event.key === "Enter") applySearch();
   }
+
+  const chips = (
+    <>
+      {filterChips.map((chip) => (
+        <button
+          key={chip.key}
+          type="button"
+          onClick={() => replaceQuery(chip.remove)}
+          className="inline-flex min-h-10 shrink-0 items-center gap-1.5 rounded-lg border border-forest-200 bg-forest-50 px-3 text-xs font-bold text-forest-900 transition hover:border-forest-500"
+        >
+          {chip.label}<X className="size-3.5" aria-hidden="true" />
+        </button>
+      ))}
+    </>
+  );
 
   return (
     <main id="main-content" className="min-h-screen bg-sand-50 pb-28 pt-16">
       <section className="border-b border-line bg-sand-100">
         <div className="stitch-container py-9 sm:py-11">
           <p className="text-xs font-bold uppercase tracking-[0.16em] text-forest-700">Verified rentals across Nigeria</p>
-          <div className="mt-2 flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
-            <div>
-              <h1 className="max-w-3xl text-3xl font-extrabold tracking-[-0.045em] text-ink sm:text-4xl">
-                Find a home with the full cost in view.
-              </h1>
-              <p className="mt-2 text-sm text-muted">
-                <span className="font-bold tabular-nums text-forest-900">{pagination.totalItems}</span>{" "}
-                {pagination.totalItems === 1 ? "property matches" : "properties match"} your search.
-              </p>
-            </div>
-            <Link href={mapHref} className="stitch-button stitch-button-secondary shrink-0">
-              <Map className="size-4" aria-hidden="true" /> Show map
-            </Link>
-          </div>
-
-          <div className="mt-7 grid gap-3 lg:grid-cols-[minmax(0,1fr)_13rem]">
-            <Input
-              value={searchValue}
-              onChange={(event) => setSearchValue(event.target.value)}
-              onKeyDown={onSearchKeyDown}
-              leadingIcon={Search}
-              placeholder="Search by area, city, property name or keyword"
-              aria-label="Search properties"
-              className="h-14 bg-white text-base shadow-[0_8px_24px_rgba(18,55,42,0.07)]"
-              trailingAction={searchValue ? (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSearchValue("");
-                    replaceQuery({ q: null });
-                  }}
-                  aria-label="Clear property search"
-                  className="grid size-9 place-items-center rounded-md text-muted hover:bg-sand-100 hover:text-forest-900"
-                >
-                  <X className="size-4" aria-hidden="true" />
-                </button>
-              ) : undefined}
-            />
-            <Select
-              value={initialFilters.sort || "recommended"}
-              onChange={(event) => replaceQuery({ sort: event.target.value === "recommended" ? null : event.target.value })}
-              aria-label="Sort properties"
-              className="h-14 bg-white font-semibold"
-            >
-              <option value="recommended">Recommended</option>
-              <option value="newest">Newest</option>
-              <option value="lowest-rent">Rent: low to high</option>
-              <option value="highest-rent">Rent: high to low</option>
-            </Select>
-          </div>
-
-          <div className="mt-4 flex flex-wrap items-center gap-2" aria-label="Quick property filters">
-            <button
-              type="button"
-              onClick={() => replaceQuery({ verified: initialFilters.verified === true ? null : "true" })}
-              aria-pressed={initialFilters.verified === true}
-              className={`min-h-11 rounded-lg border px-3 text-xs font-bold transition ${initialFilters.verified === true ? "border-forest-700 bg-forest-700 text-white" : "border-line bg-white text-muted hover:border-forest-300"}`}
-            >
-              Verified only
-            </button>
-            <Select
-              value={
-                initialFilters.types?.length === 1
-                  ? initialFilters.types[0]
-                  : initialFilters.type || ""
-              }
-              onChange={(event) => replaceQuery({ types: event.target.value || null })}
-              aria-label="Property type"
-              className="min-w-36 bg-white text-xs font-bold"
-            >
-              <option value="">Any property type</option>
-              {PROPERTY_TYPES.map((type) => <option key={type}>{type}</option>)}
-            </Select>
-            <Select
-              value={initialFilters.period || ""}
-              onChange={(event) => replaceQuery({ period: event.target.value || null })}
-              aria-label="Rent period"
-              className="min-w-36 bg-white text-xs font-bold"
-            >
-              <option value="">Any rent period</option>
-              <option value="year">Yearly</option>
-              <option value="month">Monthly</option>
-            </Select>
-            {["", "1", "2", "3"].map((value) => (
-              <button
-                key={value || "any-bedrooms"}
-                type="button"
-                onClick={() => replaceQuery({ bedrooms: value || null })}
-                aria-pressed={(initialFilters.bedrooms === undefined ? "" : String(initialFilters.bedrooms)) === value}
-                className={`min-h-11 rounded-lg border px-3 text-xs font-bold transition ${(initialFilters.bedrooms === undefined ? "" : String(initialFilters.bedrooms)) === value ? "border-forest-700 bg-forest-50 text-forest-900" : "border-line bg-white text-muted hover:border-forest-300"}`}
-              >
-                {value ? `${value}${value === "3" ? "+" : ""} beds` : "Any beds"}
-              </button>
-            ))}
-            <button
-              ref={filterButtonRef}
-              type="button"
-              onClick={() => setDrawerOpen(true)}
-              aria-expanded={drawerOpen}
-              className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-line bg-white px-3 text-xs font-bold text-forest-900 lg:hidden"
-            >
-              <SlidersHorizontal className="size-4" aria-hidden="true" />
-              More filters
-              {filterChips.length ? <span className="grid size-5 place-items-center rounded bg-lime text-[10px] text-forest-950">{filterChips.length}</span> : null}
-            </button>
-          </div>
+          <h1 className="mt-2 max-w-3xl text-3xl font-extrabold tracking-[-0.045em] text-ink sm:text-4xl">
+            Find a home with the full cost in view.
+          </h1>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-muted">
+            Search approved rentals and compare the costs that matter before you move.
+          </p>
         </div>
       </section>
 
-      <div className="stitch-container grid gap-8 py-8 lg:grid-cols-[17rem_minmax(0,1fr)]">
-        <aside className="hidden h-fit border-r border-line pr-7 lg:sticky lg:top-24 lg:block">
-          <PropertyFilterPanel
-            draft={draft}
-            onChange={setDraft}
-            onApply={applyAdvanced}
-            onReset={() => setDraft({ minPrice: "", maxPrice: "", bathrooms: "", types: [], amenities: [] })}
-            idPrefix="desktop"
-          />
-        </aside>
-
-        <section aria-busy={loadingNext} aria-describedby="property-result-status">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <p id="property-result-status" className="text-sm font-semibold text-muted" aria-live="polite">
-              Showing {properties.length} of {pagination.totalItems} properties
-            </p>
-            {filterChips.length ? (
-              <button type="button" onClick={() => router.replace("/properties", { scroll: false })} className="inline-flex min-h-11 items-center gap-1.5 text-xs font-bold text-forest-700">
-                <RotateCcw className="size-3.5" aria-hidden="true" /> Clear all
+      <div className="sticky top-16 z-30 border-b border-line bg-sand-50/95 backdrop-blur-xl lg:static lg:bg-sand-100">
+        <div className="stitch-container py-3 lg:pb-8 lg:pt-0">
+          <Input
+            value={searchValue}
+            onChange={(event) => setSearchValue(event.target.value)}
+            onKeyDown={onSearchKeyDown}
+            leadingIcon={Search}
+            placeholder="Search by area, city, property name or keyword"
+            aria-label="Search properties"
+            className="h-14 bg-white text-base shadow-[0_8px_24px_rgba(18,55,42,0.07)]"
+            trailingAction={searchValue ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchValue("");
+                  replaceQuery({ q: null });
+                }}
+                aria-label="Clear property search"
+                className="grid size-9 place-items-center rounded-md text-muted hover:bg-sand-100 hover:text-forest-900"
+              >
+                <X className="size-4" aria-hidden="true" />
               </button>
-            ) : null}
+            ) : undefined}
+          />
+
+          <div className="mt-2 grid grid-cols-4 gap-2 lg:hidden" aria-label="Property view controls">
+            <button
+              type="button"
+              onClick={openAdvanced}
+              aria-expanded={advancedOpen}
+              className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg border border-line bg-white px-2 text-xs font-bold text-forest-900"
+            >
+              <SlidersHorizontal className="size-4" aria-hidden="true" /> Filters
+            </button>
+            <button
+              type="button"
+              onClick={(event) => {
+                activeTriggerRef.current = event.currentTarget;
+                setSortOpen(true);
+              }}
+              aria-expanded={sortOpen}
+              className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg border border-line bg-white px-2 text-xs font-bold text-forest-900"
+            >
+              <ArrowDownUp className="size-4" aria-hidden="true" /> Sort
+            </button>
+            <span aria-current="page" className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg bg-forest-900 px-2 text-xs font-bold text-white">
+              <List className="size-4" aria-hidden="true" /> List
+            </span>
+            <Link href={mapHref} onClick={() => persistState()} className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg border border-line bg-white px-2 text-xs font-bold text-forest-900">
+              <Map className="size-4" aria-hidden="true" /> Map
+            </Link>
           </div>
 
           {filterChips.length ? (
-            <div className="mt-3 flex flex-wrap gap-2" aria-label="Applied filters">
-              {filterChips.map((chip) => (
-                <button
-                  key={chip.key}
-                  type="button"
-                  onClick={() => replaceQuery(chip.remove)}
-                  className="inline-flex min-h-10 items-center gap-1.5 rounded-lg border border-forest-200 bg-forest-50 px-3 text-xs font-bold text-forest-900 transition hover:border-forest-500"
-                >
-                  {chip.label}<X className="size-3.5" aria-hidden="true" />
-                </button>
-              ))}
+            <div className="-mx-1 mt-2 flex gap-2 overflow-x-auto px-1 pb-1 lg:hidden" aria-label="Applied filters">
+              {chips}
             </div>
           ) : null}
+        </div>
+      </div>
+
+      <div className="stitch-container grid gap-7 py-7 lg:grid-cols-[13rem_minmax(0,1fr)]">
+        <aside className="hidden h-fit border-r border-line pr-5 lg:sticky lg:top-24 lg:block">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-extrabold text-ink">Quick filters</h2>
+            <button type="button" onClick={() => router.replace("/properties", { scroll: false })} className="min-h-10 text-xs font-bold text-forest-700">Reset</button>
+          </div>
+          <div className="mt-4 space-y-5">
+            <label className="flex min-h-11 items-center gap-3 text-sm font-semibold text-forest-900">
+              <Checkbox
+                checked={initialFilters.verified === true}
+                onChange={() => replaceQuery({ verified: initialFilters.verified === true ? null : "true" })}
+              />
+              Verified only
+            </label>
+            <label className="block">
+              <span className="mb-1.5 block text-xs font-bold text-forest-900">Rent period</span>
+              <Select value={initialFilters.period || ""} onChange={(event) => replaceQuery({ period: event.target.value || null })}>
+                <option value="">Any period</option>
+                <option value="year">Yearly</option>
+                <option value="month">Monthly</option>
+              </Select>
+            </label>
+            <fieldset>
+              <legend className="mb-2 text-xs font-bold text-forest-900">Bedrooms</legend>
+              <div className="grid grid-cols-2 gap-2">
+                {["", "1", "2", "3"].map((value) => (
+                  <button
+                    key={value || "any-bedrooms"}
+                    type="button"
+                    onClick={() => replaceQuery({ bedrooms: value || null })}
+                    aria-pressed={(initialFilters.bedrooms === undefined ? "" : String(initialFilters.bedrooms)) === value}
+                    className={`min-h-11 rounded-lg border text-xs font-bold ${(initialFilters.bedrooms === undefined ? "" : String(initialFilters.bedrooms)) === value ? "border-forest-700 bg-forest-700 text-white" : "border-line bg-white text-muted"}`}
+                  >
+                    {value ? `${value}${value === "3" ? "+" : ""}` : "Any"}
+                  </button>
+                ))}
+              </div>
+            </fieldset>
+          </div>
+        </aside>
+
+        <section aria-busy={loadingNext} aria-describedby="property-result-status">
+          <div className="rounded-xl border border-line bg-white p-3 sm:p-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <p id="property-result-status" className="text-sm font-semibold text-muted" aria-live="polite">
+                <span className="font-extrabold tabular-nums text-forest-900">{pagination.totalItems}</span>{" "}
+                {pagination.totalItems === 1 ? "property" : "properties"}
+              </p>
+              <div className="hidden items-center gap-2 lg:flex">
+                <button type="button" onClick={openAdvanced} aria-expanded={advancedOpen} className="stitch-button stitch-button-secondary">
+                  <SlidersHorizontal className="size-4" aria-hidden="true" /> More filters
+                </button>
+                <Select value={activeSort} onChange={(event) => replaceQuery({ sort: event.target.value === "recommended" ? null : event.target.value })} aria-label="Sort properties" className="min-w-44 font-semibold">
+                  {SORT_OPTIONS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+                </Select>
+                <Link href={mapHref} onClick={() => persistState()} className="stitch-button stitch-button-secondary shrink-0">
+                  <Map className="size-4" aria-hidden="true" /> Show map
+                </Link>
+              </div>
+            </div>
+            {filterChips.length ? (
+              <div className="mt-3 hidden flex-wrap items-center gap-2 lg:flex" aria-label="Applied filters">
+                {chips}
+                <button type="button" onClick={() => router.replace("/properties", { scroll: false })} className="inline-flex min-h-10 items-center gap-1.5 px-2 text-xs font-bold text-forest-700">
+                  <RotateCcw className="size-3.5" aria-hidden="true" /> Clear all
+                </button>
+              </div>
+            ) : null}
+          </div>
 
           {properties.length ? (
             <div ref={resultsRef} className="mt-5 space-y-8">
               {batches.map((batch) => (
-                <div key={batch.page} data-property-page={batch.page} className="scroll-mt-28">
-                  <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+                <div key={batch.page} data-property-page={batch.page} className="scroll-mt-44 lg:scroll-mt-28">
+                  <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
                     {batch.items.map((property) => (
                       <StitchPropertyCard
                         key={property.id}
@@ -646,13 +799,14 @@ export function PropertySearch({
                         onToggleSaved={canShowSave ? () => void toggleSaved(property) : undefined}
                         onToggleCompare={() => toggleCompare(property.id)}
                         onOpenDetails={() => persistState()}
+                        detailsHref={`/properties/${property.id}?returnTo=${encodeURIComponent(pageHref(baseQuery, lastVisiblePage))}`}
                       />
                     ))}
                   </div>
                 </div>
               ))}
               {loadingNext ? (
-                <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3" aria-label="Loading more properties">
+                <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3" aria-label="Loading more properties">
                   {Array.from({ length: 3 }, (_, index) => <PropertySkeleton key={index} />)}
                 </div>
               ) : null}
@@ -669,20 +823,22 @@ export function PropertySearch({
           )}
 
           <div ref={sentinelRef} className="h-px" aria-hidden="true" />
-
           {loadError ? (
             <div role="alert" className="mt-6 flex flex-col items-center rounded-xl border border-error/30 bg-error-muted p-5 text-center">
               <p className="text-sm font-bold text-error">{loadError}</p>
               <button type="button" onClick={() => void loadNextPage()} className="stitch-button mt-3">Retry</button>
             </div>
           ) : null}
-
-          {!loadError && pagination.hasNextPage && automaticLoads === 0 ? (
+          {!loadError && pagination.hasNextPage && isPaused ? (
             <div className="mt-8 text-center">
-              <button type="button" onClick={() => setAutomaticLoads(3)} className="stitch-button">
+              <button type="button" onClick={() => {
+                waitingForSentinelExit.current = true;
+                setBlockEndPage(lastPage + 3);
+                void loadNextPage();
+              }} className="stitch-button">
                 Continue browsing <ChevronRight className="size-4" aria-hidden="true" />
               </button>
-              <p className="mt-2 text-xs text-muted">Loading pauses here so you can reach the rest of the page.</p>
+              <p className="mt-2 text-xs text-muted">Loading pauses after every three displayed pages.</p>
             </div>
           ) : null}
 
@@ -701,7 +857,6 @@ export function PropertySearch({
               </Link>
             ) : <span />}
           </nav>
-
           {batches.length > 1 ? (
             <div className="mt-6 text-center">
               <button type="button" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} className="inline-flex min-h-11 items-center gap-2 text-sm font-bold text-forest-700">
@@ -712,26 +867,60 @@ export function PropertySearch({
         </section>
       </div>
 
-      {drawerOpen ? (
-        <div className="fixed inset-0 z-50 bg-forest-950/45 p-3 backdrop-blur-sm lg:hidden" role="presentation" onMouseDown={(event) => {
-          if (event.target === event.currentTarget) setDrawerOpen(false);
+      {advancedOpen ? (
+        <div className="fixed inset-0 z-[110] bg-forest-950/45 backdrop-blur-sm" role="presentation" onMouseDown={(event) => {
+          if (event.target === event.currentTarget) closeAdvanced();
         }}>
-          <div ref={drawerRef} role="dialog" aria-modal="true" aria-label="More property filters" className="ml-auto h-full w-full max-w-md overflow-y-auto rounded-2xl bg-sand-50 p-5 shadow-[0_24px_80px_rgba(18,55,42,0.28)]">
-            <div className="flex justify-end">
-              <button type="button" onClick={() => {
-                setDrawerOpen(false);
-                filterButtonRef.current?.focus();
-              }} aria-label="Close filters" className="grid size-11 place-items-center rounded-lg border border-line bg-white text-forest-900">
+          <div ref={drawerRef} role="dialog" aria-modal="true" aria-label="More property filters" className="ml-auto h-full w-full overflow-y-auto bg-sand-50 p-5 shadow-[0_24px_80px_rgba(18,55,42,0.28)] sm:max-w-md sm:border-l sm:border-line">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-xs font-bold text-forest-700">Advanced search</p>
+                <h2 className="text-xl font-extrabold text-ink">More filters</h2>
+              </div>
+              <button type="button" onClick={closeAdvanced} aria-label="Close filters" className="grid size-11 place-items-center rounded-lg border border-line bg-white text-forest-900">
                 <X className="size-5" aria-hidden="true" />
               </button>
             </div>
-            <PropertyFilterPanel
-              draft={draft}
-              onChange={setDraft}
-              onApply={applyAdvanced}
-              onReset={() => setDraft({ minPrice: "", maxPrice: "", bathrooms: "", types: [], amenities: [] })}
-              idPrefix="mobile"
-            />
+            <div className="mt-5">
+              <PropertyFilterPanel
+                draft={draftFilters}
+                onChange={setDraftFilters}
+                onApply={applyAdvanced}
+                onCancel={closeAdvanced}
+                onReset={() => setDraftFilters(EMPTY_ADVANCED_FILTERS)}
+                onRetryCount={() => setCountRetry((value) => value + 1)}
+                resultCount={previewCount}
+                counting={counting}
+                countError={countError}
+                idPrefix="advanced"
+              />
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {sortOpen ? (
+        <div className="fixed inset-0 z-[110] bg-forest-950/45 backdrop-blur-sm lg:hidden" role="presentation" onMouseDown={(event) => {
+          if (event.target === event.currentTarget) {
+            setSortOpen(false);
+            activeTriggerRef.current?.focus();
+          }
+        }}>
+          <div ref={sortSheetRef} role="dialog" aria-modal="true" aria-label="Sort properties" className="absolute inset-x-0 bottom-0 rounded-t-3xl bg-sand-50 p-5 shadow-[0_-24px_60px_rgba(18,55,42,0.24)]">
+            <div className="flex items-center justify-between">
+              <div><p className="text-xs font-bold text-forest-700">Current: {activeSortLabel}</p><h2 className="text-xl font-extrabold text-ink">Sort properties</h2></div>
+              <button type="button" onClick={() => setSortOpen(false)} aria-label="Close sorting" className="grid size-11 place-items-center rounded-lg border border-line bg-white"><X className="size-5" /></button>
+            </div>
+            <div className="mt-4 space-y-2">
+              {SORT_OPTIONS.map(([value, label]) => (
+                <button key={value} type="button" onClick={() => {
+                  replaceQuery({ sort: value === "recommended" ? null : value });
+                  setSortOpen(false);
+                }} aria-pressed={activeSort === value} className={`flex min-h-12 w-full items-center justify-between rounded-lg border px-4 text-left text-sm font-bold ${activeSort === value ? "border-forest-700 bg-forest-50 text-forest-900" : "border-line bg-white text-muted"}`}>
+                  {label}{activeSort === value ? <Check className="size-4" aria-hidden="true" /> : null}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       ) : null}
@@ -740,18 +929,11 @@ export function PropertySearch({
         <div className="fixed inset-x-0 bottom-4 z-40 mx-auto flex w-[calc(100%-2rem)] max-w-xl items-center justify-between gap-3 rounded-xl border border-forest-300 bg-forest-950 px-4 py-3 text-white shadow-[0_18px_45px_rgba(18,55,42,0.28)]">
           <div className="flex min-w-0 items-center gap-3">
             <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-lime text-forest-950"><Scale className="size-4" aria-hidden="true" /></span>
-            <div className="min-w-0">
-              <p className="text-sm font-bold">{compareIds.length} of 4 selected</p>
-              <p className="truncate text-xs text-forest-100">Choose at least two homes to compare.</p>
-            </div>
+            <div className="min-w-0"><p className="text-sm font-bold">{compareIds.length} of 4 selected</p><p className="truncate text-xs text-forest-100">Choose at least two homes to compare.</p></div>
           </div>
           <div className="flex items-center gap-2">
-            <button type="button" onClick={() => setCompareIds([])} aria-label="Clear comparison" className="grid size-11 place-items-center rounded-lg text-forest-100 hover:bg-white/10"><X className="size-4" aria-hidden="true" /></button>
-            {compareIds.length >= 2 ? (
-              <Link href={`/compare?properties=${compareIds.join(",")}`} onClick={() => persistState()} className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-lime px-4 text-sm font-extrabold text-forest-950">
-                Compare <Check className="size-4" aria-hidden="true" />
-              </Link>
-            ) : null}
+            <button type="button" onClick={() => setCompareIds([])} aria-label="Clear comparison" className="grid size-11 place-items-center rounded-lg text-forest-100 hover:bg-white/10"><X className="size-4" /></button>
+            {compareIds.length >= 2 ? <Link href={`/compare?properties=${compareIds.join(",")}`} onClick={() => persistState()} className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-lime px-4 text-sm font-extrabold text-forest-950">Compare <Check className="size-4" /></Link> : null}
           </div>
         </div>
       ) : null}

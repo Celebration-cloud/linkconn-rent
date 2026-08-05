@@ -147,13 +147,30 @@ test("property discovery keeps search and staged mobile filters in the URL", asy
   await expect(page).toHaveURL(/q=Yaba(?:\+|%20)studio/);
   await expect(page.getByRole("button", { name: /“Yaba studio”/ })).toBeVisible();
 
-  await page.getByRole("button", { name: /More filters/ }).click();
+  await page.getByRole("button", { name: "Filters", exact: true }).click();
   const filters = page.getByRole("dialog", { name: "More property filters" });
   await filters.getByLabel("Minimum rent").fill("500000");
   await expect(page).not.toHaveURL(/minPrice/);
-  await filters.getByRole("button", { name: "Show results" }).click();
+  await filters
+    .getByRole("button", { name: /^Show (?:\d+ propert(?:y|ies)|properties)$/ })
+    .click();
   await expect(page).toHaveURL(/minPrice=500000/);
   await expect(page.getByRole("button", { name: /From ₦500K/ })).toBeVisible();
+
+  await page.getByRole("button", { name: "Filters", exact: true }).click();
+  const reopenedFilters = page.getByRole("dialog", { name: "More property filters" });
+  await reopenedFilters.getByLabel("Minimum rent").fill("900000");
+  await reopenedFilters.getByRole("button", { name: "Cancel" }).click();
+  await page.getByRole("button", { name: "Filters", exact: true }).click();
+  await expect(
+    page.getByRole("dialog", { name: "More property filters" }).getByLabel("Minimum rent"),
+  ).toHaveValue("500000");
+  await page.getByRole("button", { name: "Close filters" }).click();
+
+  await page.getByRole("button", { name: "Sort" }).click();
+  const sortSheet = page.getByRole("dialog", { name: "Sort properties" });
+  await sortSheet.getByRole("button", { name: "Newest" }).click();
+  await expect(page).toHaveURL(/sort=newest/);
 });
 
 test("Leaflet map remains usable at acceptance viewports", async (

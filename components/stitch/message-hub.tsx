@@ -2,6 +2,7 @@
 
 import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { Logo } from "@/components/shared/icons";
 import {
   Archive,
   ArrowLeft,
@@ -186,7 +187,7 @@ export function MessageHub() {
           <header className="border-b border-line p-5">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-forest-700">LinkConn Rent</p>
+                <Link href="/" className="inline-flex items-center" aria-label="LinkConn Rent home"><Logo variant="lockup" priority className="h-10 w-auto" sizes="86px" /></Link>
                 <h1 className="mt-1 text-2xl font-extrabold text-ink">Messages</h1>
               </div>
               <Link href="/dashboard" className="grid h-11 w-11 place-items-center rounded-full bg-sand-200 text-forest-900" aria-label="Back to dashboard"><Home className="h-4 w-4" /></Link>
