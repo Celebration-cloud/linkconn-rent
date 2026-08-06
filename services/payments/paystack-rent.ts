@@ -64,4 +64,5 @@ export function verifyRentPayment(reference: string) {
     `/transaction/verify/${encodeURIComponent(reference)}`,
   );
 }
+import "server-only";
 

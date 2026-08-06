@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useMemo, useState } from "react";
+import { Suspense, useMemo } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
@@ -33,45 +33,16 @@ import type { DashboardSnapshot } from "@/domain/types/operating-system";
 import { formatNaira } from "@/utils/map-property";
 import { Logo } from "@/components/shared/icons";
 
-const EMPTY_SNAPSHOT: DashboardSnapshot = {
-  portfolioValue: 0,
-  occupancyRate: 0,
-  activeListings: 0,
-  pendingApplications: 0,
-  savedHomes: 0,
-  openMaintenance: 0,
-  nextPayment: null,
-  applications: [],
-  viewings: [],
-  maintenance: [],
-};
-
-function DashboardContent() {
+function DashboardContent({
+  initialSnapshot,
+}: {
+  initialSnapshot: DashboardSnapshot;
+}) {
   const { user, logout } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const activeTab = searchParams.get("tab") || "overview";
-  const [snapshot, setSnapshot] = useState(EMPTY_SNAPSHOT);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (!user) {
-      router.replace(`/login?next=${encodeURIComponent("/dashboard")}`);
-      return;
-    }
-    let cancelled = false;
-    void fetch("/api/dashboard")
-      .then((response) => response.json())
-      .then((result: { success: boolean; data?: DashboardSnapshot }) => {
-        if (!cancelled && result.success && result.data) setSnapshot(result.data);
-      })
-      .finally(() => !cancelled && setLoading(false));
-    return () => {
-      cancelled = true;
-    };
-  }, [router, user]);
-
   const setTab = (tab: string) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set("tab", tab);
@@ -169,7 +140,7 @@ function DashboardContent() {
 
         <div className="p-4 pb-24 sm:p-7 md:pb-8">
           {activeTab === "overview" ? (
-            <DashboardOverview snapshot={snapshot} landlord={isLandlord} loading={loading} />
+            <DashboardOverview snapshot={initialSnapshot} landlord={isLandlord} />
           ) : (
             <div className="mx-auto max-w-5xl">{secondaryContent}</div>
           )}
@@ -215,7 +186,13 @@ function Metric({
   );
 }
 
-function DashboardOverview({ snapshot, landlord, loading }: { snapshot: DashboardSnapshot; landlord: boolean; loading: boolean }) {
+function DashboardOverview({
+  snapshot,
+  landlord,
+}: {
+  snapshot: DashboardSnapshot;
+  landlord: boolean;
+}) {
   const metrics = landlord
     ? [
         ["Total portfolio value", formatNaira(snapshot.portfolioValue), Building2],
@@ -234,7 +211,7 @@ function DashboardOverview({ snapshot, landlord, loading }: { snapshot: Dashboar
     <div className="mx-auto max-w-6xl">
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {metrics.map(([label, value, icon], index) => (
-          <Metric key={label} label={label} value={loading ? "—" : value} icon={icon} accent={index === 1} />
+          <Metric key={label} label={label} value={value} icon={icon} accent={index === 1} />
         ))}
       </div>
 
@@ -303,10 +280,14 @@ function EmptyRow({ label }: { label: string }) {
   return <p className="py-8 text-center text-sm text-muted">{label}</p>;
 }
 
-export default function AccountPage() {
+export default function AccountPage({
+  initialSnapshot,
+}: {
+  initialSnapshot: DashboardSnapshot;
+}) {
   return (
     <Suspense fallback={<div className="min-h-[100dvh] animate-pulse bg-sand-200" />}>
-      <DashboardContent />
+      <DashboardContent initialSnapshot={initialSnapshot} />
     </Suspense>
   );
 }

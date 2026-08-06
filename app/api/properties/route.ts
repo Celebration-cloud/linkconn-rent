@@ -8,6 +8,7 @@ import {
   propertySearchSchema,
 } from "@/schemas/operating-system";
 import { mapProperty } from "@/utils/map-property";
+import { invalidatePropertyCache } from "@/lib/cache/invalidate-property-cache";
 
 export async function GET(request: Request) {
   try {
@@ -38,6 +39,10 @@ export async function POST(request: Request) {
       return apiError("Add at least one property image before publishing", 409);
     }
     const property = await OperatingSystemRepository.saveDraft(profile.id, input);
+    invalidatePropertyCache({
+      propertyId: property.id,
+      collectionChanged: input.publish,
+    });
     return apiSuccess(
       property,
       input.publish ? "Property published" : "Draft saved",

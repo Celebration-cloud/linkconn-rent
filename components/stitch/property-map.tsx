@@ -30,6 +30,11 @@ import {
 import { Input } from "@/components/ui/form-controls";
 import type { Property } from "@/domain/types/property";
 import type { PropertySearchEnvelope } from "@/domain/types/property-search";
+import {
+  addBoundsToQuery,
+  distanceBetweenMetres,
+  type GeographicCoordinates,
+} from "@/features/properties/utils/map-geometry";
 import { hasMapCoordinates } from "@/lib/map-config";
 import { StitchPropertyCard } from "./property-card";
 import type {
@@ -65,37 +70,10 @@ type DirectionsEnvelope = {
 
 type MobileMode = "map" | "list";
 type LocationPermissionState = "idle" | "requesting" | "granted" | "denied";
-type BrowserCoordinates = {
-  longitude: number;
-  latitude: number;
-  accuracyMetres?: number;
-};
+type BrowserCoordinates = GeographicCoordinates;
 
 function isAbortError(error: unknown) {
   return error instanceof DOMException && error.name === "AbortError";
-}
-
-function distanceBetweenMetres(
-  first: BrowserCoordinates,
-  second: BrowserCoordinates,
-) {
-  const earthRadiusMetres = 6_371_000;
-  const toRadians = (degrees: number) => (degrees * Math.PI) / 180;
-  const latitudeDelta = toRadians(second.latitude - first.latitude);
-  const longitudeDelta = toRadians(second.longitude - first.longitude);
-  const firstLatitude = toRadians(first.latitude);
-  const secondLatitude = toRadians(second.latitude);
-  const haversine =
-    Math.sin(latitudeDelta / 2) ** 2 +
-    Math.cos(firstLatitude) *
-      Math.cos(secondLatitude) *
-      Math.sin(longitudeDelta / 2) ** 2;
-
-  return (
-    earthRadiusMetres *
-    2 *
-    Math.atan2(Math.sqrt(haversine), Math.sqrt(1 - haversine))
-  );
 }
 
 export function PropertyMap({ properties }: { properties: Property[] }) {
@@ -231,12 +209,10 @@ export function PropertyMap({ properties }: { properties: Property[] }) {
       requestController.current?.abort();
       const controller = new AbortController();
       requestController.current = controller;
-      const next = new URLSearchParams(searchParams.toString());
-      next.set("north", String(bounds.north));
-      next.set("south", String(bounds.south));
-      next.set("east", String(bounds.east));
-      next.set("west", String(bounds.west));
-      next.set("mode", "map");
+      const next = addBoundsToQuery(
+        new URLSearchParams(searchParams.toString()),
+        bounds,
+      );
       setSearchingArea(true);
       setAreaSearchAvailable(false);
       setStatusMessage("Searching this map area");

@@ -1,4 +1,5 @@
 import { ZodError } from "zod";
+import { unstable_rethrow } from "next/navigation";
 import { apiError, apiSuccess } from "@/lib/api-response";
 import { getCurrentProfile, hasRole } from "@/lib/auth/current-profile";
 import { AdministrationRepository } from "@/repositories/administration.repository";
@@ -12,9 +13,9 @@ export async function GET(request: Request) {
     const filters = queueFiltersSchema.parse(Object.fromEntries(new URL(request.url).searchParams));
     return apiSuccess(await AdministrationRepository.listVerifications(filters), "Verification queue loaded");
   } catch (error) {
+    unstable_rethrow(error);
     if (error instanceof ZodError) return apiError(error.issues[0].message, 400);
     console.error("[GET /api/admin/verifications]", error);
     return apiError("Unable to load verification queue", 500);
   }
 }
-

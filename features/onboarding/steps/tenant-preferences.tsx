@@ -2,7 +2,11 @@
 
 import { useFormContext } from "react-hook-form";
 import { MapPin, Home, Banknote, Calendar } from "lucide-react";
-import { NIGERIAN_CITIES, PROPERTY_TYPES } from "@/schemas/onboarding";
+import {
+  NIGERIAN_CITIES,
+  PROPERTY_TYPES,
+  type TenantPreferencesData,
+} from "@/schemas/onboarding";
 import { cn } from "@/utils/cn";
 import { Input } from "@/components/ui/form-controls";
 
@@ -12,8 +16,8 @@ export default function TenantPreferencesStep() {
     formState,
     watch,
     setValue,
-  } = useFormContext<any>();
-  const errors = formState.errors as any;
+  } = useFormContext<{ preferences: TenantPreferencesData }>();
+  const errors = formState.errors;
 
   const selectedLocations: string[] = watch("preferences.preferredLocations") ?? [];
   const selectedTypes: string[] = watch("preferences.preferredTypes") ?? [];

@@ -1,9 +1,11 @@
 import { notFound } from "next/navigation";
-import { PropertyRepository } from "@/repositories/property.repository";
 import { FALLBACK_PROPERTIES } from "@/domain/constants/mock-properties";
 import { PropertyDetails } from "@/components/stitch/property-details";
 import type { Property } from "@/domain/types/property";
-import { mapProperty } from "@/utils/map-property";
+import {
+  getPublicProperty,
+  getRelatedProperties,
+} from "@/features/properties/server/public-property-data";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -16,10 +18,7 @@ export async function generateMetadata({ params }: Props) {
   let property: Property | undefined = FALLBACK_PROPERTIES.find((p) => p.id === id);
 
   try {
-    const raw = await PropertyRepository.findById(id);
-    if (raw) {
-      property = mapProperty(raw);
-    }
+    property = (await getPublicProperty(id)) || property;
   } catch {
     // Graceful fallback
   }
@@ -41,19 +40,18 @@ export default async function PropertyDetailPage({ params, searchParams }: Props
       ? requestedReturn
       : "/properties";
   let property: Property | undefined = FALLBACK_PROPERTIES.find((p) => p.id === id);
-  let allProperties: Property[] = FALLBACK_PROPERTIES;
+  let related: Property[] = FALLBACK_PROPERTIES.filter(
+    (candidate) => candidate.id !== id,
+  );
 
   try {
-    // 1. Fetch main property
-    const raw = await PropertyRepository.findById(id);
-    if (raw) {
-      property = mapProperty(raw);
-    }
-
-    // 2. Fetch all properties to compute related/similar ones
-    const listRaw = await PropertyRepository.listAll();
-    if (listRaw && listRaw.length > 0) {
-      allProperties = listRaw.map(mapProperty);
+    property = (await getPublicProperty(id)) || property;
+    if (property) {
+      related = await getRelatedProperties(
+        property.id,
+        property.city,
+        property.type,
+      );
     }
   } catch {
     // Fall back to constants
@@ -62,11 +60,6 @@ export default async function PropertyDetailPage({ params, searchParams }: Props
   if (!property) {
     notFound();
   }
-
-  // Find related properties: matching city or type, excluding current property
-  const related = allProperties.filter(
-    (p) => p.id !== id && (p.city.toLowerCase() === property!.city.toLowerCase() || p.type.toLowerCase() === property!.type.toLowerCase())
-  );
 
   return (
     <PropertyDetails

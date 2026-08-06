@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { cacheLife } from "next/cache";
 import { Mail, ShieldCheck } from "lucide-react";
 import { Logo } from "./icons";
 
@@ -18,7 +19,9 @@ const learnLinks = [
 const footerLinkClass =
   "inline-flex min-h-11 items-center text-sm font-semibold text-sand-300 transition-colors hover:text-white";
 
-export default function Footer() {
+export default async function Footer() {
+  "use cache";
+  cacheLife("days");
   const currentYear = new Date().getFullYear();
 
   return (

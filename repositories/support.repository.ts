@@ -40,3 +40,4 @@ export class SupportRepository {
     });
   }
 }
+import "server-only";

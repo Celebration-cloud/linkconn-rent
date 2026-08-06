@@ -32,3 +32,4 @@ export function hasRole(profile: CurrentProfile, roles: readonly AppRole[]) {
 export function isAccountOperational(profile: CurrentProfile) {
   return profile.accountStatus !== "Suspended";
 }
+import "server-only";

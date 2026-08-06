@@ -33,3 +33,4 @@ export const disabledDocumentStorage: DocumentStorage = {
 export function getDocumentStorage(): DocumentStorage {
   return disabledDocumentStorage;
 }
+import "server-only";

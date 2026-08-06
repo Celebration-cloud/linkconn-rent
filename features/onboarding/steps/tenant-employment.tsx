@@ -7,6 +7,7 @@ import {
   INCOME_RANGE_LABELS,
   employmentTypeEnum,
   incomeRangeEnum,
+  type TenantEmploymentData,
 } from "@/schemas/onboarding";
 import { cn } from "@/utils/cn";
 import { Input } from "@/components/ui/form-controls";
@@ -17,8 +18,8 @@ export default function TenantEmploymentStep() {
     watch,
     setValue,
     formState,
-  } = useFormContext<any>();
-  const errors = formState.errors as any;
+  } = useFormContext<{ employment: TenantEmploymentData }>();
+  const errors = formState.errors;
 
   const selectedEmployment = watch("employment.employmentType");
   const selectedIncome = watch("employment.incomeRange");

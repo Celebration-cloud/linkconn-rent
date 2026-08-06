@@ -1,4 +1,5 @@
 import { ZodError, z } from "zod";
+import { unstable_rethrow } from "next/navigation";
 import { apiError, apiSuccess } from "@/lib/api-response";
 import { MAP_CONFIG } from "@/lib/map-config";
 import { directionsQuerySchema } from "@/schemas/map-directions";
@@ -62,6 +63,7 @@ export async function GET(request: Request) {
       "Driving route loaded",
     );
   } catch (error) {
+    unstable_rethrow(error);
     if (error instanceof ZodError) {
       return apiError(error.issues[0]?.message || "Invalid coordinates", 400);
     }

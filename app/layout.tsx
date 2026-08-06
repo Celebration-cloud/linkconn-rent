@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Suspense } from "react";
 import type { Metadata } from "next";
 import { Manrope } from "next/font/google";
 import "./globals.css";
@@ -50,9 +50,9 @@ export default function RootLayout({
         >
           Skip to content
         </a>
-        <AppProviders>
-          {children}
-        </AppProviders>
+        <Suspense fallback={children}>
+          <AppProviders>{children}</AppProviders>
+        </Suspense>
       </body>
     </html>
   );

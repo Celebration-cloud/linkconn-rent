@@ -4,6 +4,7 @@ import { apiError, apiSuccess } from "@/lib/api-response";
 import { getCurrentProfile } from "@/lib/auth/current-profile";
 import { OperatingSystemRepository } from "@/repositories/operating-system.repository";
 import { propertyFeesSchema } from "@/schemas/operating-system";
+import { invalidatePropertyCache } from "@/lib/cache/invalidate-property-cache";
 
 export async function PATCH(
   request: Request,
@@ -22,6 +23,7 @@ export async function PATCH(
       id,
       input,
     );
+    invalidatePropertyCache({ propertyId: id });
     return apiSuccess(property, "Rent and fees saved");
   } catch (error) {
     if (error instanceof ZodError) return apiError(error.issues[0].message, 400);

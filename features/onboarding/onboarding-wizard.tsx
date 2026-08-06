@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
-import { useForm, FormProvider } from "react-hook-form";
+import { useForm, FormProvider, type UseFormReturn } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, ArrowRight, Loader2 } from "lucide-react";
 import { useAuth } from "@/providers/auth-provider";
@@ -20,6 +20,7 @@ import {
   personalDetailsSchema,
   tenantPreferencesSchema,
   landlordBusinessSchema,
+  type CompleteOnboardingPayload,
 } from "@/schemas/onboarding";
 import { z } from "zod";
 import { toastError, toastSuccess } from "@/stores/toast-store";
@@ -93,7 +94,7 @@ export default function OnboardingWizard({ role }: OnboardingWizardProps) {
     mode: "onChange",
   });
 
-  const methods = (isTenant ? tenantMethods : landlordMethods) as any;
+  const methods = (isTenant ? tenantMethods : landlordMethods) as unknown as UseFormReturn<CompleteOnboardingPayload>;
 
   useEffect(() => {
     let cancelled = false;
@@ -112,7 +113,19 @@ export default function OnboardingWizard({ role }: OnboardingWizardProps) {
           ) {
             return;
           }
-          methods.reset({ ...methods.getValues(), ...result.data });
+          if (role === "Tenant") {
+            tenantMethods.reset({
+              ...tenantMethods.getValues(),
+              ...result.data,
+              role: "Tenant",
+            } as TenantFormData);
+          } else {
+            landlordMethods.reset({
+              ...landlordMethods.getValues(),
+              ...result.data,
+              role: "Landlord",
+            } as LandlordFormData);
+          }
           const savedStep = Number(
             window.localStorage.getItem(`onboarding-step:${role}`),
           );
@@ -183,7 +196,7 @@ export default function OnboardingWizard({ role }: OnboardingWizardProps) {
     setCurrentStep((s) => s - 1);
   };
 
-  const handleSubmit = methods.handleSubmit(async (data: any) => {
+  const handleSubmit = methods.handleSubmit(async (data: CompleteOnboardingPayload) => {
     setIsSubmitting(true);
     setSubmitError(null);
     const result = await completeOnboarding(data);

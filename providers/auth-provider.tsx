@@ -65,12 +65,37 @@ type AuthCtx = {
 };
 /* eslint-enable no-unused-vars */
 
-const Ctx = createContext<AuthCtx | null>(null);
+const Ctx = createContext<AuthCtx>({
+  user: null,
+  isLoadingProfile: true,
+  profileError: null,
+  isLoggingOut: false,
+  modalView: "closed",
+  signupDraft: {},
+  pendingEmail: null,
+  notifications: [],
+  devices: [],
+  activeAccountTab: "overview",
+  hasPermission: () => false,
+  openAuth: () => undefined,
+  closeAuth: () => undefined,
+  setSignupDraft: () => undefined,
+  login: async () => ({ ok: false }),
+  logout: async () => undefined,
+  resetPassword: async () => false,
+  requestReset: async () => false,
+  completeOnboarding: async () => ({ ok: false }),
+  toggle2fa: () => undefined,
+  updateProfile: () => undefined,
+  markNotificationRead: () => undefined,
+  markAllNotificationsRead: () => undefined,
+  addNotification: () => undefined,
+  setActiveAccountTab: () => undefined,
+  refreshProfile: async () => undefined,
+});
 
 export const useAuth = () => {
-  const c = useContext(Ctx);
-  if (!c) throw new Error("Auth context missing");
-  return c;
+  return useContext(Ctx);
 };
 
 // ─────────────────────────────────────────────────────────────

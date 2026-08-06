@@ -2,7 +2,7 @@
 
 import { useFormContext } from "react-hook-form";
 import { Building2, Home, Hash } from "lucide-react";
-import { PROPERTY_TYPES } from "@/schemas/onboarding";
+import { PROPERTY_TYPES, type LandlordBusinessData } from "@/schemas/onboarding";
 import { cn } from "@/utils/cn";
 import { Input } from "@/components/ui/form-controls";
 
@@ -12,8 +12,8 @@ export default function LandlordBusinessStep() {
     watch,
     setValue,
     formState,
-  } = useFormContext<any>();
-  const errors = formState.errors as any;
+  } = useFormContext<{ business: LandlordBusinessData }>();
+  const errors = formState.errors;
 
   const selectedTypes: string[] = watch("business.propertyTypesOffered") ?? [];
 

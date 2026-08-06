@@ -3,13 +3,14 @@
 import { useFormContext } from "react-hook-form";
 import { User, Phone, ShieldCheck } from "lucide-react";
 import { Input } from "@/components/ui/form-controls";
+import type { PersonalDetailsData } from "@/schemas/onboarding";
 
 export default function PersonalDetailsStep() {
   const {
     register,
     formState,
-  } = useFormContext<any>();
-  const errors = formState.errors as any;
+  } = useFormContext<{ personal: PersonalDetailsData }>();
+  const errors = formState.errors;
 
   return (
     <div className="space-y-5">

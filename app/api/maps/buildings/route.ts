@@ -1,4 +1,5 @@
 import { ZodError } from "zod";
+import { unstable_rethrow } from "next/navigation";
 import { apiError, apiSuccess } from "@/lib/api-response";
 import {
   buildOverpassQuery,
@@ -74,6 +75,7 @@ export async function GET(request: Request) {
 
     return apiSuccess(data, "Building detail loaded");
   } catch (error) {
+    unstable_rethrow(error);
     if (error instanceof ZodError) {
       return apiError(error.issues[0]?.message || "Invalid map area", 400);
     }

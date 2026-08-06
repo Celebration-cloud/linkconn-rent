@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { unstable_rethrow } from "next/navigation";
 import { auth } from "@/lib/neon-auth";
 import { prisma } from "@/lib/db/client";
 
@@ -95,6 +96,7 @@ export async function GET() {
       },
     });
   } catch (error) {
+    unstable_rethrow(error);
     console.error("[GET /api/profile/me]", error);
     return NextResponse.json(
       { success: false, message: "Failed to fetch profile" },

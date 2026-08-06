@@ -16,4 +16,5 @@ export const auth = createNeonAuth({
   },
   logLevel: "silent",
 });
+import "server-only";
 

@@ -9,7 +9,7 @@ import { ROLE_LABELS, VERIFICATION_LEVELS } from "@/domain/constants/permissions
 import { Input } from "@/features/auth/input";
 import { Textarea } from "@/components/ui/form-controls";
 import { Check } from "@/components/shared/icons";
-import type { Role } from "@/domain/types/auth";
+import type { Role, VerificationLevel } from "@/domain/types/auth";
 import {
   BadgeCheck,
   Building2,
@@ -278,7 +278,7 @@ export function VerificationTab() {
   const { user, updateProfile } = useAuth();
   const [submitting, setSubmitting] = useState<string | null>(null);
 
-  const submit = (step: string, level: any) => {
+  const submit = (step: string, level: VerificationLevel) => {
     setSubmitting(step);
     setTimeout(() => {
       if (user) updateProfile({ verificationLevel: level, phoneVerified: level !== "Partially Verified" });
@@ -345,7 +345,7 @@ export function VerificationTab() {
                 <span className="inline-flex items-center gap-1 rounded-full bg-success-soft px-3 py-1 text-xs font-bold text-success"><CheckCircle2 className="size-3" aria-hidden="true" /> Completed</span>
               ) : (
                 <button
-                  onClick={() => submit(s.id, s.next as any)}
+                  onClick={() => submit(s.id, s.next as VerificationLevel)}
                   disabled={submitting === s.id}
                   className="rounded-xl bg-navy-900 px-4 py-2 text-xs font-bold text-white hover:bg-brandgreen-600 disabled:opacity-60 cursor-pointer"
                 >

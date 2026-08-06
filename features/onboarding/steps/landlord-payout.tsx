@@ -2,7 +2,7 @@
 
 import { useFormContext } from "react-hook-form";
 import { ChevronDown, Landmark, CreditCard, User } from "lucide-react";
-import { NIGERIAN_BANKS } from "@/schemas/onboarding";
+import { NIGERIAN_BANKS, type LandlordPayoutData } from "@/schemas/onboarding";
 import { useState } from "react";
 import { Input } from "@/components/ui/form-controls";
 
@@ -12,8 +12,8 @@ export default function LandlordPayoutStep() {
     watch,
     setValue,
     formState,
-  } = useFormContext<any>();
-  const errors = formState.errors as any;
+  } = useFormContext<{ payout: LandlordPayoutData }>();
+  const errors = formState.errors;
 
   const selectedBank = watch("payout.bankName");
   const [bankOpen, setBankOpen] = useState(false);

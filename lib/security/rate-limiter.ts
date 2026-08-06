@@ -2,14 +2,18 @@ type RateLimitWindow = {
   timestamps: number[];
 };
 
+type RateLimitGlobal = typeof globalThis & {
+  __rateLimitInterval?: ReturnType<typeof setInterval>;
+};
+
 // Simple in-memory storage for sliding window rate limiting
 const store = new Map<string, RateLimitWindow>();
 
 // Cleanup stale entries every 5 minutes to prevent memory leaks
 if (typeof globalThis !== "undefined") {
-  const globalAny = globalThis as any;
-  if (!globalAny.__rateLimitInterval) {
-    globalAny.__rateLimitInterval = setInterval(() => {
+  const rateLimitGlobal = globalThis as RateLimitGlobal;
+  if (!rateLimitGlobal.__rateLimitInterval) {
+    rateLimitGlobal.__rateLimitInterval = setInterval(() => {
       const now = Date.now();
       for (const [key, window] of store.entries()) {
         const activeTimestamps = window.timestamps.filter(

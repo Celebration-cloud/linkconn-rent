@@ -11,8 +11,6 @@ import {
 } from "lucide-react";
 import { AdministrationRepository } from "@/repositories/administration.repository";
 
-export const dynamic = "force-dynamic";
-
 export default async function AdminOverviewPage() {
   const overview = await AdministrationRepository.getOverview();
   const metrics = [
