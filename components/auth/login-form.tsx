@@ -1,35 +1,38 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { z } from "zod";
 import { motion } from "framer-motion";
-import { authClient } from "@/lib/neon-auth-client";
 import { Check, Sparkle } from "@/components/shared/icons";
 import { LockKeyhole, Mail } from "lucide-react";
 import { Input } from "@/components/ui/form-controls";
+import { getInternalRedirectPath } from "@/lib/security/internal-redirect";
 
 const loginSchema = z.object({
   email: z.string().email("Enter a valid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
-export default function LoginForm() {
+type LoginFormProps = {
+  portal?: "public" | "admin";
+  defaultDestination?: string;
+  forgotPasswordHref?: string;
+};
+
+export default function LoginForm({
+  portal = "public",
+  defaultDestination = "/dashboard",
+  forgotPasswordHref = "/forgot-password",
+}: LoginFormProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const session = authClient.useSession();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    if (session.data) {
-      router.replace(searchParams.get("next") || "/dashboard");
-    }
-  }, [router, searchParams, session.data]);
-
-  const next = searchParams.get("next") || "/dashboard";
+  const next = getInternalRedirectPath(searchParams.get("next"), defaultDestination);
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -50,6 +53,7 @@ export default function LoginForm() {
           email: parsed.data.email,
           password: parsed.data.password,
           callbackURL: next,
+          portal,
         }),
       });
 
@@ -61,19 +65,18 @@ export default function LoginForm() {
 
       if (result.error) {
         setError(result.error.message || "Unable to sign in");
+        setLoading(false);
         return;
       }
 
       if (!result.data.user.emailVerified) {
-        router.push(`/verify-email?email=${encodeURIComponent(parsed.data.email)}&next=${encodeURIComponent(next)}`);
+        router.replace(`/verify-email?email=${encodeURIComponent(parsed.data.email)}&next=${encodeURIComponent(next)}`);
         return;
       }
 
-      router.push(result.data?.url || next);
-      router.refresh();
+      router.replace(result.data?.url || next);
     } catch (error) {
       setError(error instanceof Error ? error.message : "Unable to sign in");
-    } finally {
       setLoading(false);
     }
   };
@@ -105,7 +108,7 @@ export default function LoginForm() {
       </label>
 
       {error && (
-        <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div role="alert" className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           {error}
         </div>
       )}
@@ -116,16 +119,16 @@ export default function LoginForm() {
         disabled={loading}
         className="stitch-button w-full disabled:cursor-not-allowed disabled:opacity-70"
       >
-        {loading ? "Signing in..." : "Sign in"}
+        {loading ? "Signing in and checking account…" : "Sign in"}
       </motion.button>
 
       <div className="flex items-center justify-between text-sm">
         <button
           type="button"
-          onClick={() => router.push(`/forgot-password?next=${encodeURIComponent(next)}`)}
+          onClick={() => router.push(`${forgotPasswordHref}?next=${encodeURIComponent(next)}`)}
           className="min-h-11 font-bold text-forest-700 hover:underline"
         >
-          Forgot password?
+          Reset password
         </button>
         <span className="inline-flex items-center gap-1 text-muted">
           <Sparkle className="h-4 w-4 text-forest-600" />
@@ -136,7 +139,7 @@ export default function LoginForm() {
       <div className="rounded-lg border border-forest-100 bg-forest-50 px-4 py-3 text-sm text-forest-900">
         <div className="flex items-start gap-2">
           <Check className="mt-0.5 h-4 w-4 shrink-0" />
-          <p>Guest sessions redirect into the dashboard after sign in.</p>
+          <p>We check your account status before opening the correct workspace.</p>
         </div>
       </div>
     </form>

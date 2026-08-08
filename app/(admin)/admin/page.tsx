@@ -55,7 +55,7 @@ export default async function AdminOverviewPage() {
           ))}
         </section>
 
-        <section className="mt-6 grid gap-4 lg:grid-cols-3">
+        <section className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {[
             [
               "/admin/verifications",
@@ -72,6 +72,26 @@ export default async function AdminOverviewPage() {
               "Moderate users and listings",
               "Act on reports with a reason and a complete audit event.",
             ],
+            [
+              "/admin/users",
+              "Manage users",
+              "Inspect roles, onboarding, verification, and account state.",
+            ],
+            [
+              "/admin/properties",
+              "Review properties",
+              "Search every listing and inspect its moderation history.",
+            ],
+            [
+              "/admin/payments",
+              "Inspect payments",
+              "Review provider-controlled payment and failure records.",
+            ],
+            [
+              "/admin/audit",
+              "Open audit log",
+              "Trace administrator decisions and before/after state.",
+            ],
           ].map(([href, title, copy]) => (
             <Link
               key={href}
@@ -86,6 +106,21 @@ export default async function AdminOverviewPage() {
               </span>
             </Link>
           ))}
+        </section>
+
+        <section className="mt-6 rounded-2xl border border-line bg-white p-5 sm:p-6">
+          <div className="flex items-center justify-between gap-3">
+            <div><p className="text-xs font-bold uppercase tracking-[.14em] text-forest-700">Neon activity</p><h2 className="mt-1 text-xl font-extrabold">Recent administrator actions</h2></div>
+            <Link href="/admin/audit" className="text-sm font-bold text-forest-700">View all</Link>
+          </div>
+          <div className="mt-5 divide-y divide-line">
+            {overview.recentActivity.length ? overview.recentActivity.map((event) => (
+              <article key={event.id} className="flex flex-col gap-2 py-4 sm:flex-row sm:items-start sm:justify-between">
+                <div className="min-w-0"><p className="break-words text-sm font-bold text-ink">{event.action}</p><p className="mt-1 break-words text-xs text-muted">{event.actor.firstName} {event.actor.lastName} · {event.targetType} · {event.reason}</p></div>
+                <time className="shrink-0 text-xs text-muted">{event.createdAt.toLocaleString()}</time>
+              </article>
+            )) : <p className="py-8 text-center text-sm text-muted">No administrator activity has been recorded yet.</p>}
+          </div>
         </section>
       </div>
     </div>

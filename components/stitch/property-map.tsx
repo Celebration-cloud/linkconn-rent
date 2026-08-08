@@ -62,6 +62,8 @@ type DirectionsEnvelope = {
   success: boolean;
   data?: {
     geometry: MapRoute["geometry"];
+    origin: [number, number];
+    destination: [number, number];
     distanceMetres: number;
     durationSeconds: number;
   };
@@ -299,18 +301,21 @@ export function PropertyMap({ properties }: { properties: Property[] }) {
       directionsController.current?.abort();
       const controller = new AbortController();
       directionsController.current = controller;
-      const params = new URLSearchParams({
-        originLongitude: String(origin.longitude),
-        originLatitude: String(origin.latitude),
-        destinationLongitude: String(destination.longitude),
-        destinationLatitude: String(destination.latitude),
-      });
       setRouting(true);
 
       try {
-        const response = await fetch(`/api/maps/directions?${params}`, {
+        const response = await fetch("/api/maps/directions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
           cache: "no-store",
           signal: controller.signal,
+          body: JSON.stringify({
+            origin: {
+              longitude: origin.longitude,
+              latitude: origin.latitude,
+            },
+            propertyId: destination.id,
+          }),
         });
         const result = (await response.json()) as DirectionsEnvelope;
         if (!response.ok || !result.success || !result.data) {
@@ -318,8 +323,8 @@ export function PropertyMap({ properties }: { properties: Property[] }) {
         }
         setRoute({
           geometry: result.data.geometry,
-          origin: [origin.longitude, origin.latitude],
-          destination: [destination.longitude, destination.latitude],
+          origin: result.data.origin,
+          destination: result.data.destination,
         });
         setRouteSummary({
           distanceMetres: result.data.distanceMetres,
@@ -614,7 +619,7 @@ export function PropertyMap({ properties }: { properties: Property[] }) {
               {Math.max(1, Math.round(routeSummary.durationSeconds / 60))} min
             </p>
             <p className="mt-0.5 text-[10px] font-medium text-muted">
-              Route ends at the public approximate property pin
+              Route ends at the verified exact property destination
             </p>
             {liveLocation ? (
               <p
@@ -665,7 +670,7 @@ export function PropertyMap({ properties }: { properties: Property[] }) {
               Get directions to this home
             </p>
             <p className="mt-1 text-[11px] leading-5 text-muted">
-              See your live location and route to the approximate property pin.
+              See your live location and route to the verified exact destination.
             </p>
             <button
               type="button"
@@ -927,8 +932,8 @@ export function PropertyMap({ properties }: { properties: Property[] }) {
                 landlord.
               </p>
               <div className="mt-4 rounded-xl border border-line bg-white p-3 text-xs leading-5 text-forest-800">
-                For privacy, the route ends at the home&apos;s public
-                approximate pin. The exact address stays protected.
+                This route uses the listing&apos;s verified exact destination.
+                Your live location is used only for routing and is not stored.
               </div>
               <div className="mt-6 grid grid-cols-2 gap-3">
                 <button

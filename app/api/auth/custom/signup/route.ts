@@ -3,12 +3,13 @@ import { z } from "zod";
 import { auth } from "@/lib/neon-auth";
 import { checkRateLimit, getClientIp } from "@/lib/security/rate-limiter";
 import { verifyCsrf } from "@/lib/security/csrf";
+import { internalRedirectSchema } from "@/lib/security/internal-redirect";
 
 const signupSchema = z.object({
-  name: z.string().min(2, "Enter your full name"),
-  email: z.string().email("Enter a valid email address"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
-  callbackURL: z.string().optional(),
+  name: z.string().min(2, "Enter your full name").max(120),
+  email: z.string().email("Enter a valid email address").max(254),
+  password: z.string().min(8, "Password must be at least 8 characters").max(1024),
+  callbackURL: internalRedirectSchema.optional(),
 });
 
 export async function POST(req: Request) {
@@ -63,7 +64,7 @@ export async function POST(req: Request) {
 
     if (result.error) {
       return NextResponse.json(
-        { success: false, message: result.error.message || "Unable to create account" },
+        { success: false, message: "Unable to create account with those details" },
         { status: 400 }
       );
     }
@@ -74,6 +75,9 @@ export async function POST(req: Request) {
       message: "Account created successfully",
     });
   } catch (error) {
+    if (error instanceof SyntaxError) {
+      return NextResponse.json({ success: false, message: "Invalid JSON body." }, { status: 400 });
+    }
     console.error("Signup route error:", error);
     return NextResponse.json(
       { success: false, message: "An unexpected error occurred during signup." },

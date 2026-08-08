@@ -1,11 +1,10 @@
 import { notFound } from "next/navigation";
-import { FALLBACK_PROPERTIES } from "@/domain/constants/mock-properties";
 import { PropertyDetails } from "@/components/stitch/property-details";
-import type { Property } from "@/domain/types/property";
 import {
   getPublicProperty,
   getRelatedProperties,
 } from "@/features/properties/server/public-property-data";
+import { getPropertyNavigationTarget } from "@/features/properties/server/navigation-data";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -15,13 +14,7 @@ type Props = {
 // Generate dynamic metadata for SEO compliance
 export async function generateMetadata({ params }: Props) {
   const { id } = await params;
-  let property: Property | undefined = FALLBACK_PROPERTIES.find((p) => p.id === id);
-
-  try {
-    property = (await getPublicProperty(id)) || property;
-  } catch {
-    // Graceful fallback
-  }
+  const property = await getPublicProperty(id);
 
   return {
     title: property ? `${property.title} | LinkConn Rent` : "Property Details | LinkConn Rent",
@@ -39,32 +32,21 @@ export default async function PropertyDetailPage({ params, searchParams }: Props
     requestedReturn === "/properties" || requestedReturn?.startsWith("/properties?")
       ? requestedReturn
       : "/properties";
-  let property: Property | undefined = FALLBACK_PROPERTIES.find((p) => p.id === id);
-  let related: Property[] = FALLBACK_PROPERTIES.filter(
-    (candidate) => candidate.id !== id,
-  );
-
-  try {
-    property = (await getPublicProperty(id)) || property;
-    if (property) {
-      related = await getRelatedProperties(
-        property.id,
-        property.city,
-        property.type,
-      );
-    }
-  } catch {
-    // Fall back to constants
-  }
+  const property = await getPublicProperty(id);
 
   if (!property) {
     notFound();
   }
+  const [related, navigationTarget] = await Promise.all([
+    getRelatedProperties(property.id, property.city, property.type),
+    getPropertyNavigationTarget(property.id),
+  ]);
 
   return (
     <PropertyDetails
       property={property}
       relatedProperties={related}
+      navigationTarget={navigationTarget}
       returnTo={returnTo}
     />
   );

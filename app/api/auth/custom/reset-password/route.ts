@@ -5,8 +5,8 @@ import { checkRateLimit, getClientIp } from "@/lib/security/rate-limiter";
 import { verifyCsrf } from "@/lib/security/csrf";
 
 const schema = z.object({
-  password: z.string().min(8, "Password must be at least 8 characters"),
-  token: z.string().min(1, "Reset token is required"),
+  password: z.string().min(8, "Password must be at least 8 characters").max(1024),
+  token: z.string().min(1, "Reset token is required").max(4096),
 });
 
 export async function POST(req: Request) {
@@ -70,6 +70,9 @@ export async function POST(req: Request) {
       message: "Password updated successfully.",
     });
   } catch (error) {
+    if (error instanceof SyntaxError) {
+      return NextResponse.json({ success: false, message: "Invalid JSON body." }, { status: 400 });
+    }
     console.error("Reset password route error:", error);
     return NextResponse.json(
       { success: false, message: "An unexpected error occurred during password reset." },

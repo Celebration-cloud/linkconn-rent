@@ -2,11 +2,12 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { auth } from "@/lib/neon-auth";
 import { verifyCsrf } from "@/lib/security/csrf";
+import { internalRedirectSchema } from "@/lib/security/internal-redirect";
 
 const schema = z.object({
-  token: z.string().optional(),
-  callbackURL: z.string().optional(),
-  email: z.string().email("Enter a valid email address").optional(),
+  token: z.string().max(4096).optional(),
+  callbackURL: internalRedirectSchema.optional(),
+  email: z.string().email("Enter a valid email address").max(254).optional(),
   otp: z.string().length(6, "Enter the 6-digit code").optional(),
 }).refine((data) => data.token || (data.email && data.otp), {
   message: "Provide either a token or email + otp code",
@@ -82,6 +83,9 @@ export async function POST(req: Request) {
       { status: 400 }
     );
   } catch (error) {
+    if (error instanceof SyntaxError) {
+      return NextResponse.json({ success: false, message: "Invalid JSON body." }, { status: 400 });
+    }
     console.error("Verify email route error:", error);
     return NextResponse.json(
       { success: false, message: "An unexpected error occurred during email verification." },

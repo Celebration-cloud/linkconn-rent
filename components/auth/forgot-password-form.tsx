@@ -9,7 +9,15 @@ const schema = z.object({
   email: z.string().email("Enter a valid email"),
 });
 
-export default function ForgotPasswordForm() {
+type ForgotPasswordFormProps = {
+  portal?: "public" | "admin";
+  redirectTo?: string;
+};
+
+export default function ForgotPasswordForm({
+  portal = "public",
+  redirectTo = "/reset-password",
+}: ForgotPasswordFormProps) {
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -32,7 +40,8 @@ export default function ForgotPasswordForm() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         email: parsed.data.email,
-        redirectTo: "/reset-password",
+        redirectTo,
+        portal,
       }),
     });
 
@@ -64,10 +73,10 @@ export default function ForgotPasswordForm() {
         />
       </label>
 
-      {error && <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}
+      {error && <div role="alert" className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}
 
       {success && (
-        <div className="rounded-2xl border border-brandgreen-200 bg-brandgreen-50 px-4 py-3 text-sm text-brandgreen-900">
+        <div role="status" className="rounded-2xl border border-brandgreen-200 bg-brandgreen-50 px-4 py-3 text-sm text-brandgreen-900">
           <div className="flex items-start gap-2">
             <Check className="mt-0.5 h-4 w-4 shrink-0" />
             <p>{success}</p>

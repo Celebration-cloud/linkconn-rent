@@ -253,6 +253,14 @@ body {
     background-color 180ms ease;
 }
 
+.form-control.form-control-leading {
+  padding-left: 3rem;
+}
+
+.form-control.form-control-trailing {
+  padding-right: 3rem;
+}
+
 .form-control::placeholder {
   color: #66736c;
   opacity: 0.78;

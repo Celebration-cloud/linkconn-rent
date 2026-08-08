@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/providers/auth-provider";
+import { getAccountDestination, isAdminWorkspaceRole } from "@/lib/auth/account-destination";
 import { ROLE_LABELS, VERIFICATION_LEVELS } from "@/domain/constants/permissions";
 import {
   Bell,
@@ -29,7 +30,7 @@ export default function UserMenu() {
   const ref = useRef<HTMLDivElement>(null);
 
   const openAccount = (tab: string) => {
-    router.push(`/dashboard?tab=${tab}`);
+    router.push(getAccountDestination(user?.role, tab));
   };
 
   useEffect(() => {
@@ -65,6 +66,7 @@ export default function UserMenu() {
   const unread = notifications.filter((n) => !n.read).length;
   const roleMeta = ROLE_LABELS[user.role] || { label: user.role, color: "bg-navy-100 text-navy-700" };
   const verif = VERIFICATION_LEVELS[user.verificationLevel] || { label: user.verificationLevel, color: "bg-navy-100 text-navy-600" };
+  const administrator = isAdminWorkspaceRole(user.role);
 
   return (
     <div ref={ref} className="relative flex items-center gap-2">
@@ -180,14 +182,18 @@ export default function UserMenu() {
               </div>
 
               <div className="p-2 text-sm">
-                {[
+                {(administrator ? [
+                  { icon: House, label: "Admin Dashboard", tab: "overview" },
+                  { icon: UserRound, label: "Admin Profile", tab: "profile" },
+                  { icon: ShieldCheck, label: "Security", tab: "security" },
+                ] : [
                   { icon: House, label: "My Dashboard", tab: "overview" },
                   { icon: UserRound, label: "My Profile", tab: "profile" },
                   { icon: Heart, label: "Saved Homes", tab: "saved" },
                   { icon: Bell, label: "Notifications", tab: "notifications" },
                   { icon: ShieldCheck, label: "Security", tab: "security" },
                   { icon: CreditCard, label: "Payments", tab: "payments" },
-                ].map((m) => (
+                ]).map((m) => (
                   <button
                     key={m.label}
                     onClick={() => { setOpen(false); openAccount(m.tab); }}

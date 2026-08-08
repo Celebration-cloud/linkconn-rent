@@ -156,6 +156,7 @@ enum AdminAuditTarget {
   Property
   Payment
   Maintenance
+  AdminInvitation
 }
 
 enum SupportTicketStatus {
@@ -214,8 +215,30 @@ model Profile {
   moderationReviews       Property[]               @relation("PropertyReviewer")
   maintenanceActivities   MaintenanceActivity[]
   supportTickets          SupportTicket[]
+  sentAdminInvitations    AdminInvitation[]         @relation("AdminInvitationInviter")
+  acceptedAdminInvitations AdminInvitation[]         @relation("AdminInvitationAcceptor")
 
   @@map("profiles")
+}
+
+model AdminInvitation {
+  id           String    @id @default(uuid())
+  email        String
+  tokenHash    String    @unique
+  invitedById  String
+  invitedBy    Profile   @relation("AdminInvitationInviter", fields: [invitedById], references: [id], onDelete: Restrict)
+  acceptedById String?
+  acceptedBy   Profile?  @relation("AdminInvitationAcceptor", fields: [acceptedById], references: [id], onDelete: SetNull)
+  expiresAt    DateTime
+  acceptedAt   DateTime?
+  revokedAt    DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([email, createdAt])
+  @@index([invitedById, createdAt])
+  @@index([expiresAt])
+  @@map("admin_invitations")
 }
 
 // ─────────────────────────────────────────────────────────────

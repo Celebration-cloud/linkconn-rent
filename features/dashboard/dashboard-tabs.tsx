@@ -9,6 +9,7 @@ import { ROLE_LABELS, VERIFICATION_LEVELS } from "@/domain/constants/permissions
 import { Input } from "@/features/auth/input";
 import { Textarea } from "@/components/ui/form-controls";
 import { Check } from "@/components/shared/icons";
+import { toastError, toastSuccess } from "@/stores/toast-store";
 import type { Role, VerificationLevel } from "@/domain/types/auth";
 import {
   BadgeCheck,
@@ -685,16 +686,31 @@ export function SecurityTab() {
   const [confirm, setConfirm] = useState("");
   const [current, setCurrent] = useState("");
   const [changed, setChanged] = useState(false);
+  const [changing, setChanging] = useState(false);
 
-  const change = () => {
-    if (!current || password.length < 8 || password !== confirm) return;
+  const change = async () => {
+    if (!current || password.length < 12 || password !== confirm) {
+      toastError("Password not changed", "Use at least 12 characters and make sure both new passwords match.");
+      return;
+    }
+    setChanging(true);
+    const response = await fetch("/api/auth/custom/change-password", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ currentPassword: current, newPassword: password }),
+    });
+    const result = await response.json() as { success: boolean; message: string };
+    setChanging(false);
+    if (!response.ok || !result.success) {
+      toastError("Password not changed", result.message || "Unable to update password");
+      return;
+    }
     setChanged(true);
-    setTimeout(() => {
-      setChanged(false);
-      setPassword("");
-      setConfirm("");
-      setCurrent("");
-    }, 2000);
+    setPassword("");
+    setConfirm("");
+    setCurrent("");
+    toastSuccess("Password updated", "Other sessions have been revoked.");
+    setTimeout(() => setChanged(false), 2000);
   };
 
   return (
@@ -713,8 +729,8 @@ export function SecurityTab() {
             <Input label="New password" type="password" value={password} onChange={setPassword} showPasswordToggle required />
             <Input label="Confirm new password" type="password" value={confirm} onChange={setConfirm} showPasswordToggle required />
           </div>
-          <button onClick={change} className="mt-4 w-full rounded-xl bg-navy-900 py-3 text-sm font-bold text-white hover:bg-brandgreen-600 cursor-pointer">
-            {changed ? <span className="inline-flex items-center gap-1"><CheckCircle2 className="size-4" aria-hidden="true" /> Password updated</span> : "Update password"}
+          <button disabled={changing} onClick={() => void change()} className="mt-4 w-full rounded-xl bg-navy-900 py-3 text-sm font-bold text-white hover:bg-brandgreen-600 cursor-pointer disabled:cursor-wait disabled:opacity-60">
+            {changed ? <span className="inline-flex items-center gap-1"><CheckCircle2 className="size-4" aria-hidden="true" /> Password updated</span> : changing ? "Updating…" : "Update password"}
           </button>
         </div>
 

@@ -11,7 +11,8 @@ export function verifyCsrf(req: Request): boolean {
   try {
     siteUrl = new URL(siteUrlStr);
   } catch {
-    return true; // If site URL is misconfigured, skip check to avoid breaking the app in dev
+    // A bad production origin must never disable CSRF protection.
+    return process.env.NODE_ENV !== "production";
   }
 
   // 1. If Origin header is present, it must match our site origin

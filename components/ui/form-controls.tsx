@@ -91,8 +91,8 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
         aria-invalid={invalid || undefined}
         className={cn(
           "form-control",
-          LeadingIcon && "pl-10",
-          trailingAction && "pr-11",
+          LeadingIcon && "form-control-leading",
+          trailingAction && "form-control-trailing",
           className,
         )}
         {...props}
@@ -125,7 +125,11 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select
       <select
         ref={ref}
         aria-invalid={invalid || undefined}
-        className={cn("form-control appearance-none pr-10", LeadingIcon && "pl-10", className)}
+        className={cn(
+          "form-control form-control-trailing appearance-none",
+          LeadingIcon && "form-control-leading",
+          className,
+        )}
         {...props}
       >
         {children}
@@ -156,7 +160,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
           aria-invalid={invalid || undefined}
           className={cn(
             "form-control min-h-28 resize-y",
-            LeadingIcon && "pl-10",
+            LeadingIcon && "form-control-leading",
             className,
           )}
           {...props}

@@ -1,13 +1,16 @@
 import { ZodError } from "zod";
 import { apiError, apiSuccess } from "@/lib/api-response";
-import { getCurrentProfile } from "@/lib/auth/current-profile";
+import { getCurrentProfile, isAccountOperational } from "@/lib/auth/current-profile";
 import { AdministrationRepository } from "@/repositories/administration.repository";
 import { userModerationSchema } from "@/schemas/administration";
+import { verifyCsrf } from "@/lib/security/csrf";
 
 export async function PATCH(request: Request, context: { params: Promise<{ id: string }> }) {
   try {
+    if (!verifyCsrf(request)) return apiError("Security check failed", 403);
     const profile = await getCurrentProfile();
     if (!profile) return apiError("Authentication required", 401);
+    if (!isAccountOperational(profile)) return apiError("Account access unavailable", 403);
     const input = userModerationSchema.parse(await request.json());
     const { id } = await context.params;
     return apiSuccess(await AdministrationRepository.moderateUser(profile, id, input.status, input.reason), "Account status updated");
@@ -20,4 +23,3 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
     return apiError("Unable to update account", 500);
   }
 }
-

@@ -1,73 +1,47 @@
-import { ZodError, z } from "zod";
+import { ZodError } from "zod";
 import { unstable_rethrow } from "next/navigation";
 import { apiError, apiSuccess } from "@/lib/api-response";
-import { MAP_CONFIG } from "@/lib/map-config";
-import { directionsQuerySchema } from "@/schemas/map-directions";
+import {
+  DirectionsProviderError,
+  getDrivingRoute,
+} from "@/features/properties/server/directions-provider";
+import { getPropertyNavigationTarget } from "@/features/properties/server/navigation-data";
+import {
+  directionsQuerySchema,
+  propertyDirectionsSchema,
+} from "@/schemas/map-directions";
 
-const osrmResponseSchema = z.object({
-  code: z.string(),
-  routes: z
-    .array(
-      z.object({
-        distance: z.number(),
-        duration: z.number(),
-        geometry: z.object({
-          type: z.literal("LineString"),
-          coordinates: z.array(z.tuple([z.number(), z.number()])),
-        }),
-      }),
-    )
-    .default([]),
-});
+function handleError(error: unknown, method: string) {
+  unstable_rethrow(error);
+  if (error instanceof SyntaxError) return apiError("Request body must be valid JSON", 400);
+  if (error instanceof ZodError) return apiError(error.issues[0]?.message || "Invalid directions request", 400);
+  if (error instanceof DirectionsProviderError) return apiError(error.message, error.statusCode);
+  console.error(`[${method} /api/maps/directions]`, error);
+  return apiError("Unable to calculate directions", 500);
+}
 
+export async function POST(request: Request) {
+  try {
+    const input = propertyDirectionsSchema.parse(await request.json());
+    const destination = await getPropertyNavigationTarget(input.propertyId);
+    if (!destination) return apiError("Directions are unavailable for this property", 404);
+    const route = await getDrivingRoute(input.origin, destination);
+    return apiSuccess(route, "Driving route loaded");
+  } catch (error) {
+    return handleError(error, "POST");
+  }
+}
+
+/** @deprecated Use POST with a propertyId so exact destinations are resolved server-side. */
 export async function GET(request: Request) {
   try {
-    const input = directionsQuerySchema.parse(
-      Object.fromEntries(new URL(request.url).searchParams),
+    const input = directionsQuerySchema.parse(Object.fromEntries(new URL(request.url).searchParams));
+    const route = await getDrivingRoute(
+      { longitude: input.originLongitude, latitude: input.originLatitude },
+      { longitude: input.destinationLongitude, latitude: input.destinationLatitude },
     );
-    if (!MAP_CONFIG.directionsUrl) {
-      return apiError("Driving directions are not configured", 503);
-    }
-
-    const coordinates = [
-      `${input.originLongitude},${input.originLatitude}`,
-      `${input.destinationLongitude},${input.destinationLatitude}`,
-    ].join(";");
-    const endpoint = new URL(
-      `/route/v1/driving/${coordinates}`,
-      MAP_CONFIG.directionsUrl,
-    );
-    endpoint.searchParams.set("overview", "full");
-    endpoint.searchParams.set("geometries", "geojson");
-    endpoint.searchParams.set("steps", "false");
-
-    const response = await fetch(endpoint, {
-      headers: { Accept: "application/json" },
-      signal: AbortSignal.timeout(12_000),
-      next: { revalidate: 300 },
-    });
-    if (!response.ok) return apiError("The route service is unavailable", 502);
-
-    const parsed = osrmResponseSchema.parse(await response.json());
-    const route = parsed.routes[0];
-    if (parsed.code !== "Ok" || !route) {
-      return apiError("No driving route was found", 404);
-    }
-
-    return apiSuccess(
-      {
-        geometry: route.geometry,
-        distanceMetres: Math.round(route.distance),
-        durationSeconds: Math.round(route.duration),
-      },
-      "Driving route loaded",
-    );
+    return apiSuccess(route, "Driving route loaded");
   } catch (error) {
-    unstable_rethrow(error);
-    if (error instanceof ZodError) {
-      return apiError(error.issues[0]?.message || "Invalid coordinates", 400);
-    }
-    console.error("[GET /api/maps/directions]", error);
-    return apiError("Unable to calculate directions", 500);
+    return handleError(error, "GET");
   }
 }

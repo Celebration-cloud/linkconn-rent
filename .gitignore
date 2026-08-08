@@ -9,6 +9,8 @@ out
 dist
 coverage
 *.tsbuildinfo
+test-results/
+playwright-report/
 
 # env files
 .env

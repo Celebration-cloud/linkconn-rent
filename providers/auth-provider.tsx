@@ -26,6 +26,7 @@ import { performLogout } from "@/lib/auth/logout";
 import { getCheckoutAmount, getPlanMeta } from "@/domain/billing";
 import { useAuthFlowStore } from "@/stores/auth-flow-store";
 import { toastError, toastInfo, toastSuccess } from "@/stores/toast-store";
+import { isAdminReviewExemptRole } from "@/lib/auth/review-access";
 
 // ─────────────────────────────────────────────────────────────
 // Context shape
@@ -308,14 +309,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!user) return;
     if (!user.emailVerified) return;
     if (user.onboardingComplete) return;
-    // Skip onboarding for admin roles
-    if (
-      user.role === "Admin" ||
-      user.role === "Super Admin" ||
-      user.role === "Moderator" ||
-      user.role === "Property Manager"
-    )
-      return;
+    if (isAdminReviewExemptRole(user.role)) return;
     const requiresCompletedProfile =
       pathname === "/account-review" ||
       pathname.startsWith("/dashboard") ||
@@ -345,12 +339,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       !user
     ) return;
     if (!user.emailVerified || !user.onboardingComplete) return;
-    if (
-      user.role === "Admin" ||
-      user.role === "Super Admin" ||
-      user.role === "Moderator" ||
-      user.role === "Property Manager"
-    ) return;
+    if (isAdminReviewExemptRole(user.role)) {
+      if (pathname === "/account-review" || pathname === "/onboarding") {
+        router.replace("/admin");
+      }
+      return;
+    }
 
     if (user.accountReviewStatus === "Approved") {
       if (pathname === "/account-review" || pathname === "/onboarding") {

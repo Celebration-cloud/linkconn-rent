@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { z } from "zod";
 import { Check, Shield } from "@/components/shared/icons";
 import { Input } from "@/components/ui/form-controls";
+import { getInternalRedirectPath } from "@/lib/security/internal-redirect";
 
 const schema = z.object({
   password: z.string().min(8, "Password must be at least 8 characters"),
@@ -16,9 +17,10 @@ const schema = z.object({
 
 type Props = {
   token?: string;
+  defaultDestination?: string;
 };
 
-export default function ResetPasswordForm({ token }: Props) {
+export default function ResetPasswordForm({ token, defaultDestination = "/login" }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [password, setPassword] = useState("");
@@ -27,7 +29,7 @@ export default function ResetPasswordForm({ token }: Props) {
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const next = searchParams.get("next") || "/login";
+  const next = getInternalRedirectPath(searchParams.get("next"), defaultDestination);
   const resolvedToken = token || searchParams.get("token") || "";
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
@@ -100,10 +102,10 @@ export default function ResetPasswordForm({ token }: Props) {
         />
       </label>
 
-      {error && <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}
+      {error && <div role="alert" className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}
 
       {success && (
-        <div className="rounded-2xl border border-brandgreen-200 bg-brandgreen-50 px-4 py-3 text-sm text-brandgreen-900">
+        <div role="status" className="rounded-2xl border border-brandgreen-200 bg-brandgreen-50 px-4 py-3 text-sm text-brandgreen-900">
           <div className="flex items-start gap-2">
             <Check className="mt-0.5 h-4 w-4 shrink-0" />
             <p>{success}</p>

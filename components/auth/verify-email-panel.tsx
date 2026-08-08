@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
+import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { z } from "zod";
@@ -8,6 +8,7 @@ import { authClient } from "@/lib/neon-auth-client";
 import { Check, Shield, Verified } from "@/components/shared/icons";
 import { Input } from "@/components/ui/form-controls";
 import { toastError, toastSuccess } from "@/stores/toast-store";
+import { getInternalRedirectPath } from "@/lib/security/internal-redirect";
 
 const emailSchema = z.object({
   email: z.string().email("Enter a valid email"),
@@ -22,36 +23,45 @@ export default function VerifyEmailPanel({ token }: Props) {
   const searchParams = useSearchParams();
   const session = authClient.useSession();
   const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
-  const [email, setEmail] = useState("");
+  const autoSendStartedRef = useRef(false);
+  const sendInFlightRef = useRef(false);
+  const emailFromQuery = searchParams.get("email") || "";
+  const codeWasAlreadySent = searchParams.get("sent") === "1";
+  const [email, setEmail] = useState<string | null>(null);
   const [code, setCode] = useState(["", "", "", "", "", ""]);
   const [error, setError] = useState("");
-  const [status, setStatus] = useState("");
+  const [status, setStatus] = useState(
+    codeWasAlreadySent ? "We sent a 6-digit code to your email." : "",
+  );
   const [loading, setLoading] = useState(false);
   const [codeLoading, setCodeLoading] = useState(false);
-  const [sentFor, setSentFor] = useState("");
-  const [autoSent, setAutoSent] = useState(false);
+  const [sentFor, setSentFor] = useState(codeWasAlreadySent ? emailFromQuery : "");
+  const [autoSent, setAutoSent] = useState(codeWasAlreadySent);
+  const [resendSeconds, setResendSeconds] = useState(codeWasAlreadySent ? 60 : 0);
 
-  const next = searchParams.get("next") || "/dashboard";
-  const emailFromQuery = searchParams.get("email") || "";
+  const next = getInternalRedirectPath(searchParams.get("next"), "/dashboard");
   const emailFromSession = session.data?.user.email || "";
-  const resolvedEmail = useMemo(() => email || emailFromQuery || emailFromSession, [email, emailFromQuery, emailFromSession]);
+  const resolvedEmail = email ?? (emailFromQuery || emailFromSession);
   const resolvedToken = token || searchParams.get("token") || "";
   const otp = code.join("");
 
   useEffect(() => {
-    if (emailFromQuery && email !== emailFromQuery) {
-      setEmail(emailFromQuery);
-    } else if (!emailFromQuery && emailFromSession && !email) {
-      setEmail(emailFromSession);
-    }
-  }, [email, emailFromQuery, emailFromSession]);
+    if (resendSeconds <= 0) return;
+    const timer = window.setInterval(() => {
+      setResendSeconds((seconds) => Math.max(0, seconds - 1));
+    }, 1000);
+    return () => window.clearInterval(timer);
+  }, [resendSeconds]);
 
   useEffect(() => {
     if (session.isPending || autoSent) return;
     if (!resolvedEmail) return;
     if (sentFor === resolvedEmail) return;
     if (resolvedToken) return;
+    if (autoSendStartedRef.current || sendInFlightRef.current) return;
 
+    autoSendStartedRef.current = true;
+    sendInFlightRef.current = true;
     let active = true;
     const sendCode = async () => {
       setCodeLoading(true);
@@ -67,20 +77,24 @@ export default function VerifyEmailPanel({ token }: Props) {
         error: resData.success ? null : { message: resData.message },
       };
       if (!active) return;
+      sendInFlightRef.current = false;
       setCodeLoading(false);
       if (result.error) {
+        setResendSeconds(resData.data?.retryAfterSeconds || 0);
         setError(result.error.message || "Unable to send verification code");
         toastError("Verification code failed", result.error.message || "Unable to send verification code");
         return;
       }
       setSentFor(resolvedEmail);
       setAutoSent(true);
+      setResendSeconds(resData.data?.retryAfterSeconds || 60);
       setStatus("We sent a 6-digit code to your email.");
       toastSuccess("Verification code sent", "Check your inbox for the code.");
     };
     void sendCode();
     return () => {
       active = false;
+      sendInFlightRef.current = false;
     };
   }, [autoSent, resolvedEmail, resolvedToken, sentFor, session.isPending]);
 
@@ -179,6 +193,7 @@ export default function VerifyEmailPanel({ token }: Props) {
   };
 
   const resend = async () => {
+    if (sendInFlightRef.current || codeLoading || resendSeconds > 0) return;
     const parsed = emailSchema.safeParse({ email: resolvedEmail });
     if (!parsed.success) {
       setError(parsed.error.issues[0]?.message || "Enter your email");
@@ -188,20 +203,27 @@ export default function VerifyEmailPanel({ token }: Props) {
 
     setError("");
     setStatus("");
+    sendInFlightRef.current = true;
     setCodeLoading(true);
-    const res = await fetch("/api/auth/custom/send-otp", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: parsed.data.email }),
-    });
-    const resData = await res.json();
+    let resData: { success: boolean; data?: { retryAfterSeconds?: number }; message?: string };
+    try {
+      const res = await fetch("/api/auth/custom/send-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: parsed.data.email }),
+      });
+      resData = await res.json();
+    } finally {
+      sendInFlightRef.current = false;
+      setCodeLoading(false);
+    }
     const result = {
       data: resData.data,
       error: resData.success ? null : { message: resData.message },
     };
-    setCodeLoading(false);
 
     if (result.error) {
+      setResendSeconds(resData.data?.retryAfterSeconds || 0);
       setError(result.error.message || "Unable to send verification code");
       toastError("Verification code failed", result.error.message || "Unable to send verification code");
       return;
@@ -209,6 +231,7 @@ export default function VerifyEmailPanel({ token }: Props) {
 
     setSentFor(parsed.data.email);
     setAutoSent(true);
+    setResendSeconds(result.data?.retryAfterSeconds || 60);
     setStatus("We sent another 6-digit code. Check your inbox.");
     toastSuccess("Verification code sent", "Check your inbox for the code.");
   };
@@ -225,7 +248,7 @@ export default function VerifyEmailPanel({ token }: Props) {
       <label className="block">
         <span className="mb-1.5 block text-sm font-semibold text-navy-700">Email</span>
         <Input
-          value={email}
+          value={resolvedEmail}
           onChange={(e) => {
             setEmail(e.target.value);
             setAutoSent(false);
@@ -296,9 +319,10 @@ export default function VerifyEmailPanel({ token }: Props) {
           <button
             type="button"
             onClick={() => void resend()}
-            className="w-full rounded-2xl border border-navy-200 bg-white px-4 py-3.5 text-sm font-bold text-navy-900 transition-colors hover:bg-navy-50"
+            disabled={codeLoading || resendSeconds > 0}
+            className="w-full rounded-2xl border border-navy-200 bg-white px-4 py-3.5 text-sm font-bold text-navy-900 transition-colors hover:bg-navy-50 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            Resend 6-digit code
+            {resendSeconds > 0 ? `Resend code in ${resendSeconds}s` : "Resend 6-digit code"}
           </button>
         </>
       )}

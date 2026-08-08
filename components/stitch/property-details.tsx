@@ -18,6 +18,8 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import type { Property } from "@/domain/types/property";
+import type { PropertyNavigationTarget } from "@/features/properties/types/navigation";
+import { PropertyDirectionsSection } from "@/features/properties/components/property-directions-section";
 import { formatNaira, getMoveInEstimate } from "@/utils/map-property";
 import { toastError, toastSuccess } from "@/stores/toast-store";
 import { StitchPropertyCard } from "./property-card";
@@ -29,10 +31,12 @@ async function readJson(response: Response) {
 export function PropertyDetails({
   property,
   relatedProperties,
+  navigationTarget,
   returnTo = "/properties",
 }: {
   property: Property;
   relatedProperties: Property[];
+  navigationTarget: PropertyNavigationTarget | null;
   returnTo?: string;
 }) {
   const router = useRouter();
@@ -171,6 +175,8 @@ export function PropertyDetails({
                 ))}
               </div>
             </section>
+
+            <PropertyDirectionsSection target={navigationTarget} />
 
             <section className="py-8">
               <h2 className="text-2xl font-extrabold tracking-tight text-ink">House rules</h2>

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { FALLBACK_PROPERTIES } from "@/domain/constants/mock-properties";
 import {
   getPropertySearchStorageKey,
+  isPropertySearchRestorationCompatible,
   normalizePropertySearchQuery,
   parsePropertySearchRestoration,
   PROPERTY_SEARCH_RESTORE_VERSION,
@@ -33,7 +34,7 @@ describe("property search restoration", () => {
       "types=Apartment,Duplex&sort=newest",
     );
     expect(first).toBe(second);
-    expect(getPropertySearchStorageKey(first)).toContain("v2:");
+    expect(getPropertySearchStorageKey(first)).toContain("v3:");
   });
 
   it("accepts current unexpired restoration state", () => {
@@ -52,5 +53,17 @@ describe("property search restoration", () => {
         1_000,
       ),
     ).toBeNull();
+  });
+
+  it("rejects restoration batches when the live result set changed", () => {
+    expect(
+      isPropertySearchRestorationCompatible(validState, {
+        ...validState.pagination,
+        totalItems: 500,
+      }),
+    ).toBe(false);
+    expect(
+      isPropertySearchRestorationCompatible(validState, validState.pagination),
+    ).toBe(true);
   });
 });

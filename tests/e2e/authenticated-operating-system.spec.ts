@@ -7,12 +7,12 @@ const landlordPassword = process.env.E2E_LANDLORD_PASSWORD;
 const adminEmail = process.env.E2E_ADMIN_EMAIL;
 const adminPassword = process.env.E2E_ADMIN_PASSWORD;
 
-async function signIn(page: Page, email: string, password: string) {
-  await page.goto("/login");
+async function signIn(page: Page, email: string, password: string, administrator = false) {
+  await page.goto(administrator ? "/admin/login" : "/login");
   await page.getByLabel(/email/i).fill(email);
   await page.getByLabel(/password/i).fill(password);
   await page.getByRole("button", { name: /sign in/i }).click();
-  await page.waitForURL(/\/(dashboard|onboarding)/);
+  await page.waitForURL(administrator ? /\/admin/ : /\/(dashboard|onboarding)/);
 }
 
 test("tenant dashboard, messages, and verification routes", async ({ page }) => {
@@ -55,11 +55,15 @@ test("landlord property portfolio and full listing wizard", async ({ page }) => 
 
 test("admin verification, dispute, and moderation centers", async ({ page }) => {
   test.skip(!adminEmail || !adminPassword, "Set admin E2E credentials");
-  await signIn(page, adminEmail!, adminPassword!);
+  await signIn(page, adminEmail!, adminPassword!, true);
   for (const [path, heading] of [
     ["/admin/verifications", /verification queue/i],
     ["/admin/disputes", /fraud & dispute center/i],
     ["/admin/moderation", /platform moderation/i],
+    ["/admin/users", /^users$/i],
+    ["/admin/properties", /^properties$/i],
+    ["/admin/payments", /^payments$/i],
+    ["/admin/audit", /audit log/i],
   ] as const) {
     await page.goto(path);
     await expect(page.getByRole("heading", { name: heading })).toBeVisible();

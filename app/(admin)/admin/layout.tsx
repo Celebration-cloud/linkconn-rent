@@ -5,8 +5,8 @@ import { getCurrentProfile, hasRole, isAccountOperational } from "@/lib/auth/cur
 
 export default async function AdminLayout({ children }: { children: ReactNode }) {
   const profile = await getCurrentProfile();
-  if (!profile) redirect("/login?next=/admin/verifications");
+  if (!profile) redirect("/admin/login?next=/admin");
   if (!isAccountOperational(profile)) redirect("/forbidden");
   if (!hasRole(profile, ["Moderator", "Admin", "SuperAdmin"])) redirect("/forbidden");
-  return <AdminShell>{children}</AdminShell>;
+  return <AdminShell viewer={{ id: profile.id, firstName: profile.firstName, lastName: profile.lastName, email: profile.email, role: profile.role, accountStatus: profile.accountStatus }}>{children}</AdminShell>;
 }

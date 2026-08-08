@@ -2,7 +2,7 @@ import { z } from "zod";
 import type { Property } from "@/domain/types/property";
 import type { PropertyPagination } from "@/domain/types/property-search";
 
-export const PROPERTY_SEARCH_RESTORE_VERSION = 2 as const;
+export const PROPERTY_SEARCH_RESTORE_VERSION = 3 as const;
 export const PROPERTY_SEARCH_RESTORE_TTL = 30 * 60 * 1_000;
 const STORAGE_PREFIX = "linkconn.property-search:";
 
@@ -86,4 +86,15 @@ export function parsePropertySearchRestoration(
   } catch {
     return null;
   }
+}
+
+export function isPropertySearchRestorationCompatible(
+  state: PropertySearchRestorationState,
+  current: PropertyPagination,
+) {
+  return (
+    state.pagination.totalItems === current.totalItems &&
+    state.pagination.pageSize === current.pageSize &&
+    state.batches.at(-1)!.page >= current.page
+  );
 }

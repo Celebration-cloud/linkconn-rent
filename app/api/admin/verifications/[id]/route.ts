@@ -1,13 +1,16 @@
 import { ZodError } from "zod";
 import { apiError, apiSuccess } from "@/lib/api-response";
-import { getCurrentProfile } from "@/lib/auth/current-profile";
+import { getCurrentProfile, isAccountOperational } from "@/lib/auth/current-profile";
 import { AdministrationRepository } from "@/repositories/administration.repository";
 import { verificationReviewSchema } from "@/schemas/administration";
+import { verifyCsrf } from "@/lib/security/csrf";
 
 export async function PATCH(request: Request, context: { params: Promise<{ id: string }> }) {
   try {
+    if (!verifyCsrf(request)) return apiError("Security check failed", 403);
     const profile = await getCurrentProfile();
     if (!profile) return apiError("Authentication required", 401);
+    if (!isAccountOperational(profile)) return apiError("Account access unavailable", 403);
     const { id } = await context.params;
     const input = verificationReviewSchema.parse(await request.json());
     const data = await AdministrationRepository.reviewVerification(profile, id, input);
@@ -22,4 +25,3 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
     return apiError("Unable to update verification", 500);
   }
 }
-

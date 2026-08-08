@@ -1,14 +1,11 @@
 import type { Metadata } from "next";
 import { PropertySearch } from "@/components/stitch/property-search";
-import { FALLBACK_PROPERTIES } from "@/domain/constants/mock-properties";
 import { OperatingSystemRepository } from "@/repositories/operating-system.repository";
 import {
   propertySearchSchema,
   type PropertySearchInput,
 } from "@/schemas/operating-system";
 import { mapProperty } from "@/utils/map-property";
-import { searchFallbackProperties } from "@/utils/property-search";
-import { withTimeout } from "@/utils/with-timeout";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
@@ -58,23 +55,11 @@ export default async function PropertiesPage({
 }) {
   const rawParams = await searchParams;
   const filters = parseSearchParams(rawParams);
-  let result = searchFallbackProperties(FALLBACK_PROPERTIES, filters);
-
-  try {
-    const databaseResult = await withTimeout(
-      OperatingSystemRepository.searchProperties(filters),
-      2_500,
-      "Public catalogue unavailable",
-    );
-    if (databaseResult.pagination.totalItems > 0) {
-      result = {
-        ...databaseResult,
-        items: databaseResult.items.map(mapProperty),
-      };
-    }
-  } catch {
-    // The deterministic catalogue keeps public search usable during local setup.
-  }
+  const databaseResult = await OperatingSystemRepository.searchProperties(filters);
+  const result = {
+    ...databaseResult,
+    items: databaseResult.items.map(mapProperty),
+  };
 
   const queryKey = new URLSearchParams(
     Object.entries(flattenSearchParams(rawParams)).filter(

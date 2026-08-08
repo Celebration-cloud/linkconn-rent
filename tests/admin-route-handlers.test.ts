@@ -10,6 +10,7 @@ const mocks = vi.hoisted(() => ({
 vi.mock("@/lib/auth/current-profile", () => ({
   getCurrentProfile: mocks.getCurrentProfile,
   hasRole: mocks.hasRole,
+  isAccountOperational: (profile: { accountStatus: string }) => profile.accountStatus !== "Suspended",
 }));
 
 vi.mock("@/repositories/administration.repository", () => ({

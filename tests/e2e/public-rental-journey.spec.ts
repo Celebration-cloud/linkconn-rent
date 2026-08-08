@@ -7,7 +7,7 @@ test("search, labelled 2.5D map, directions, and details stay connected", async 
   test.setTimeout(120_000);
   await context.grantPermissions(["geolocation"]);
   await context.setGeolocation({ longitude: 3.35, latitude: 6.52 });
-  await page.route("**/api/maps/directions?**", async (route) => {
+  await page.route("**/api/maps/directions", async (route) => {
     await route.fulfill({
       contentType: "application/json",
       body: JSON.stringify({
@@ -24,6 +24,19 @@ test("search, labelled 2.5D map, directions, and details stay connected", async 
           },
           distanceMetres: 5200,
           durationSeconds: 900,
+          origin: [3.35, 6.52],
+          destination: [3.391234, 6.501234],
+          steps: [
+            {
+              instruction: "Continue on Herbert Macaulay Way",
+              maneuverType: "continue",
+              modifier: "straight",
+              roadName: "Herbert Macaulay Way",
+              location: [3.35, 6.52],
+              distanceMetres: 5200,
+              durationSeconds: 900,
+            },
+          ],
         },
       }),
     });
@@ -113,9 +126,7 @@ test("search, labelled 2.5D map, directions, and details stay connected", async 
     }),
   ).toBeVisible();
   await expect(page.getByText(/browser accuracy: ±/i)).toBeVisible();
-  await expect(
-    page.getByText(/public approximate property pin/i),
-  ).toBeVisible();
+  await expect(page.getByText(/verified exact property destination/i)).toBeVisible();
 
   await expect(page.getByText("Search this area")).toBeVisible();
 });

@@ -19,6 +19,16 @@ export default defineConfig([
       "react-hooks/incompatible-library": "warn",
     },
   },
+  {
+    files: [
+      "components/stitch/admin-centers.tsx",
+      "features/admin/components/admin-workspaces.tsx",
+    ],
+    rules: {
+      // TypeScript-aware analysis replaces the base rule for typed files.
+      "no-unused-vars": "off",
+    },
+  },
   globalIgnores([
     ".next/**",
     "node_modules/**",

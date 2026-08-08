@@ -22,6 +22,7 @@ import {
 } from "@/domain/billing";
 import { useAuthFlowStore } from "@/stores/auth-flow-store";
 import { toastError, toastSuccess } from "@/stores/toast-store";
+import { getInternalRedirectPath } from "@/lib/security/internal-redirect";
 
 const signupSchema = z
   .object({
@@ -89,6 +90,7 @@ export default function SignupForm() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
+  const isAdminInvitation = searchParams.get("adminInvite") === "1";
 
   const role = useAuthFlowStore((state) => state.role);
   const planKey = useAuthFlowStore((state) => state.planKey);
@@ -100,7 +102,7 @@ export default function SignupForm() {
 
   useEffect(() => {
     if (session.data) {
-      router.replace(searchParams.get("next") || "/dashboard");
+      router.replace(getInternalRedirectPath(searchParams.get("next"), "/dashboard"));
     }
   }, [router, searchParams, session.data]);
 
@@ -127,12 +129,18 @@ export default function SignupForm() {
     });
   }, [flow.planKey, flow.role, hydrateFromQuery, searchParams]);
 
+  useEffect(() => {
+    if (!isAdminInvitation) return;
+    const invitedEmail = sessionStorage.getItem("linkconn-admin-invite-email");
+    if (invitedEmail) queueMicrotask(() => setEmail(invitedEmail));
+  }, [isAdminInvitation]);
+
   const selectedPlans = useMemo(() => PLAN_LIBRARY[role], [role]);
   const nextOnboarding = useMemo(
     () => buildOnboardingNext({ role, planKey, billingPeriod }),
     [billingPeriod, planKey, role]
   );
-  const next = searchParams.get("next") || nextOnboarding;
+  const next = getInternalRedirectPath(searchParams.get("next"), isAdminInvitation ? "/admin-invite" : nextOnboarding);
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -142,6 +150,12 @@ export default function SignupForm() {
     const parsed = signupSchema.safeParse({ name, email, password, confirmPassword });
     if (!parsed.success) {
       const message = parsed.error.issues[0]?.message || "Check the form fields";
+      setError(message);
+      toastError("Signup failed", message);
+      return;
+    }
+    if (isAdminInvitation && parsed.data.password.length < 12) {
+      const message = "Administrator passwords must be at least 12 characters";
       setError(message);
       toastError("Signup failed", message);
       return;
@@ -172,7 +186,9 @@ export default function SignupForm() {
     toastSuccess("Account created", "Check your inbox to verify your email.");
 
     if (!resData.data.user.emailVerified) {
-      router.push(`/verify-email?email=${encodeURIComponent(parsed.data.email)}&next=${encodeURIComponent(next)}`);
+      router.push(
+        `/verify-email?email=${encodeURIComponent(parsed.data.email)}&next=${encodeURIComponent(next)}&sent=1`,
+      );
       return;
     }
 
@@ -207,11 +223,12 @@ export default function SignupForm() {
             type="email"
             autoComplete="email"
             placeholder="you@example.com"
+            readOnly={isAdminInvitation}
           />
         </label>
       </div>
 
-      <div className="space-y-3">
+      {!isAdminInvitation && <div className="space-y-3">
         <div className="flex items-center justify-between">
           <span className="text-sm font-semibold text-navy-700">Choose your role</span>
           <span className="text-xs font-medium text-navy-400">Required</span>
@@ -235,9 +252,9 @@ export default function SignupForm() {
             </button>
           ))}
         </div>
-      </div>
+      </div>}
 
-      <div className="space-y-3">
+      {!isAdminInvitation && <div className="space-y-3">
         <div className="flex items-center justify-between">
           <span className="text-sm font-semibold text-navy-700">Choose your plan</span>
           <span className="text-xs font-medium text-navy-400">
@@ -275,9 +292,9 @@ export default function SignupForm() {
             );
           })}
         </div>
-      </div>
+      </div>}
 
-      {role === "Landlord" && (
+      {!isAdminInvitation && role === "Landlord" && (
         <div className="flex items-center justify-between rounded-2xl border border-navy-100 bg-navy-50/70 px-4 py-3">
           <div>
             <div className="text-sm font-semibold text-navy-900">Billing cycle</div>
@@ -301,7 +318,7 @@ export default function SignupForm() {
             onChange={(e) => setPassword(e.target.value)}
             type="password"
             autoComplete="new-password"
-            placeholder="At least 8 characters"
+            placeholder={isAdminInvitation ? "At least 12 characters" : "At least 8 characters"}
           />
         </label>
         <label className="block">
@@ -347,7 +364,7 @@ export default function SignupForm() {
       <div className="grid gap-3 rounded-2xl border border-navy-100 bg-navy-50/70 p-4 text-sm text-navy-600">
         <div className="flex items-start gap-2">
           <Shield className="mt-0.5 h-4 w-4 shrink-0 text-brandgreen-600" />
-          <p>Your role and plan are saved in session-scoped flow state and carried through verification.</p>
+          <p>{isAdminInvitation ? "Your role is granted only after the one-time invitation is accepted." : "Your role and plan are saved in session-scoped flow state and carried through verification."}</p>
         </div>
         <div className="flex items-start gap-2">
           <Check className="mt-0.5 h-4 w-4 shrink-0 text-brandgreen-600" />

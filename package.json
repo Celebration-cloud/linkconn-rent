@@ -17,10 +17,21 @@
     "check:architecture": "vitest run tests/architecture-boundaries.test.ts",
     "check": "npm run typecheck && npm run lint && npm test && npm run check:architecture",
     "test:e2e": "playwright test",
+    "test:e2e:auth": "node scripts/auth-e2e/run.mjs",
+    "test:e2e:auth:cleanup": "ts-node --project tsconfig.scripts.json scripts/auth-e2e/cleanup.ts",
+    "admin:bootstrap": "ts-node --project tsconfig.scripts.json scripts/admin-bootstrap/cli.ts bootstrap",
+    "admin:bootstrap:verify": "ts-node --project tsconfig.scripts.json scripts/admin-bootstrap/cli.ts verify",
+    "admin:bootstrap:recover-password": "ts-node --project tsconfig.scripts.json scripts/admin-bootstrap/cli.ts recover-password",
+    "admin:preflight": "ts-node --project tsconfig.scripts.json scripts/admin-preflight.ts",
     "prisma:generate": "prisma generate",
     "prisma:db-push": "prisma db push",
     "prisma:studio": "prisma studio",
-    "db:seed": "ts-node --compiler-options '{\"module\":\"CommonJS\"}' scripts/seed.ts"
+    "db:seed": "ts-node --compiler-options '{\"module\":\"CommonJS\"}' scripts/seed.ts",
+    "db:properties:dry-run": "ts-node --project tsconfig.scripts.json scripts/property-load-test/cli.ts dry-run",
+    "db:properties:seed": "ts-node --project tsconfig.scripts.json scripts/property-load-test/cli.ts seed",
+    "db:properties:verify": "ts-node --project tsconfig.scripts.json scripts/property-load-test/cli.ts verify",
+    "db:properties:benchmark": "ts-node --project tsconfig.scripts.json scripts/property-load-test/cli.ts benchmark",
+    "db:properties:cleanup": "ts-node --project tsconfig.scripts.json scripts/property-load-test/cli.ts cleanup"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.4.0",

@@ -77,14 +77,14 @@ export function checkRateLimit(
  * Extracts the IP address from Next.js request headers.
  */
 export function getClientIp(req: Request): string {
-  const xForwardedFor = req.headers.get("x-forwarded-for");
-  if (xForwardedFor) {
-    const ips = xForwardedFor.split(",");
-    return ips[0]?.trim() || "127.0.0.1";
-  }
-  const xRealIp = req.headers.get("x-real-ip");
-  if (xRealIp) {
-    return xRealIp;
-  }
+  const trustProxy = process.env.VERCEL === "1" || process.env.TRUST_PROXY_HEADERS === "true";
+  if (!trustProxy) return "127.0.0.1";
+
+  const forwarded = process.env.VERCEL === "1"
+    ? req.headers.get("x-vercel-forwarded-for") || req.headers.get("x-forwarded-for")
+    : req.headers.get("x-real-ip");
+
+  const candidate = forwarded?.split(",")[0]?.trim();
+  if (candidate && /^[0-9a-f:.]+$/i.test(candidate)) return candidate;
   return "127.0.0.1";
 }

@@ -17,6 +17,19 @@ import {
   canSanctionUsers,
   REVIEWER_ROLES,
 } from "@/lib/admin-permissions";
+import type { AdminQueueFilters } from "@/schemas/administration";
+
+function pageResult<T>(items: T[], totalItems: number, page: number, pageSize: number) {
+  return {
+    items,
+    pagination: {
+      page,
+      pageSize,
+      totalItems,
+      totalPages: Math.max(1, Math.ceil(totalItems / pageSize)),
+    },
+  };
+}
 
 function requireReviewer(role: AppRole) {
   if (!canReviewQueues(role)) throw new Error("FORBIDDEN");
@@ -37,6 +50,7 @@ export class AdministrationRepository {
       openDisputes,
       completedViewings,
       successfulTenancies,
+      recentActivity,
     ] = await Promise.all([
       prisma.profile.count(),
       prisma.property.count(),
@@ -50,6 +64,14 @@ export class AdministrationRepository {
       }),
       prisma.viewing.count({ where: { status: "Completed" } }),
       prisma.application.count({ where: { status: "Accepted" } }),
+      prisma.adminAuditEvent.findMany({
+        select: {
+          id: true, action: true, reason: true, targetType: true, createdAt: true,
+          actor: { select: { firstName: true, lastName: true } },
+        },
+        orderBy: { createdAt: "desc" },
+        take: 8,
+      }),
     ]);
 
     return {
@@ -61,12 +83,12 @@ export class AdministrationRepository {
       openDisputes,
       completedViewings,
       successfulTenancies,
+      recentActivity,
     };
   }
 
-  static listVerifications(filters: { status?: string; query?: string; limit: number }) {
-    return prisma.verificationSubmission.findMany({
-      where: {
+  static async listVerifications(filters: AdminQueueFilters) {
+    const where: Prisma.VerificationSubmissionWhereInput = {
         ...(filters.status ? { status: filters.status as never } : {}),
         ...(filters.query
           ? {
@@ -79,7 +101,10 @@ export class AdministrationRepository {
               },
             }
           : {}),
-      },
+    };
+    const [items, totalItems] = await Promise.all([
+      prisma.verificationSubmission.findMany({
+      where,
       include: {
         owner: { select: { id: true, firstName: true, lastName: true, email: true, role: true } },
         property: { select: { id: true, title: true } },
@@ -87,8 +112,12 @@ export class AdministrationRepository {
         documents: true,
       },
       orderBy: { createdAt: "asc" },
-      take: filters.limit,
-    });
+      skip: (filters.page - 1) * filters.pageSize,
+      take: filters.pageSize,
+    }),
+      prisma.verificationSubmission.count({ where }),
+    ]);
+    return pageResult(items, totalItems, filters.page, filters.pageSize);
   }
 
   static async reviewVerification(
@@ -161,9 +190,8 @@ export class AdministrationRepository {
     });
   }
 
-  static listDisputes(filters: { status?: string; priority?: string; query?: string; limit: number }) {
-    return prisma.disputeCase.findMany({
-      where: {
+  static async listDisputes(filters: AdminQueueFilters) {
+    const where: Prisma.DisputeCaseWhereInput = {
         ...(filters.status ? { status: filters.status as DisputeStatus } : {}),
         ...(filters.priority ? { priority: filters.priority as DisputePriority } : {}),
         ...(filters.query
@@ -174,7 +202,10 @@ export class AdministrationRepository {
               ],
             }
           : {}),
-      },
+    };
+    const [items, totalItems] = await Promise.all([
+      prisma.disputeCase.findMany({
+      where,
       include: {
         reporter: { select: { id: true, firstName: true, lastName: true, email: true } },
         assignedTo: { select: { id: true, firstName: true, lastName: true } },
@@ -183,8 +214,12 @@ export class AdministrationRepository {
         notes: { orderBy: { createdAt: "asc" }, include: { author: { select: { firstName: true, lastName: true } } } },
       },
       orderBy: [{ priority: "desc" }, { createdAt: "asc" }],
-      take: filters.limit,
-    });
+      skip: (filters.page - 1) * filters.pageSize,
+      take: filters.pageSize,
+    }),
+      prisma.disputeCase.count({ where }),
+    ]);
+    return pageResult(items, totalItems, filters.page, filters.pageSize);
   }
 
   static async createDispute(
@@ -233,6 +268,11 @@ export class AdministrationRepository {
         if (current.assignedToId && current.assignedToId !== input.assigneeId) {
           throw new Error("ASSIGNMENT_CONFLICT");
         }
+        const assignee = await tx.profile.findFirst({
+          where: { id: input.assigneeId, role: { in: [...REVIEWER_ROLES] }, accountStatus: { not: "Suspended" } },
+          select: { id: true },
+        });
+        if (!assignee) throw new Error("INVALID_ASSIGNEE");
         const updated = await tx.disputeCase.update({
           where: { id },
           data: { assignedToId: input.assigneeId },
@@ -297,6 +337,134 @@ export class AdministrationRepository {
       }),
     ]);
     return { users, listings, audits };
+  }
+
+  static async listUsers(filters: AdminQueueFilters) {
+    const where: Prisma.ProfileWhereInput = {
+      ...(filters.role ? { role: filters.role as AppRole } : {}),
+      ...(filters.status ? { accountStatus: filters.status as AccountStatus } : {}),
+      ...(filters.query
+        ? {
+            OR: [
+              { firstName: { contains: filters.query, mode: "insensitive" } },
+              { lastName: { contains: filters.query, mode: "insensitive" } },
+              { email: { contains: filters.query, mode: "insensitive" } },
+            ],
+          }
+        : {}),
+    };
+    const [items, totalItems] = await Promise.all([
+      prisma.profile.findMany({
+        where,
+        select: {
+          id: true, firstName: true, lastName: true, email: true, role: true,
+          accountStatus: true, verificationLevel: true, emailVerified: true,
+          onboardingComplete: true, createdAt: true, updatedAt: true,
+          _count: { select: { properties: true, applications: true, payments: true } },
+        },
+        orderBy: [{ createdAt: "desc" }, { id: "asc" }],
+        skip: (filters.page - 1) * filters.pageSize,
+        take: filters.pageSize,
+      }),
+      prisma.profile.count({ where }),
+    ]);
+    return pageResult(items, totalItems, filters.page, filters.pageSize);
+  }
+
+  static async listProperties(filters: AdminQueueFilters) {
+    const where: Prisma.PropertyWhereInput = {
+      ...(filters.status ? { moderationStatus: filters.status as ModerationStatus } : {}),
+      ...(filters.query
+        ? {
+            OR: [
+              { title: { contains: filters.query, mode: "insensitive" } },
+              { location: { contains: filters.query, mode: "insensitive" } },
+              { city: { contains: filters.query, mode: "insensitive" } },
+              { owner: { email: { contains: filters.query, mode: "insensitive" } } },
+            ],
+          }
+        : {}),
+    };
+    const [items, totalItems] = await Promise.all([
+      prisma.property.findMany({
+        where,
+        select: {
+          id: true, title: true, location: true, city: true, type: true, price: true,
+          status: true, moderationStatus: true, moderationReason: true, verified: true,
+          createdAt: true, updatedAt: true, reviewedAt: true,
+          owner: { select: { id: true, firstName: true, lastName: true, email: true } },
+          reviewedBy: { select: { firstName: true, lastName: true } },
+        },
+        orderBy: [{ updatedAt: "desc" }, { id: "asc" }],
+        skip: (filters.page - 1) * filters.pageSize,
+        take: filters.pageSize,
+      }),
+      prisma.property.count({ where }),
+    ]);
+    return pageResult(items, totalItems, filters.page, filters.pageSize);
+  }
+
+  static async listPayments(filters: AdminQueueFilters) {
+    const where: Prisma.PaymentWhereInput = {
+      ...(filters.status ? { status: filters.status as never } : {}),
+      ...(filters.query
+        ? {
+            OR: [
+              { reference: { contains: filters.query, mode: "insensitive" } },
+              { property: { title: { contains: filters.query, mode: "insensitive" } } },
+              { tenant: { email: { contains: filters.query, mode: "insensitive" } } },
+            ],
+          }
+        : {}),
+    };
+    const [items, totalItems] = await Promise.all([
+      prisma.payment.findMany({
+        where,
+        select: {
+          id: true, amount: true, status: true, reference: true, failureReason: true,
+          dueDate: true, paidAt: true, createdAt: true, updatedAt: true,
+          tenant: { select: { id: true, firstName: true, lastName: true, email: true } },
+          property: { select: { id: true, title: true, location: true } },
+          _count: { select: { disputes: true } },
+        },
+        orderBy: [{ updatedAt: "desc" }, { id: "asc" }],
+        skip: (filters.page - 1) * filters.pageSize,
+        take: filters.pageSize,
+      }),
+      prisma.payment.count({ where }),
+    ]);
+    return pageResult(items, totalItems, filters.page, filters.pageSize);
+  }
+
+  static async listAuditEvents(filters: AdminQueueFilters) {
+    const where: Prisma.AdminAuditEventWhereInput = {
+      ...(filters.targetType ? { targetType: filters.targetType as never } : {}),
+      ...(filters.query
+        ? {
+            OR: [
+              { action: { contains: filters.query, mode: "insensitive" } },
+              { reason: { contains: filters.query, mode: "insensitive" } },
+              { targetId: { contains: filters.query, mode: "insensitive" } },
+              { actor: { email: { contains: filters.query, mode: "insensitive" } } },
+            ],
+          }
+        : {}),
+    };
+    const [items, totalItems] = await Promise.all([
+      prisma.adminAuditEvent.findMany({
+        where,
+        select: {
+          id: true, action: true, targetType: true, targetId: true, reason: true,
+          previousState: true, resultingState: true, createdAt: true,
+          actor: { select: { id: true, firstName: true, lastName: true, email: true, role: true } },
+        },
+        orderBy: [{ createdAt: "desc" }, { id: "asc" }],
+        skip: (filters.page - 1) * filters.pageSize,
+        take: filters.pageSize,
+      }),
+      prisma.adminAuditEvent.count({ where }),
+    ]);
+    return pageResult(items, totalItems, filters.page, filters.pageSize);
   }
 
   static async moderateUser(

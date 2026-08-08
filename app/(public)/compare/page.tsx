@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
 import { PropertyComparison } from "@/components/stitch/property-comparison";
-import { FALLBACK_PROPERTIES } from "@/domain/constants/mock-properties";
 import { PropertyRepository } from "@/repositories/property.repository";
 import { mapProperty } from "@/utils/map-property";
-import { withTimeout } from "@/utils/with-timeout";
+import { getPropertyNavigationTargets } from "@/features/properties/server/navigation-data";
 
 export const metadata: Metadata = {
   title: "Compare rental properties | LinkConn Rent",
@@ -24,21 +23,16 @@ export default async function ComparePage({
     .map((id) => id.trim())
     .filter(Boolean)
     .slice(0, 4);
-  let properties = FALLBACK_PROPERTIES;
-  try {
-    const records = await withTimeout(
-      PropertyRepository.listAll(),
-      2_500,
-      "Comparison catalogue unavailable",
-    );
-    if (records.length) properties = records.map(mapProperty);
-  } catch {
-    // Deterministic catalogue keeps public comparison available.
-  }
+  const records = await PropertyRepository.listComparisonCandidates(propertyIds);
+  const properties = records.map(mapProperty);
+  const navigationTargets = await getPropertyNavigationTargets(
+    records.map((record) => record.id),
+  );
   return (
     <PropertyComparison
       properties={properties}
       initialSelectedIds={propertyIds}
+      navigationTargets={navigationTargets}
     />
   );
 }

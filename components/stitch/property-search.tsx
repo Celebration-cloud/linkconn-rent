@@ -37,6 +37,7 @@ import { useAuth } from "@/providers/auth-provider";
 import { formatCompactNaira } from "@/utils/map-property";
 import {
   getPropertySearchStorageKey,
+  isPropertySearchRestorationCompatible,
   parsePropertySearchRestoration,
   PROPERTY_SEARCH_RESTORE_TTL,
   PROPERTY_SEARCH_RESTORE_VERSION,
@@ -223,10 +224,7 @@ export function PropertySearch({
       return;
     }
     const cached = parsePropertySearchRestoration(raw);
-    if (
-      !cached ||
-      cached.batches.at(-1)!.page < initialResult.pagination.page
-    ) {
+    if (!cached || !isPropertySearchRestorationCompatible(cached, initialResult.pagination)) {
       sessionStorage.removeItem(storageKey);
       setRestored(true);
       return;
@@ -242,7 +240,7 @@ export function PropertySearch({
       requestAnimationFrame(() => window.scrollTo({ top: cached.scrollY })),
     );
     setRestored(true);
-  }, [initialResult.pagination.page, storageKey]);
+  }, [initialResult.pagination, storageKey]);
 
   const persistState = useCallback(
     (scrollY = window.scrollY) => {

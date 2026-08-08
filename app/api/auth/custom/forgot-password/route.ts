@@ -3,11 +3,16 @@ import { z } from "zod";
 import { auth } from "@/lib/neon-auth";
 import { checkRateLimit, getClientIp } from "@/lib/security/rate-limiter";
 import { verifyCsrf } from "@/lib/security/csrf";
+import { internalRedirectSchema } from "@/lib/security/internal-redirect";
+import { getAccountRoleByEmail } from "@/lib/auth/account-access";
+import { isAdministratorRole } from "@/lib/auth/review-access";
 
 const schema = z.object({
-  email: z.string().email("Enter a valid email address"),
-  redirectTo: z.string().optional(),
+  email: z.string().email("Enter a valid email address").max(254),
+  redirectTo: internalRedirectSchema.optional(),
+  portal: z.enum(["public", "admin"]).default("public"),
 });
+const PASSWORD_RESET_DECOY_EMAIL = "auth-decoy@example.com";
 
 export async function POST(req: Request) {
   // 1. Verify CSRF
@@ -49,27 +54,30 @@ export async function POST(req: Request) {
       );
     }
 
-    const { email, redirectTo } = parsed.data;
+    const { email, redirectTo, portal } = parsed.data;
+    const accountRole = await getAccountRoleByEmail(email);
+    const administrator = isAdministratorRole(accountRole);
+    const eligibleForPortal = portal === "admin" ? administrator : !administrator;
 
     // 4. Request Password Reset via Neon Auth
     const result = await auth.requestPasswordReset({
-      email,
-      redirectTo: redirectTo || "/reset-password",
+      email: eligibleForPortal ? email : PASSWORD_RESET_DECOY_EMAIL,
+      redirectTo: redirectTo || (portal === "admin" ? "/admin/reset-password" : "/reset-password"),
     });
 
     if (result.error) {
-      return NextResponse.json(
-        { success: false, message: result.error.message || "Unable to request password reset" },
-        { status: 400 }
-      );
+      console.warn("Password reset request was not accepted by the auth provider");
     }
 
     return NextResponse.json({
       success: true,
-      data: result.data,
-      message: result.data?.message || "Check your inbox for the reset link.",
+      data: null,
+      message: "If an account exists for that email, a reset link will be sent.",
     });
   } catch (error) {
+    if (error instanceof SyntaxError) {
+      return NextResponse.json({ success: false, message: "Invalid JSON body." }, { status: 400 });
+    }
     console.error("Forgot password route error:", error);
     return NextResponse.json(
       { success: false, message: "An unexpected error occurred during password reset request." },

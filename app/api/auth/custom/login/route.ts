@@ -3,11 +3,18 @@ import { z } from "zod";
 import { auth } from "@/lib/neon-auth";
 import { checkRateLimit, getClientIp } from "@/lib/security/rate-limiter";
 import { verifyCsrf } from "@/lib/security/csrf";
+import { internalRedirectSchema } from "@/lib/security/internal-redirect";
+import {
+  getAccountAccessProfile,
+  getPostLoginDestination,
+} from "@/lib/auth/account-access";
+import { isAdministratorRole } from "@/lib/auth/review-access";
 
 const loginSchema = z.object({
-  email: z.string().email("Enter a valid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-  callbackURL: z.string().optional(),
+  email: z.string().email("Enter a valid email address").max(254),
+  password: z.string().min(6, "Password must be at least 6 characters").max(1024),
+  callbackURL: internalRedirectSchema.optional(),
+  portal: z.enum(["public", "admin"]).default("public"),
 });
 
 export async function POST(req: Request) {
@@ -50,7 +57,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const { email, password, callbackURL } = parsed.data;
+    const { email, password, callbackURL, portal } = parsed.data;
 
     // 4. Authenticate via Neon Auth
     const result = await auth.signIn.email({
@@ -61,17 +68,58 @@ export async function POST(req: Request) {
 
     if (result.error) {
       return NextResponse.json(
-        { success: false, message: result.error.message || "Invalid credentials" },
+        { success: false, message: "Invalid email or password" },
         { status: 400 }
       );
     }
 
+    const profile = await getAccountAccessProfile(result.data.user.id);
+    const administrator = isAdministratorRole(profile?.role);
+
+    if (portal === "public" && administrator) {
+      await auth.signOut();
+      return NextResponse.json(
+        {
+          success: false,
+          data: null,
+          message: "Administrator accounts must use the administrator sign-in page.",
+        },
+        { status: 403 },
+      );
+    }
+
+    if (
+      portal === "admin" &&
+      (!administrator || !profile || profile.accountStatus === "Suspended" || !result.data.user.emailVerified)
+    ) {
+      await auth.signOut();
+      return NextResponse.json(
+        {
+          success: false,
+          data: null,
+          message: "Invalid credentials or administrator access is unavailable.",
+        },
+        { status: 403 },
+      );
+    }
+
+    const requestedDestination = callbackURL || (portal === "admin" ? "/admin" : "/dashboard");
+    const destination = result.data.user.emailVerified
+      ? getPostLoginDestination(
+          profile,
+          requestedDestination,
+        )
+      : requestedDestination;
+
     return NextResponse.json({
       success: true,
-      data: result.data,
+      data: { ...result.data, url: destination },
       message: "Signed in successfully",
     });
   } catch (error) {
+    if (error instanceof SyntaxError) {
+      return NextResponse.json({ success: false, message: "Invalid JSON body." }, { status: 400 });
+    }
     console.error("Login route error:", error);
     return NextResponse.json(
       { success: false, message: "An unexpected error occurred during login." },

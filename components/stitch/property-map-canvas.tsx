@@ -583,7 +583,7 @@ export const PropertyMapCanvas = forwardRef<
               fillOpacity: 1,
             }}
           >
-            <Tooltip>Approximate property destination</Tooltip>
+            <Tooltip>Exact property destination</Tooltip>
           </CircleMarker>
         </>
       ) : null}
