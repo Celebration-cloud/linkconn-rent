@@ -30,6 +30,12 @@ export class VerificationRepository {
       status: input.submit ? ("Pending" as const) : ("Draft" as const),
       submittedAt: input.submit ? new Date() : null,
     };
+    const metadataOnlyDocuments = input.documents.map((document) => ({
+      fileName: document.fileName,
+      mimeType: document.mimeType,
+      size: document.size,
+      storageKey: null,
+    }));
     if (input.id) {
       const owned = await prisma.verificationSubmission.findFirst({
         where: { id: input.id, ownerId },
@@ -38,12 +44,12 @@ export class VerificationRepository {
       if (!owned) throw new Error("NOT_FOUND");
       return prisma.verificationSubmission.update({
         where: { id: input.id },
-        data: { ...data, documents: { deleteMany: {}, create: input.documents } },
+        data: { ...data, documents: { deleteMany: {}, create: metadataOnlyDocuments } },
         include: { documents: true },
       });
     }
     return prisma.verificationSubmission.create({
-      data: { ownerId, ...data, documents: { create: input.documents } },
+      data: { ownerId, ...data, documents: { create: metadataOnlyDocuments } },
       include: { documents: true },
     });
   }

@@ -113,6 +113,21 @@ enum VerificationSubmissionStatus {
   Rejected
 }
 
+enum VerificationDocumentKind {
+  GovernmentId
+  Selfie
+  ProofOfAddress
+  EmploymentEvidence
+  SelfEmploymentEvidence
+  StudentEvidence
+  RetirementEvidence
+  GuarantorEvidence
+  PropertyOwnership
+  ManagementAuthority
+  PayoutAccountEvidence
+  BusinessRegistration
+}
+
 enum AccountStatus {
   Active
   Restricted
@@ -543,13 +558,21 @@ model VerificationDocument {
   id           String                 @id @default(uuid())
   submissionId String
   submission   VerificationSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
-  fileName     String
+  kind         VerificationDocumentKind @default(GovernmentId)
+  fileName     String?
   storageKey   String?
   mimeType     String?
   size         Int?
+  uploadIntentId String?
+  deleteAfter  DateTime?
+  deletedAt    DateTime?
+  deletionError String?
   createdAt    DateTime               @default(now())
+  updatedAt    DateTime               @updatedAt
 
   @@index([submissionId])
+  @@index([submissionId, kind])
+  @@index([deleteAfter, deletedAt])
   @@map("verification_documents")
 }
 

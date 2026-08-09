@@ -26,7 +26,10 @@ import { performLogout } from "@/lib/auth/logout";
 import { getCheckoutAmount, getPlanMeta } from "@/domain/billing";
 import { useAuthFlowStore } from "@/stores/auth-flow-store";
 import { toastError, toastInfo, toastSuccess } from "@/stores/toast-store";
-import { isAdminReviewExemptRole } from "@/lib/auth/review-access";
+import {
+  isAdminReviewExemptRole,
+  needsOnboarding,
+} from "@/lib/auth/review-access";
 
 // ─────────────────────────────────────────────────────────────
 // Context shape
@@ -308,8 +311,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     ) return;
     if (!user) return;
     if (!user.emailVerified) return;
-    if (user.onboardingComplete) return;
     if (isAdminReviewExemptRole(user.role)) return;
+    if (
+      !needsOnboarding(
+        user.role,
+        user.onboardingComplete,
+        user.accountReviewStatus,
+      )
+    ) return;
     const requiresCompletedProfile =
       pathname === "/account-review" ||
       pathname.startsWith("/dashboard") ||
@@ -338,13 +347,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       profileError ||
       !user
     ) return;
-    if (!user.emailVerified || !user.onboardingComplete) return;
+    if (!user.emailVerified) return;
     if (isAdminReviewExemptRole(user.role)) {
       if (pathname === "/account-review" || pathname === "/onboarding") {
         router.replace("/admin");
       }
       return;
     }
+    if (
+      needsOnboarding(
+        user.role,
+        user.onboardingComplete,
+        user.accountReviewStatus,
+      )
+    ) return;
 
     if (user.accountReviewStatus === "Approved") {
       if (pathname === "/account-review" || pathname === "/onboarding") {

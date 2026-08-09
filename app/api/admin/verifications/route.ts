@@ -12,7 +12,7 @@ export async function GET(request: Request) {
     if (!isAccountOperational(profile)) return apiError("Account access unavailable", 403);
     if (!hasRole(profile, ["Moderator", "Admin", "SuperAdmin"])) return apiError("Reviewer access required", 403);
     const filters = queueFiltersSchema.parse(Object.fromEntries(new URL(request.url).searchParams));
-    return apiSuccess(await AdministrationRepository.listVerifications(filters), "Verification queue loaded");
+    return apiSuccess(await AdministrationRepository.listVerifications(filters, profile.role), "Verification queue loaded");
   } catch (error) {
     unstable_rethrow(error);
     if (error instanceof ZodError) return apiError(error.issues[0].message, 400);

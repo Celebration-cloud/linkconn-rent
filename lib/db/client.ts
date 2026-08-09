@@ -1,6 +1,9 @@
+import "server-only";
+
+import { PrismaNeon } from "@prisma/adapter-neon";
 import { PrismaClient } from "@prisma/client";
 
-const globalForPrisma = globalThis as unknown as { prisma: PrismaClient };
+const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
 
 function resolveDatabaseUrl(rawUrl: string | undefined): string | undefined {
   if (!rawUrl) return undefined;
@@ -28,20 +31,20 @@ function resolveDatabaseUrl(rawUrl: string | undefined): string | undefined {
 
 const databaseUrl = resolveDatabaseUrl(process.env.DATABASE_URL);
 
-export const prisma =
-  globalForPrisma.prisma ||
-  new PrismaClient({
-    ...(databaseUrl
-      ? {
-          datasources: {
-            db: {
-              url: databaseUrl,
-            },
-          },
-        }
-      : {}),
-    log: process.env.NODE_ENV === "development" ? ["query"] : [],
-  });
+function createPrismaClient(): PrismaClient {
+  const log = process.env.NODE_ENV === "development" ? (["query"] as const) : [];
+
+  if (!databaseUrl) {
+    return new PrismaClient({ log: [...log] });
+  }
+
+  // Use Neon's HTTP/WebSocket transport instead of Prisma's native TCP engine.
+  // This keeps the pooled Neon connection while avoiding platform-specific TLS
+  // failures in local Windows development.
+  const adapter = new PrismaNeon({ connectionString: databaseUrl });
+  return new PrismaClient({ adapter, log: [...log] });
+}
+
+export const prisma = globalForPrisma.prisma ?? createPrismaClient();
 
 if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
-import "server-only";

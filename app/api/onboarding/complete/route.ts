@@ -4,6 +4,11 @@ import { prisma } from "@/lib/db/client";
 import { checkRateLimit, getClientIp } from "@/lib/security/rate-limiter";
 import { verifyCsrf } from "@/lib/security/csrf";
 import { completeOnboardingSchema } from "@/schemas/onboarding";
+import { getDocumentStorage } from "@/services/storage/document-storage";
+import {
+  getMissingDocumentRequirements,
+  getOnboardingDocumentRequirements,
+} from "@/features/onboarding/document-requirements";
 
 /**
  * POST /api/onboarding/complete
@@ -84,7 +89,46 @@ export async function POST(req: Request) {
   const payload = parsed.data;
   const userId = session.user.id;
 
+  if (!getDocumentStorage().configured) {
+    return NextResponse.json(
+      { success: false, message: "Private document storage is not configured. Save your draft and try again later." },
+      { status: 503 },
+    );
+  }
+
+  const requirements = getOnboardingDocumentRequirements(
+    payload.role === "Tenant"
+      ? { role: "Tenant", employmentType: payload.employment.employmentType }
+      : { role: "Landlord" },
+  );
+
   try {
+    const uploadDraft = await prisma.verificationSubmission.findFirst({
+      where: { ownerId: userId, type: "Identity", status: "Draft" },
+      orderBy: { createdAt: "desc" },
+      include: {
+        documents: {
+          where: { storageKey: { not: null }, deletedAt: null, uploadIntentId: null },
+          select: { id: true, storageKey: true, mimeType: true, size: true },
+        },
+      },
+    });
+    if (!uploadDraft) throw new Error("DOCUMENTS_INCOMPLETE");
+    const storage = getDocumentStorage();
+    await Promise.all(uploadDraft.documents.map(async (document) => {
+      if (!document.storageKey?.startsWith(`private-verifications/${uploadDraft.id}/${document.id}/`)) {
+        throw new Error("DOCUMENT_BLOB_MISSING");
+      }
+      try {
+        const stored = await storage.inspect(document.storageKey);
+        if (stored.pathname !== document.storageKey || stored.contentType !== document.mimeType || stored.size !== document.size) {
+          throw new Error("DOCUMENT_BLOB_MISSING");
+        }
+      } catch {
+        throw new Error("DOCUMENT_BLOB_MISSING");
+      }
+    }));
+
     // Persist the profile and submit one idempotent identity review request.
     await prisma.$transaction(async (tx) => {
       await tx.profile.upsert({
@@ -171,35 +215,42 @@ export async function POST(req: Request) {
       });
     }
 
-      const latestReview = await tx.verificationSubmission.findFirst({
-        where: { ownerId: userId, type: "Identity" },
+      const draftReview = await tx.verificationSubmission.findFirst({
+        where: { ownerId: userId, type: "Identity", status: "Draft" },
         orderBy: { createdAt: "desc" },
+        include: {
+          documents: {
+            where: { storageKey: { not: null }, deletedAt: null },
+            select: { id: true, kind: true, storageKey: true, uploadIntentId: true },
+          },
+        },
       });
-      if (!latestReview) {
-        await tx.verificationSubmission.create({
-          data: {
-            ownerId: userId,
-            type: "Identity",
-            status: "Pending",
-            documentType: "NIN",
-            note: "Account review submitted after onboarding.",
-            submittedAt: new Date(),
-          },
-        });
-      } else if (latestReview.status === "Rejected") {
-        await tx.verificationSubmission.update({
-          where: { id: latestReview.id },
-          data: {
-            status: "Pending",
-            submittedAt: new Date(),
-            assignedToId: null,
-            reviewedById: null,
-            reviewedAt: null,
-            decisionReason: null,
-            reviewNotes: null,
-          },
-        });
+      if (!draftReview) throw new Error("DOCUMENTS_INCOMPLETE");
+      const verifiedDocuments = draftReview.documents.filter((document) =>
+        document.uploadIntentId === null &&
+        document.storageKey?.startsWith(`private-verifications/${draftReview.id}/${document.id}/`),
+      );
+      const missing = getMissingDocumentRequirements(
+        requirements,
+        verifiedDocuments.map((document) => document.kind),
+      );
+      if (missing.length > 0) throw new Error(`DOCUMENTS_INCOMPLETE:${missing.map((item) => item.label).join(", ")}`);
+      const submittedIds = new Set(payload.documents.map((document) => document.id));
+      if (verifiedDocuments.some((document) => !submittedIds.has(document.id))) {
+        throw new Error("DOCUMENT_REFERENCES_INVALID");
       }
+      await tx.verificationSubmission.update({
+        where: { id: draftReview.id },
+        data: {
+          status: "Pending",
+          submittedAt: new Date(),
+          assignedToId: null,
+          reviewedById: null,
+          reviewedAt: null,
+          decisionReason: null,
+          reviewNotes: null,
+        },
+      });
     });
 
     return NextResponse.json({
@@ -208,6 +259,25 @@ export async function POST(req: Request) {
       data: { onboardingComplete: true, accountReviewStatus: "Pending" },
     });
   } catch (error) {
+    if (error instanceof Error && error.message.startsWith("DOCUMENTS_INCOMPLETE")) {
+      const missing = error.message.split(":").slice(1).join(":");
+      return NextResponse.json(
+        { success: false, message: missing ? `Upload the required documents: ${missing}.` : "Upload all required documents before submitting for review." },
+        { status: 409 },
+      );
+    }
+    if (error instanceof Error && error.message === "DOCUMENT_REFERENCES_INVALID") {
+      return NextResponse.json(
+        { success: false, message: "Document references are incomplete. Refresh the page and try again." },
+        { status: 409 },
+      );
+    }
+    if (error instanceof Error && error.message === "DOCUMENT_BLOB_MISSING") {
+      return NextResponse.json(
+        { success: false, message: "One or more uploaded documents are unavailable or changed. Replace them and try again." },
+        { status: 409 },
+      );
+    }
     console.error("[POST /api/onboarding/complete]", error);
     return NextResponse.json(
       { success: false, message: "Failed to save onboarding data." },

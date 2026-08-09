@@ -2,7 +2,7 @@
 
 import { useFormContext } from "react-hook-form";
 import { User, Phone, ShieldCheck } from "lucide-react";
-import { Input } from "@/components/ui/form-controls";
+import { FormField, Input } from "@/components/ui/form-controls";
 import type { PersonalDetailsData } from "@/schemas/onboarding";
 
 export default function PersonalDetailsStep() {
@@ -14,89 +14,70 @@ export default function PersonalDetailsStep() {
 
   return (
     <div className="space-y-5">
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         {/* First name */}
-        <div className="space-y-1.5">
-          <label className="text-sm font-semibold text-navy-800" htmlFor="personal.firstName">
-            First Name
-          </label>
+        <FormField label="First name" htmlFor="personal.firstName" required error={errors.personal?.firstName?.message}>
           <Input
-              id="personal.firstName"
-              {...register("personal.firstName")}
-              placeholder="Ada"
-              leadingIcon={User}
-              invalid={Boolean(errors.personal?.firstName)}
-            />
-          {errors.personal?.firstName && (
-            <p className="text-xs text-red-500">
-              {String((errors.personal.firstName as { message?: string })?.message ?? "")}
-            </p>
-          )}
-        </div>
+            id="personal.firstName"
+            {...register("personal.firstName")}
+            autoComplete="given-name"
+            placeholder="Ada"
+            leadingIcon={User}
+            invalid={Boolean(errors.personal?.firstName)}
+            aria-describedby="personal.firstName-description"
+          />
+        </FormField>
 
         {/* Last name */}
-        <div className="space-y-1.5">
-          <label className="text-sm font-semibold text-navy-800" htmlFor="personal.lastName">
-            Last Name
-          </label>
+        <FormField label="Last name" htmlFor="personal.lastName" required error={errors.personal?.lastName?.message}>
           <Input
-              id="personal.lastName"
-              {...register("personal.lastName")}
-              placeholder="Okonkwo"
-              leadingIcon={User}
-              invalid={Boolean(errors.personal?.lastName)}
-            />
-          {errors.personal?.lastName && (
-            <p className="text-xs text-red-500">
-              {String((errors.personal.lastName as { message?: string })?.message ?? "")}
-            </p>
-          )}
-        </div>
+            id="personal.lastName"
+            {...register("personal.lastName")}
+            autoComplete="family-name"
+            placeholder="Okonkwo"
+            leadingIcon={User}
+            invalid={Boolean(errors.personal?.lastName)}
+            aria-describedby="personal.lastName-description"
+          />
+        </FormField>
       </div>
 
       {/* Phone */}
-      <div className="space-y-1.5">
-        <label className="text-sm font-semibold text-navy-800" htmlFor="personal.phone">
-          Phone Number
-        </label>
+      <FormField label="Phone number" htmlFor="personal.phone" required error={errors.personal?.phone?.message}>
         <Input
-            id="personal.phone"
-            {...register("personal.phone")}
-            placeholder="+234 801 234 5678"
-            type="tel"
-            leadingIcon={Phone}
-            invalid={Boolean(errors.personal?.phone)}
-          />
-        {errors.personal?.phone && (
-          <p className="text-xs text-red-500">
-            {String((errors.personal.phone as { message?: string })?.message ?? "")}
-          </p>
-        )}
-      </div>
+          id="personal.phone"
+          {...register("personal.phone")}
+          autoComplete="tel"
+          inputMode="tel"
+          placeholder="+234 801 234 5678"
+          type="tel"
+          leadingIcon={Phone}
+          invalid={Boolean(errors.personal?.phone)}
+          aria-describedby="personal.phone-description"
+        />
+      </FormField>
 
       {/* NIN */}
-      <div className="space-y-1.5">
-        <label className="text-sm font-semibold text-navy-800" htmlFor="personal.nin">
-          <span>NIN</span>{" "}
-          <span className="font-normal text-navy-400">(required for identity verification)</span>
-        </label>
+      <FormField
+        label="NIN"
+        htmlFor="personal.nin"
+        required
+        error={errors.personal?.nin?.message}
+        hint="Your 11-digit NIN is encrypted and only used for identity verification."
+      >
         <Input
-            id="personal.nin"
-            {...register("personal.nin")}
-            placeholder="12345678901"
-            maxLength={11}
-            leadingIcon={ShieldCheck}
-            invalid={Boolean(errors.personal?.nin)}
-          />
-        {errors.personal?.nin && (
-          <p className="text-xs text-red-500">
-            {String((errors.personal.nin as { message?: string })?.message ?? "")}
-          </p>
-        )}
-        <p className="text-xs text-navy-400">
-          Your NIN is encrypted and only used for identity verification.
-        </p>
-      </div>
+          id="personal.nin"
+          {...register("personal.nin")}
+          autoComplete="off"
+          inputMode="numeric"
+          pattern="[0-9]*"
+          placeholder="12345678901"
+          maxLength={11}
+          leadingIcon={ShieldCheck}
+          invalid={Boolean(errors.personal?.nin)}
+          aria-describedby="personal.nin-description"
+        />
+      </FormField>
     </div>
   );
 }

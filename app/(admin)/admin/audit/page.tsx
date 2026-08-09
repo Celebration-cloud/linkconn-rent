@@ -3,6 +3,8 @@ import { parseAdminSearchParams, type AdminSearchParams } from "@/features/admin
 import { AdministrationRepository } from "@/repositories/administration.repository";
 
 export default async function AdminAuditPage({ searchParams }: { searchParams: AdminSearchParams }) {
+  await connection();
   const data = await AdministrationRepository.listAuditEvents(await parseAdminSearchParams(searchParams));
   return <AuditWorkspace data={data} />;
 }
+import { connection } from "next/server";

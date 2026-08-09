@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
-import { useForm, FormProvider, type UseFormReturn } from "react-hook-form";
+import { useForm, FormProvider, useWatch, type FieldErrors, type FieldPath, type UseFormReturn } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, ArrowRight, Loader2 } from "lucide-react";
 import { useAuth } from "@/providers/auth-provider";
@@ -13,17 +13,21 @@ import TenantPreferencesStep from "./steps/tenant-preferences";
 import TenantEmploymentStep from "./steps/tenant-employment";
 import LandlordBusinessStep from "./steps/landlord-business";
 import LandlordPayoutStep from "./steps/landlord-payout";
+import DocumentsStep from "./steps/documents";
 import type { Role } from "@/domain/types/auth";
 import {
   completeTenantOnboardingSchema,
   completeLandlordOnboardingSchema,
   personalDetailsSchema,
   tenantPreferencesSchema,
+  tenantEmploymentSchema,
   landlordBusinessSchema,
+  landlordPayoutSchema,
   type CompleteOnboardingPayload,
 } from "@/schemas/onboarding";
 import { z } from "zod";
 import { toastError, toastSuccess } from "@/stores/toast-store";
+import { getFirstInvalidOnboardingStep } from "@/features/onboarding/utils/step-validation";
 
 // ─────────────────────────────────────────────────────────────
 // Types
@@ -36,8 +40,8 @@ type LandlordFormData = z.infer<typeof completeLandlordOnboardingSchema>;
 // Step config per role
 // ─────────────────────────────────────────────────────────────
 
-const TENANT_STEPS = ["Personal Details", "Housing Preferences", "Employment & Income"];
-const LANDLORD_STEPS = ["Personal Details", "Business Info", "Payout Setup"];
+const TENANT_STEPS = ["Personal Details", "Housing Preferences", "Employment & Income", "Documents"];
+const LANDLORD_STEPS = ["Personal Details", "Business Info", "Payout Setup", "Documents"];
 
 const SLIDE_VARIANTS = {
   enter: (dir: number) => ({
@@ -67,6 +71,9 @@ export default function OnboardingWizard({ role }: OnboardingWizardProps) {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSavingDraft, setIsSavingDraft] = useState(false);
+  const [invalidFocusRevision, setInvalidFocusRevision] = useState(0);
+  const stepContainerRef = useRef<HTMLDivElement>(null);
+  const [hasNavigated, setHasNavigated] = useState(false);
 
   const isTenant = role === "Tenant";
   const steps = isTenant ? TENANT_STEPS : LANDLORD_STEPS;
@@ -79,6 +86,7 @@ export default function OnboardingWizard({ role }: OnboardingWizardProps) {
       personal: { firstName: "", lastName: "", phone: "", nin: "" },
       preferences: { preferredLocations: [], preferredTypes: [] },
       employment: { employmentType: "Employed", incomeRange: "Below50k" },
+      documents: [],
     },
     mode: "onChange",
   });
@@ -90,11 +98,40 @@ export default function OnboardingWizard({ role }: OnboardingWizardProps) {
       personal: { firstName: "", lastName: "", phone: "", nin: "" },
       business: { businessName: "", propertyCount: 1, propertyTypesOffered: [] },
       payout: { bankName: "", accountNumber: "", accountName: "" },
+      documents: [],
     },
     mode: "onChange",
   });
-
+  const tenantEmploymentType = useWatch({
+    control: tenantMethods.control,
+    name: "employment.employmentType",
+  });
   const methods = (isTenant ? tenantMethods : landlordMethods) as unknown as UseFormReturn<CompleteOnboardingPayload>;
+
+  const focusFirstInvalidControl = () => {
+    requestAnimationFrame(() => {
+      const control = stepContainerRef.current?.querySelector<HTMLElement>(
+        '[aria-invalid="true"], input:invalid, select:invalid, textarea:invalid',
+      );
+      control?.focus();
+    });
+  };
+
+  useEffect(() => {
+    if (!hasNavigated) return;
+    const container = stepContainerRef.current;
+    container?.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (invalidFocusRevision === 0) {
+      container?.focus({ preventScroll: true });
+      return;
+    }
+    const timer = window.setTimeout(() => {
+      container?.querySelector<HTMLElement>(
+        '[aria-invalid="true"], input:invalid, select:invalid, textarea:invalid',
+      )?.focus();
+    }, 350);
+    return () => window.clearTimeout(timer);
+  }, [currentStep, hasNavigated, invalidFocusRevision]);
 
   useEffect(() => {
     let cancelled = false;
@@ -140,63 +177,84 @@ export default function OnboardingWizard({ role }: OnboardingWizardProps) {
     return () => {
       cancelled = true;
     };
-  }, [methods, role, steps.length]);
+  }, [landlordMethods, methods, role, steps.length, tenantMethods]);
 
   // Per-step validation schemas (subset of the full schema)
   async function validateStep(step: number): Promise<boolean> {
     const values = methods.getValues() as Record<string, unknown>;
+    const validation = step === 0
+      ? { section: "personal", result: personalDetailsSchema.safeParse(values.personal) }
+      : step === 1 && isTenant
+        ? { section: "preferences", result: tenantPreferencesSchema.safeParse(values.preferences) }
+        : step === 1
+          ? { section: "business", result: landlordBusinessSchema.safeParse(values.business) }
+          : step === 2 && isTenant
+            ? { section: "employment", result: tenantEmploymentSchema.safeParse(values.employment) }
+            : { section: "payout", result: landlordPayoutSchema.safeParse(values.payout) };
 
-    if (step === 0) {
-      const result = personalDetailsSchema.safeParse(values.personal);
-      if (!result.success) {
-        result.error.errors.forEach((e) => {
-          const field = `personal.${e.path.join(".")}` as Parameters<typeof methods.setError>[0];
-          methods.setError(field, { message: e.message });
-        });
-        return false;
-      }
-      return true;
-    }
+    methods.clearErrors(validation.section as FieldPath<CompleteOnboardingPayload>);
+    if (validation.result.success) return true;
 
-    if (step === 1) {
-      if (isTenant) {
-        const result = tenantPreferencesSchema.safeParse(values.preferences);
-        if (!result.success) {
-          result.error.errors.forEach((e) => {
-            const field = `preferences.${e.path.join(".")}` as Parameters<typeof methods.setError>[0];
-            methods.setError(field, { message: e.message });
-          });
-          return false;
-        }
-      } else {
-        const result = landlordBusinessSchema.safeParse(values.business);
-        if (!result.success) {
-          result.error.errors.forEach((e) => {
-            const field = `business.${e.path.join(".")}` as Parameters<typeof methods.setError>[0];
-            methods.setError(field, { message: e.message });
-          });
-          return false;
-        }
-      }
-      return true;
-    }
+    validation.result.error.errors.forEach((issue) => {
+      const path = `${validation.section}.${issue.path.join(".")}` as FieldPath<CompleteOnboardingPayload>;
+      methods.setError(path, { type: "validation", message: issue.message });
+    });
+    focusFirstInvalidControl();
+    return false;
+  }
 
-    return true; // Step 2 validated on submit
+  async function persistDraft(step: number) {
+    const response = await fetch("/api/onboarding/draft", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ...methods.getValues(),
+        role,
+        currentStep: step,
+      }),
+    });
+    const result = (await response.json()) as {
+      success: boolean;
+      message: string;
+    };
+    if (!result.success) throw new Error(result.message);
   }
 
   const handleNext = async () => {
     const valid = await validateStep(currentStep);
     if (!valid) return;
+    const nextStep = currentStep + 1;
+    if (nextStep === steps.length - 1) {
+      setIsSavingDraft(true);
+      setSubmitError(null);
+      try {
+        // Persist the selected Tenant/Landlord role before document upload so
+        // the UI requirements and server authorization use the same profile.
+        await persistDraft(nextStep);
+        window.localStorage.setItem(`onboarding-step:${role}`, String(nextStep));
+      } catch (error) {
+        const message = error instanceof Error
+          ? error.message
+          : "Unable to prepare secure document uploads.";
+        setSubmitError(message);
+        toastError("Documents not ready", message);
+        return;
+      } finally {
+        setIsSavingDraft(false);
+      }
+    }
+    setHasNavigated(true);
     setDirection(1);
-    setCurrentStep((s) => s + 1);
+    setCurrentStep(nextStep);
   };
 
   const handleBack = () => {
+    setHasNavigated(true);
     setDirection(-1);
     setCurrentStep((s) => s - 1);
   };
 
-  const handleSubmit = methods.handleSubmit(async (data: CompleteOnboardingPayload) => {
+  const submitOnboarding = methods.handleSubmit(async (data: CompleteOnboardingPayload) => {
     setIsSubmitting(true);
     setSubmitError(null);
     const result = await completeOnboarding(data);
@@ -205,26 +263,23 @@ export default function OnboardingWizard({ role }: OnboardingWizardProps) {
       setIsSubmitting(false);
     }
     // On success: completeOnboarding() navigates to the account-review page.
+  }, (errors: FieldErrors<CompleteOnboardingPayload>) => {
+    const invalidStep = getFirstInvalidOnboardingStep(
+      isTenant ? "Tenant" : "Landlord",
+      errors as Record<string, unknown>,
+    );
+    setHasNavigated(true);
+    setDirection(invalidStep < currentStep ? -1 : 1);
+    setCurrentStep(invalidStep);
+    setSubmitError("Please correct the highlighted fields before submitting.");
+    setInvalidFocusRevision((revision) => revision + 1);
   });
 
   const handleSaveAndExit = async () => {
     setIsSavingDraft(true);
     setSubmitError(null);
     try {
-      const response = await fetch("/api/onboarding/draft", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...methods.getValues(),
-          role,
-          currentStep,
-        }),
-      });
-      const result = (await response.json()) as {
-        success: boolean;
-        message: string;
-      };
-      if (!result.success) throw new Error(result.message);
+      await persistDraft(currentStep);
       window.localStorage.setItem(
         `onboarding-step:${role}`,
         String(currentStep),
@@ -247,12 +302,14 @@ export default function OnboardingWizard({ role }: OnboardingWizardProps) {
         case 0: return <PersonalDetailsStep />;
         case 1: return <TenantPreferencesStep />;
         case 2: return <TenantEmploymentStep />;
+        case 3: return <DocumentsStep role="Tenant" employmentType={tenantEmploymentType} />;
       }
     } else {
       switch (currentStep) {
         case 0: return <PersonalDetailsStep />;
         case 1: return <LandlordBusinessStep />;
         case 2: return <LandlordPayoutStep />;
+        case 3: return <DocumentsStep role="Landlord" />;
       }
     }
   }
@@ -270,6 +327,10 @@ export default function OnboardingWizard({ role }: OnboardingWizardProps) {
             .submitter as HTMLButtonElement | null;
           if (submitter?.value === "save-exit") {
             void handleSaveAndExit();
+          } else if (isLastStep) {
+            void submitOnboarding();
+          } else {
+            void handleNext();
           }
         }}
       >
@@ -285,7 +346,13 @@ export default function OnboardingWizard({ role }: OnboardingWizardProps) {
         </div>
 
         {/* Step content with slide animation */}
-        <div className="relative min-h-[320px] overflow-hidden">
+        <div
+          ref={stepContainerRef}
+          tabIndex={-1}
+          role="group"
+          aria-label={steps[currentStep]}
+          className="relative min-h-[320px] scroll-mt-24 overflow-x-clip outline-none"
+        >
           <AnimatePresence mode="wait" custom={direction}>
             <motion.div
               key={currentStep}
@@ -309,7 +376,7 @@ export default function OnboardingWizard({ role }: OnboardingWizardProps) {
         )}
 
         {/* Navigation */}
-        <div className="flex items-center gap-3 pt-2">
+        <div className="sticky bottom-0 z-20 -mx-5 flex items-center gap-3 border-t border-line bg-white/95 px-5 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] backdrop-blur sm:-mx-7 sm:px-7">
           {currentStep > 0 && (
             <button
               type="button"
@@ -323,8 +390,9 @@ export default function OnboardingWizard({ role }: OnboardingWizardProps) {
           )}
 
           <button
-            type="button"
-            onClick={isLastStep ? handleSubmit : handleNext}
+            type="submit"
+            name="intent"
+            value={isLastStep ? "submit" : "next"}
             disabled={isSubmitting || isSavingDraft}
             className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-navy-950 px-5 py-3 text-sm font-bold text-white transition hover:bg-navy-800 disabled:opacity-60"
           >

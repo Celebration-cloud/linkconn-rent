@@ -6,7 +6,10 @@ import type {
   VerificationSubmissionStatus,
 } from "@prisma/client";
 import { prisma } from "@/lib/db/client";
-import { isAdminReviewExemptRole } from "@/lib/auth/review-access";
+import {
+  isAdminReviewExemptRole,
+  needsOnboarding,
+} from "@/lib/auth/review-access";
 
 export type AccountReviewStatus =
   | VerificationSubmissionStatus
@@ -64,7 +67,15 @@ export function getAccountGateDestination(
 ): "/forbidden" | "/onboarding" | "/account-review" | null {
   if (profile.accountStatus === "Suspended") return "/forbidden";
   if (isAdminReviewExemptRole(profile.role)) return null;
-  if (!profile.onboardingComplete) return "/onboarding";
+  if (
+    needsOnboarding(
+      profile.role,
+      profile.onboardingComplete,
+      profile.accountReviewStatus,
+    )
+  ) {
+    return "/onboarding";
+  }
   if (profile.accountReviewStatus !== "Approved") return "/account-review";
   return null;
 }

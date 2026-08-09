@@ -169,6 +169,7 @@ export default function SignupForm() {
         name: parsed.data.name,
         email: parsed.data.email,
         password: parsed.data.password,
+        ...(!isAdminInvitation ? { role } : {}),
         callbackURL: `/verify-email?next=${encodeURIComponent(next)}`,
       }),
     });

@@ -4,11 +4,13 @@ import { auth } from "@/lib/neon-auth";
 import { checkRateLimit, getClientIp } from "@/lib/security/rate-limiter";
 import { verifyCsrf } from "@/lib/security/csrf";
 import { internalRedirectSchema } from "@/lib/security/internal-redirect";
+import { prisma } from "@/lib/db/client";
 
 const signupSchema = z.object({
   name: z.string().min(2, "Enter your full name").max(120),
   email: z.string().email("Enter a valid email address").max(254),
   password: z.string().min(8, "Password must be at least 8 characters").max(1024),
+  role: z.enum(["Tenant", "Landlord"]).default("Tenant"),
   callbackURL: internalRedirectSchema.optional(),
 });
 
@@ -52,7 +54,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const { name, email, password, callbackURL } = parsed.data;
+    const { name, email, password, role, callbackURL } = parsed.data;
 
     // 4. Register via Neon Auth
     const result = await auth.signUp.email({
@@ -67,6 +69,42 @@ export async function POST(req: Request) {
         { success: false, message: "Unable to create account with those details" },
         { status: 400 }
       );
+    }
+
+    const user = result.data?.user;
+    if (!user) {
+      return NextResponse.json(
+        { success: false, message: "Account was created but could not be initialized. Please sign in to continue." },
+        { status: 500 },
+      );
+    }
+    const [firstName = "New", ...lastNameParts] = name.trim().split(/\s+/);
+    try {
+      await prisma.profile.upsert({
+        where: { id: user.id },
+        create: {
+          id: user.id,
+          email: user.email,
+          firstName,
+          lastName: lastNameParts.join(" ") || "User",
+          emailVerified: Boolean(user.emailVerified),
+          role,
+          onboardingComplete: false,
+        },
+        update: {
+          email: user.email,
+          firstName,
+          lastName: lastNameParts.join(" ") || "User",
+          emailVerified: Boolean(user.emailVerified),
+          role,
+          onboardingComplete: false,
+        },
+      });
+    } catch (error) {
+      // Neon Auth owns the new identity. Do not falsely report signup failure
+      // after that irreversible step; onboarding draft persistence retries the
+      // role mirror before any role-specific document can be uploaded.
+      console.error("[signup profile role mirror]", error);
     }
 
     return NextResponse.json({

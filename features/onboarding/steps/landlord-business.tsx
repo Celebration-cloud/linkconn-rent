@@ -3,8 +3,8 @@
 import { useFormContext } from "react-hook-form";
 import { Building2, Home, Hash } from "lucide-react";
 import { PROPERTY_TYPES, type LandlordBusinessData } from "@/schemas/onboarding";
-import { cn } from "@/utils/cn";
-import { Input } from "@/components/ui/form-controls";
+import { FormField, Input } from "@/components/ui/form-controls";
+import { CheckboxChipGroup } from "@/features/onboarding/components/choice-groups";
 
 export default function LandlordBusinessStep() {
   const {
@@ -17,80 +17,43 @@ export default function LandlordBusinessStep() {
 
   const selectedTypes: string[] = watch("business.propertyTypesOffered") ?? [];
 
-  function toggleType(type: string) {
-    const next = selectedTypes.includes(type)
-      ? selectedTypes.filter((t) => t !== type)
-      : [...selectedTypes, type];
-    setValue("business.propertyTypesOffered", next, { shouldValidate: true });
-  }
-
   return (
     <div className="space-y-6">
       {/* Business name */}
-      <div className="space-y-1.5">
-        <label className="flex items-center gap-1.5 text-sm font-semibold text-navy-800" htmlFor="business.businessName">
-          <Building2 className="h-4 w-4 text-brandgreen-500" />
-          Business / Agency Name{" "}
-          <span className="font-normal text-navy-400">(optional)</span>
-        </label>
+      <FormField label="Business / agency name" htmlFor="business.businessName" hint="Optional. Enter this only when you manage properties through a business or agency.">
         <Input
           id="business.businessName"
           {...register("business.businessName")}
           placeholder="e.g. Okonkwo Properties Ltd."
+          leadingIcon={Building2}
         />
-      </div>
+      </FormField>
 
       {/* Property count */}
-      <div className="space-y-1.5">
-        <label className="flex items-center gap-1.5 text-sm font-semibold text-navy-800" htmlFor="business.propertyCount">
-          <Hash className="h-4 w-4 text-brandgreen-500" />
-          Number of Properties You Manage
-        </label>
+      <FormField label="Number of properties you manage" htmlFor="business.propertyCount" required error={errors.business?.propertyCount?.message}>
         <Input
           id="business.propertyCount"
           {...register("business.propertyCount")}
           type="number"
+          inputMode="numeric"
           min={1}
+          step={1}
           placeholder="e.g. 5"
+          leadingIcon={Hash}
           invalid={Boolean(errors.business?.propertyCount)}
         />
-        {errors.business?.propertyCount && (
-          <p className="text-xs text-red-500">
-            {String((errors.business.propertyCount as { message?: string })?.message ?? "")}
-          </p>
-        )}
-      </div>
+      </FormField>
 
       {/* Property types offered */}
-      <div className="space-y-2">
-        <label className="flex items-center gap-1.5 text-sm font-semibold text-navy-800">
-          <Home className="h-4 w-4 text-brandgreen-500" />
-          Types of Properties You List
-        </label>
-        <p className="text-xs text-navy-400">Select all that apply</p>
-        <div className="flex flex-wrap gap-2">
-          {PROPERTY_TYPES.map((type) => (
-            <button
-              key={type}
-              type="button"
-              onClick={() => toggleType(type)}
-              className={cn(
-                "rounded-full border px-3 py-1.5 text-xs font-medium transition-all",
-                selectedTypes.includes(type)
-                  ? "border-brandgreen-500 bg-brandgreen-50 text-brandgreen-700"
-                  : "border-navy-200 bg-white text-navy-600 hover:border-navy-400"
-              )}
-            >
-              {type}
-            </button>
-          ))}
-        </div>
-        {errors.business?.propertyTypesOffered && (
-          <p className="text-xs text-red-500">
-            {String((errors.business.propertyTypesOffered as { message?: string })?.message ?? "")}
-          </p>
-        )}
-      </div>
+      <CheckboxChipGroup
+        name="business.propertyTypesOffered"
+        legend={<span className="flex items-center gap-1.5"><Home className="size-4 text-forest-600" aria-hidden="true" />Types of properties you list</span>}
+        hint="Select all that apply."
+        options={PROPERTY_TYPES.map((type) => ({ value: type, label: type }))}
+        values={selectedTypes}
+        onChange={(values) => setValue("business.propertyTypesOffered", values, { shouldValidate: true, shouldDirty: true })}
+        error={errors.business?.propertyTypesOffered?.message}
+      />
     </div>
   );
 }

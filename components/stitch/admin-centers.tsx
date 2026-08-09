@@ -28,10 +28,47 @@ interface VerificationItem {
   type: string;
   status: string;
   createdAt: Date;
-  owner: { firstName: string; lastName: string; email: string; role: string };
+  owner: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string | null;
+    role: string;
+    emailVerified: boolean;
+    tenantProfile: {
+      employmentType: string;
+      employerName: string | null;
+      jobTitle: string | null;
+      incomeRange: string;
+      preferredLocations: string[];
+      preferredTypes: string[];
+      budgetMin: number | null;
+      budgetMax: number | null;
+      moveInDate: Date | null;
+      ninStatus: string;
+      ninNumber: string | null;
+    } | null;
+    landlordProfile: {
+      businessName: string | null;
+      propertyCount: number;
+      propertyTypesOffered: string[];
+      ninStatus: string;
+      ninNumber: string | null;
+      bankName: string | null;
+      accountNumber: string | null;
+      accountName: string | null;
+    } | null;
+  };
   property?: { title: string } | null;
   assignedTo?: { firstName: string; lastName: string } | null;
-  documents: Array<{ id: string; fileName: string; mimeType?: string | null }>;
+  documents: Array<{
+    id: string;
+    kind: string;
+    fileName: string | null;
+    mimeType?: string | null;
+    size?: number | null;
+    deletedAt?: Date | null;
+  }>;
 }
 interface DisputeItem {
   id: string;
@@ -203,7 +240,13 @@ function EmptyQueue({ label }: { label: string }) {
   );
 }
 
-export function VerificationQueue({ initialData }: { initialData: PageData<VerificationItem> }) {
+export function VerificationQueue({
+  initialData,
+  canViewPrivateDocuments,
+}: {
+  initialData: PageData<VerificationItem>;
+  canViewPrivateDocuments: boolean;
+}) {
   const { user } = useAuth();
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -276,6 +319,9 @@ export function VerificationQueue({ initialData }: { initialData: PageData<Verif
           <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
             <Fact label="Submission" value={selected.type} />
             <Fact label="Status" value={selected.status} />
+            <Fact label="Role" value={formatReviewValue(selected.owner.role)} />
+            <Fact label="Phone" value={selected.owner.phone || "Not supplied"} />
+            <Fact label="Email verification" value={selected.owner.emailVerified ? "Verified" : "Not verified"} />
             <Fact
               label="Assigned to"
               value={
@@ -287,14 +333,47 @@ export function VerificationQueue({ initialData }: { initialData: PageData<Verif
               value={`${selected.documents.length} document${selected.documents.length === 1 ? "" : "s"}`}
             />
           </dl>
+          {selected.owner.tenantProfile && (
+            <ReviewFactsSection title="Tenant onboarding details">
+              <Fact label="Employment" value={formatReviewValue(selected.owner.tenantProfile.employmentType)} />
+              <Fact label="Employer / organisation" value={selected.owner.tenantProfile.employerName || "Not supplied"} />
+              <Fact label="Job title" value={selected.owner.tenantProfile.jobTitle || "Not supplied"} />
+              <Fact label="Income range" value={formatReviewValue(selected.owner.tenantProfile.incomeRange)} />
+              <Fact label="Preferred locations" value={formatReviewList(selected.owner.tenantProfile.preferredLocations)} />
+              <Fact label="Preferred property types" value={formatReviewList(selected.owner.tenantProfile.preferredTypes)} />
+              <Fact label="Minimum budget" value={formatReviewCurrency(selected.owner.tenantProfile.budgetMin)} />
+              <Fact label="Maximum budget" value={formatReviewCurrency(selected.owner.tenantProfile.budgetMax)} />
+              <Fact label="Move-in date" value={formatReviewDate(selected.owner.tenantProfile.moveInDate)} />
+              <Fact label="NIN status" value={formatReviewValue(selected.owner.tenantProfile.ninStatus)} />
+              {canViewPrivateDocuments && <Fact label="NIN" value={selected.owner.tenantProfile.ninNumber || "Not supplied"} />}
+            </ReviewFactsSection>
+          )}
+          {selected.owner.landlordProfile && (
+            <ReviewFactsSection title="Landlord onboarding details">
+              <Fact label="Business / agency" value={selected.owner.landlordProfile.businessName || "Not supplied"} />
+              <Fact label="Properties managed" value={String(selected.owner.landlordProfile.propertyCount)} />
+              <Fact label="Property types" value={formatReviewList(selected.owner.landlordProfile.propertyTypesOffered)} />
+              <Fact label="NIN status" value={formatReviewValue(selected.owner.landlordProfile.ninStatus)} />
+              {canViewPrivateDocuments && <Fact label="NIN" value={selected.owner.landlordProfile.ninNumber || "Not supplied"} />}
+              <Fact label="Payout bank" value={selected.owner.landlordProfile.bankName || "Not supplied"} />
+              <Fact label="Payout account name" value={selected.owner.landlordProfile.accountName || "Not supplied"} />
+              {canViewPrivateDocuments && <Fact label="Payout account number" value={selected.owner.landlordProfile.accountNumber || "Not supplied"} />}
+            </ReviewFactsSection>
+          )}
           {selected.documents.length > 0 && (
-            <ul className="mt-4 space-y-2">
+            <div className="mt-5">
+              <h3 className="text-sm font-extrabold text-ink">Submitted documents</h3>
+              <ul className="mt-2 space-y-2">
               {selected.documents.map((document) => (
-                <li key={document.id} className="rounded-lg bg-sand-100 p-3 text-xs font-semibold">
-                  {document.fileName}
+                <li key={document.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-sand-100 p-3 text-xs font-semibold">
+                  <span className="min-w-0"><span className="block text-ink">{document.kind.replace(/([a-z])([A-Z])/g, "$1 $2")}</span><span className="block truncate text-muted">{document.fileName ?? "File removed after retention period"}</span></span>
+                  {canViewPrivateDocuments && !document.deletedAt && (
+                    <a href={`/api/admin/verifications/${selected.id}/documents/${document.id}`} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center rounded-lg border border-forest-300 px-3 text-forest-800 hover:bg-white">View securely</a>
+                  )}
                 </li>
               ))}
-            </ul>
+              </ul>
+            </div>
           )}
           <button disabled={pending} onClick={() => void assignToMe()} className="stitch-button-secondary mt-5 w-full">
             Assign to me
@@ -585,6 +664,38 @@ export function ModerationCenter({ initialData }: { initialData: ModerationData 
 function AdminCanvas({ children }: { children: React.ReactNode }) {
   return <div className="mx-auto w-full max-w-7xl p-4 pb-28 sm:p-6 md:pb-8 lg:p-8">{children}</div>;
 }
+
+function formatReviewValue(value: string) {
+  return value.replace(/([a-z])([A-Z])/g, "$1 $2").replace(/(\d+)k\b/gi, "$1,000");
+}
+
+function formatReviewList(values: string[]) {
+  return values.length > 0 ? values.join(", ") : "Not supplied";
+}
+
+function formatReviewCurrency(value: number | null) {
+  return value === null
+    ? "Not supplied"
+    : new Intl.NumberFormat("en-NG", { style: "currency", currency: "NGN", maximumFractionDigits: 0 }).format(value);
+}
+
+function formatReviewDate(value: Date | null) {
+  if (!value) return "Not supplied";
+  const date = new Date(value);
+  return Number.isNaN(date.getTime())
+    ? "Not supplied"
+    : new Intl.DateTimeFormat("en-NG", { dateStyle: "medium", timeZone: "UTC" }).format(date);
+}
+
+function ReviewFactsSection({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <section className="mt-5 rounded-xl border border-line bg-sand-50 p-4">
+      <h3 className="text-sm font-extrabold text-ink">{title}</h3>
+      <dl className="mt-3 grid gap-3 text-sm sm:grid-cols-2">{children}</dl>
+    </section>
+  );
+}
+
 function Fact({ label, value }: { label: string; value: string }) {
   return (
     <div>

@@ -3,7 +3,9 @@ import { parseAdminSearchParams, type AdminSearchParams } from "@/features/admin
 import { AdministrationRepository } from "@/repositories/administration.repository";
 
 export default async function AdminDisputesPage({ searchParams }: { searchParams: AdminSearchParams }) {
+  await connection();
   const filters = await parseAdminSearchParams(searchParams);
   const data = await AdministrationRepository.listDisputes(filters);
   return <DisputeCenter initialData={data} />;
 }
+import { connection } from "next/server";

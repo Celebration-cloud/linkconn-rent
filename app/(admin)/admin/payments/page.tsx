@@ -3,6 +3,8 @@ import { parseAdminSearchParams, type AdminSearchParams } from "@/features/admin
 import { AdministrationRepository } from "@/repositories/administration.repository";
 
 export default async function AdminPaymentsPage({ searchParams }: { searchParams: AdminSearchParams }) {
+  await connection();
   const data = await AdministrationRepository.listPayments(await parseAdminSearchParams(searchParams));
   return <PaymentsWorkspace data={data} />;
 }
+import { connection } from "next/server";

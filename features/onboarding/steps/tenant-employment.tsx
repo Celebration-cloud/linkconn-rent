@@ -9,8 +9,9 @@ import {
   incomeRangeEnum,
   type TenantEmploymentData,
 } from "@/schemas/onboarding";
-import { cn } from "@/utils/cn";
-import { Input } from "@/components/ui/form-controls";
+import { FormField, Input } from "@/components/ui/form-controls";
+import { RadioCardGroup } from "@/features/onboarding/components/choice-groups";
+import { employmentUsesOrganizationDetails } from "@/features/onboarding/utils/form-values";
 
 export default function TenantEmploymentStep() {
   const {
@@ -23,120 +24,65 @@ export default function TenantEmploymentStep() {
 
   const selectedEmployment = watch("employment.employmentType");
   const selectedIncome = watch("employment.incomeRange");
-  const showEmployerFields =
-    selectedEmployment === "Employed" ||
-    selectedEmployment === "SelfEmployed" ||
-    selectedEmployment === "Freelancer";
+  const showEmployerFields = employmentUsesOrganizationDetails(selectedEmployment);
 
   return (
     <div className="space-y-6">
       {/* Employment type */}
-      <div className="space-y-2">
-        <label className="flex items-center gap-1.5 text-sm font-semibold text-navy-800">
-          <Briefcase className="h-4 w-4 text-brandgreen-500" />
-          Employment Status
-        </label>
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-          {employmentTypeEnum.options.map((type) => (
-            <button
-              key={type}
-              type="button"
-              onClick={() =>
-                setValue("employment.employmentType", type, {
-                  shouldValidate: true,
-                })
-              }
-              className={cn(
-                "rounded-2xl border px-3 py-2.5 text-center text-xs font-medium transition-all",
-                selectedEmployment === type
-                  ? "border-brandgreen-500 bg-brandgreen-50 text-brandgreen-700"
-                  : "border-navy-200 bg-white text-navy-600 hover:border-navy-400"
-              )}
-            >
-              {EMPLOYMENT_LABELS[type]}
-            </button>
-          ))}
-        </div>
-        {errors.employment?.employmentType && (
-          <p className="text-xs text-red-500">
-            {String((errors.employment.employmentType as { message?: string })?.message ?? "")}
-          </p>
-        )}
-      </div>
+      <RadioCardGroup
+        name="employment.employmentType"
+        legend={<span className="flex items-center gap-1.5"><Briefcase className="size-4 text-forest-600" aria-hidden="true" />Employment status</span>}
+        columns
+        options={employmentTypeEnum.options.map((type) => ({ value: type, label: EMPLOYMENT_LABELS[type] }))}
+        value={selectedEmployment}
+        onChange={(value) => {
+          setValue("employment.employmentType", value, { shouldValidate: true, shouldDirty: true });
+          if (!employmentUsesOrganizationDetails(value)) {
+            setValue("employment.employerName", "", { shouldDirty: true });
+            setValue("employment.jobTitle", "", { shouldDirty: true });
+          }
+        }}
+        error={errors.employment?.employmentType?.message}
+      />
 
       {/* Employer fields — shown conditionally */}
       {showEmployerFields && (
         <div className="space-y-4">
-          <div className="space-y-1.5">
-            <label className="text-sm font-semibold text-navy-800" htmlFor="employment.employerName">
-              <Building2 className="inline h-4 w-4 text-navy-400 mr-1" />
-              {selectedEmployment === "SelfEmployed"
+          <FormField
+            label={selectedEmployment === "SelfEmployed"
                 ? "Business Name"
                 : selectedEmployment === "Freelancer"
                 ? "Primary Client / Platform"
                 : "Employer Name"}
-              <span className="font-normal text-navy-400 ml-1">(optional)</span>
-            </label>
+            htmlFor="employment.employerName"
+            hint="Optional"
+          >
             <Input
               id="employment.employerName"
               {...register("employment.employerName")}
               placeholder="e.g. MTN Nigeria PLC"
+              leadingIcon={Building2}
             />
-          </div>
-          <div className="space-y-1.5">
-            <label className="text-sm font-semibold text-navy-800" htmlFor="employment.jobTitle">
-              Job Title <span className="font-normal text-navy-400">(optional)</span>
-            </label>
+          </FormField>
+          <FormField label="Job title" htmlFor="employment.jobTitle" hint="Optional">
             <Input
               id="employment.jobTitle"
               {...register("employment.jobTitle")}
               placeholder="e.g. Software Engineer"
             />
-          </div>
+          </FormField>
         </div>
       )}
 
       {/* Income range */}
-      <div className="space-y-2">
-        <label className="flex items-center gap-1.5 text-sm font-semibold text-navy-800">
-          <DollarSign className="h-4 w-4 text-brandgreen-500" />
-          Monthly Income Range
-        </label>
-        <div className="space-y-2">
-          {incomeRangeEnum.options.map((range) => (
-            <button
-              key={range}
-              type="button"
-              onClick={() =>
-                setValue("employment.incomeRange", range, {
-                  shouldValidate: true,
-                })
-              }
-              className={cn(
-                "flex w-full items-center justify-between rounded-2xl border px-4 py-3 text-sm transition-all",
-                selectedIncome === range
-                  ? "border-brandgreen-500 bg-brandgreen-50 text-brandgreen-800"
-                  : "border-navy-200 bg-white text-navy-700 hover:border-navy-400"
-              )}
-            >
-              <span>{INCOME_RANGE_LABELS[range]}</span>
-              <span
-                className={cn(
-                  "h-4 w-4 rounded-full border-2 transition-all",
-                  selectedIncome === range
-                    ? "border-brandgreen-500 bg-brandgreen-500"
-                    : "border-navy-300 bg-white"
-                )}
-              />
-            </button>
-          ))}
-        </div>
-        {errors.employment?.incomeRange && (
-          <p className="text-xs text-red-500">
-            {String((errors.employment.incomeRange as { message?: string })?.message ?? "")}
-          </p>
-        )}
-      </div>
+      <RadioCardGroup
+        name="employment.incomeRange"
+        legend={<span className="flex items-center gap-1.5"><DollarSign className="size-4 text-forest-600" aria-hidden="true" />Monthly income range</span>}
+        options={incomeRangeEnum.options.map((range) => ({ value: range, label: INCOME_RANGE_LABELS[range] }))}
+        value={selectedIncome}
+        onChange={(value) => setValue("employment.incomeRange", value, { shouldValidate: true, shouldDirty: true })}
+        error={errors.employment?.incomeRange?.message}
+      />
     </div>
   );
 }

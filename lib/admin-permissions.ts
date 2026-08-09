@@ -11,3 +11,6 @@ export function canSanctionUsers(role: AppRole) {
   return SANCTION_ROLES.includes(role);
 }
 
+export function canAccessPrivateVerificationDocuments(role: AppRole) {
+  return role === "Admin" || role === "SuperAdmin";
+}

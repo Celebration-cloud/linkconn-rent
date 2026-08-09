@@ -1,4 +1,5 @@
 import { loadEnvConfig } from "@next/env";
+import { PrismaNeon } from "@prisma/adapter-neon";
 import { PrismaClient } from "@prisma/client";
 import { validateBootstrapDatabaseUrl } from "./admin-bootstrap/utils";
 
@@ -18,7 +19,9 @@ function requireMatchingNeonProject(databaseUrl: URL) {
 async function main() {
   const databaseUrl = validateBootstrapDatabaseUrl(process.env.DATABASE_URL);
   requireMatchingNeonProject(databaseUrl);
-  const prisma = new PrismaClient();
+  const prisma = new PrismaClient({
+    adapter: new PrismaNeon({ connectionString: databaseUrl.toString() }),
+  });
   try {
     const [identity, profiles, properties, payments, verifications, disputes, audits, superAdmins] = await Promise.all([
       prisma.$queryRaw<Array<{ database: string; version: string }>>`SELECT current_database()::text AS database, version()::text AS version`,

@@ -3,6 +3,8 @@ import { parseAdminSearchParams, type AdminSearchParams } from "@/features/admin
 import { AdministrationRepository } from "@/repositories/administration.repository";
 
 export default async function AdminPropertiesPage({ searchParams }: { searchParams: AdminSearchParams }) {
+  await connection();
   const data = await AdministrationRepository.listProperties(await parseAdminSearchParams(searchParams));
   return <PropertiesWorkspace data={data} />;
 }
+import { connection } from "next/server";

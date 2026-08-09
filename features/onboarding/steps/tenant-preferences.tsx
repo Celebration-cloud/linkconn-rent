@@ -7,8 +7,9 @@ import {
   PROPERTY_TYPES,
   type TenantPreferencesData,
 } from "@/schemas/onboarding";
-import { cn } from "@/utils/cn";
-import { Input } from "@/components/ui/form-controls";
+import { FormField, Input } from "@/components/ui/form-controls";
+import { CheckboxChipGroup } from "@/features/onboarding/components/choice-groups";
+import { normalizeOptionalNumberInput } from "@/features/onboarding/utils/form-values";
 
 export default function TenantPreferencesStep() {
   const {
@@ -22,121 +23,77 @@ export default function TenantPreferencesStep() {
   const selectedLocations: string[] = watch("preferences.preferredLocations") ?? [];
   const selectedTypes: string[] = watch("preferences.preferredTypes") ?? [];
 
-  function toggleItem(
-    field: "preferences.preferredLocations" | "preferences.preferredTypes",
-    value: string,
-    current: string[]
-  ) {
-    const next = current.includes(value)
-      ? current.filter((v) => v !== value)
-      : [...current, value];
-    setValue(field, next, { shouldValidate: true });
-  }
-
   return (
     <div className="space-y-6">
-      {/* Preferred locations */}
-      <div className="space-y-2">
-        <label className="flex items-center gap-1.5 text-sm font-semibold text-navy-800">
-          <MapPin className="h-4 w-4 text-brandgreen-500" />
-          Preferred Locations
-        </label>
-        <p className="text-xs text-navy-400">Select all cities you&apos;d like to live in</p>
-        <div className="flex flex-wrap gap-2">
-          {NIGERIAN_CITIES.map((city) => (
-            <button
-              key={city}
-              type="button"
-              onClick={() =>
-                toggleItem("preferences.preferredLocations", city, selectedLocations)
-              }
-              className={cn(
-                "rounded-full border px-3 py-1.5 text-xs font-medium transition-all",
-                selectedLocations.includes(city)
-                  ? "border-brandgreen-500 bg-brandgreen-50 text-brandgreen-700"
-                  : "border-navy-200 bg-white text-navy-600 hover:border-navy-400"
-              )}
-            >
-              {city}
-            </button>
-          ))}
-        </div>
-        {errors.preferences?.preferredLocations && (
-          <p className="text-xs text-red-500">
-            {String((errors.preferences.preferredLocations as { message?: string })?.message ?? "")}
-          </p>
-        )}
-      </div>
+      <CheckboxChipGroup
+        name="preferences.preferredLocations"
+        legend={<span className="flex items-center gap-1.5"><MapPin className="size-4 text-forest-600" aria-hidden="true" />Preferred locations</span>}
+        hint="Select all cities you would like to live in."
+        options={NIGERIAN_CITIES.map((city) => ({ value: city, label: city }))}
+        values={selectedLocations}
+        onChange={(values) => setValue("preferences.preferredLocations", values, { shouldValidate: true, shouldDirty: true })}
+        error={errors.preferences?.preferredLocations?.message}
+      />
 
       {/* Preferred property types */}
-      <div className="space-y-2">
-        <label className="flex items-center gap-1.5 text-sm font-semibold text-navy-800">
-          <Home className="h-4 w-4 text-brandgreen-500" />
-          Property Types
-        </label>
-        <p className="text-xs text-navy-400">What kinds of homes are you looking for?</p>
-        <div className="flex flex-wrap gap-2">
-          {PROPERTY_TYPES.map((type) => (
-            <button
-              key={type}
-              type="button"
-              onClick={() =>
-                toggleItem("preferences.preferredTypes", type, selectedTypes)
-              }
-              className={cn(
-                "rounded-full border px-3 py-1.5 text-xs font-medium transition-all",
-                selectedTypes.includes(type)
-                  ? "border-brandgreen-500 bg-brandgreen-50 text-brandgreen-700"
-                  : "border-navy-200 bg-white text-navy-600 hover:border-navy-400"
-              )}
-            >
-              {type}
-            </button>
-          ))}
-        </div>
-        {errors.preferences?.preferredTypes && (
-          <p className="text-xs text-red-500">
-            {String((errors.preferences.preferredTypes as { message?: string })?.message ?? "")}
-          </p>
-        )}
-      </div>
+      <CheckboxChipGroup
+        name="preferences.preferredTypes"
+        legend={<span className="flex items-center gap-1.5"><Home className="size-4 text-forest-600" aria-hidden="true" />Property types</span>}
+        hint="Select every home type that works for you."
+        options={PROPERTY_TYPES.map((type) => ({ value: type, label: type }))}
+        values={selectedTypes}
+        onChange={(values) => setValue("preferences.preferredTypes", values, { shouldValidate: true, shouldDirty: true })}
+        error={errors.preferences?.preferredTypes?.message}
+      />
 
       {/* Budget range */}
-      <div className="space-y-2">
-        <label className="flex items-center gap-1.5 text-sm font-semibold text-navy-800">
+      <fieldset className="space-y-2">
+        <legend className="flex items-center gap-1.5 text-sm font-semibold text-content">
           <Banknote className="h-4 w-4 text-brandgreen-500" />
           Monthly Budget Range (₦) <span className="font-normal text-navy-400">(optional)</span>
-        </label>
-        <div className="grid grid-cols-2 gap-3">
-          <div>
+        </legend>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <FormField label="Minimum" htmlFor="preferences.budgetMin" error={errors.preferences?.budgetMin?.message}>
             <Input
-              {...register("preferences.budgetMin")}
+              id="preferences.budgetMin"
+              {...register("preferences.budgetMin", {
+                setValueAs: normalizeOptionalNumberInput,
+              })}
               type="number"
+              inputMode="numeric"
+              min={0}
+              step={1000}
               placeholder="Min e.g. 50000"
+              invalid={Boolean(errors.preferences?.budgetMin)}
             />
-          </div>
-          <div>
+          </FormField>
+          <FormField label="Maximum" htmlFor="preferences.budgetMax" error={errors.preferences?.budgetMax?.message}>
             <Input
-              {...register("preferences.budgetMax")}
+              id="preferences.budgetMax"
+              {...register("preferences.budgetMax", {
+                setValueAs: normalizeOptionalNumberInput,
+              })}
               type="number"
+              inputMode="numeric"
+              min={0}
+              step={1000}
               placeholder="Max e.g. 200000"
+              invalid={Boolean(errors.preferences?.budgetMax)}
             />
-          </div>
+          </FormField>
         </div>
-      </div>
+      </fieldset>
 
       {/* Move-in date */}
-      <div className="space-y-1.5">
-        <label className="flex items-center gap-1.5 text-sm font-semibold text-navy-800" htmlFor="preferences.moveInDate">
-          <Calendar className="h-4 w-4 text-brandgreen-500" />
-          Earliest Move-in Date <span className="font-normal text-navy-400">(optional)</span>
-        </label>
+      <FormField label="Earliest move-in date (optional)" htmlFor="preferences.moveInDate" error={errors.preferences?.moveInDate?.message}>
         <Input
           id="preferences.moveInDate"
           {...register("preferences.moveInDate")}
           type="date"
+          leadingIcon={Calendar}
+          invalid={Boolean(errors.preferences?.moveInDate)}
         />
-      </div>
+      </FormField>
     </div>
   );
 }

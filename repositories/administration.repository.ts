@@ -13,11 +13,13 @@ import {
   isListingDecision,
 } from "@/lib/admin-lifecycle";
 import {
+  canAccessPrivateVerificationDocuments,
   canReviewQueues,
   canSanctionUsers,
   REVIEWER_ROLES,
 } from "@/lib/admin-permissions";
 import type { AdminQueueFilters } from "@/schemas/administration";
+import { getDocumentDeletionDeadline } from "@/features/verifications/document-retention";
 
 function pageResult<T>(items: T[], totalItems: number, page: number, pageSize: number) {
   return {
@@ -87,7 +89,7 @@ export class AdministrationRepository {
     };
   }
 
-  static async listVerifications(filters: AdminQueueFilters) {
+  static async listVerifications(filters: AdminQueueFilters, viewerRole?: AppRole) {
     const where: Prisma.VerificationSubmissionWhereInput = {
         ...(filters.status ? { status: filters.status as never } : {}),
         ...(filters.query
@@ -106,10 +108,56 @@ export class AdministrationRepository {
       prisma.verificationSubmission.findMany({
       where,
       include: {
-        owner: { select: { id: true, firstName: true, lastName: true, email: true, role: true } },
+        owner: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            phone: true,
+            role: true,
+            emailVerified: true,
+            tenantProfile: {
+              select: {
+                employmentType: true,
+                employerName: true,
+                jobTitle: true,
+                incomeRange: true,
+                preferredLocations: true,
+                preferredTypes: true,
+                budgetMin: true,
+                budgetMax: true,
+                moveInDate: true,
+                ninStatus: true,
+                ninNumber: true,
+              },
+            },
+            landlordProfile: {
+              select: {
+                businessName: true,
+                propertyCount: true,
+                propertyTypesOffered: true,
+                ninStatus: true,
+                ninNumber: true,
+                bankName: true,
+                accountNumber: true,
+                accountName: true,
+              },
+            },
+          },
+        },
         property: { select: { id: true, title: true } },
         assignedTo: { select: { id: true, firstName: true, lastName: true } },
-        documents: true,
+        documents: {
+          select: {
+            id: true,
+            kind: true,
+            fileName: true,
+            mimeType: true,
+            size: true,
+            deletedAt: true,
+          },
+        },
       },
       orderBy: { createdAt: "asc" },
       skip: (filters.page - 1) * filters.pageSize,
@@ -117,7 +165,29 @@ export class AdministrationRepository {
     }),
       prisma.verificationSubmission.count({ where }),
     ]);
-    return pageResult(items, totalItems, filters.page, filters.pageSize);
+    const canViewSensitive = viewerRole
+      ? canAccessPrivateVerificationDocuments(viewerRole)
+      : false;
+    const safeItems = items.map((item) => ({
+      ...item,
+      owner: {
+        ...item.owner,
+        tenantProfile: item.owner.tenantProfile
+          ? {
+              ...item.owner.tenantProfile,
+              ninNumber: canViewSensitive ? item.owner.tenantProfile.ninNumber : null,
+            }
+          : null,
+        landlordProfile: item.owner.landlordProfile
+          ? {
+              ...item.owner.landlordProfile,
+              ninNumber: canViewSensitive ? item.owner.landlordProfile.ninNumber : null,
+              accountNumber: canViewSensitive ? item.owner.landlordProfile.accountNumber : null,
+            }
+          : null,
+      },
+    }));
+    return pageResult(safeItems, totalItems, filters.page, filters.pageSize);
   }
 
   static async reviewVerification(
@@ -159,14 +229,22 @@ export class AdministrationRepository {
       }
       if (!canReviewVerification(current.status)) throw new Error("INVALID_TRANSITION");
       const nextStatus = input.action === "approve" ? "Approved" : "Rejected";
+      const reviewedAt = new Date();
       const updated = await tx.verificationSubmission.update({
         where: { id },
         data: {
           status: nextStatus,
           reviewedById: actor.id,
-          reviewedAt: new Date(),
+          reviewedAt,
           decisionReason: input.reason,
           reviewNotes: input.notes,
+        },
+      });
+      await tx.verificationDocument.updateMany({
+        where: { submissionId: id, storageKey: { not: null }, deletedAt: null },
+        data: {
+          deleteAfter: getDocumentDeletionDeadline(reviewedAt),
+          deletionError: null,
         },
       });
       if (current.type === "Identity" && input.action === "approve") {

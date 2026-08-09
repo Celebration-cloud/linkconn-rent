@@ -3,7 +3,6 @@ import { apiError, apiSuccess } from "@/lib/api-response";
 import { getCurrentProfile } from "@/lib/auth/current-profile";
 import { OperatingSystemRepository } from "@/repositories/operating-system.repository";
 import { verificationDraftSchema } from "@/schemas/operating-system";
-import { getDocumentStorage } from "@/services/storage/document-storage";
 
 export async function GET() {
   try {
@@ -12,7 +11,7 @@ export async function GET() {
     const submissions =
       await OperatingSystemRepository.listVerificationSubmissions(profile.id);
     return apiSuccess(
-      { submissions, storageConfigured: getDocumentStorage().configured },
+      { submissions, storageConfigured: false },
       "Verification records loaded",
     );
   } catch (error) {
@@ -26,12 +25,11 @@ export async function POST(request: Request) {
     const profile = await getCurrentProfile();
     if (!profile) return apiError("Authentication required", 401);
     const input = verificationDraftSchema.parse(await request.json());
-    const storage = getDocumentStorage();
     const submission =
       await OperatingSystemRepository.saveVerificationDraft(
         profile.id,
         input,
-        storage.configured && input.documents.every((item) => item.storageKey),
+        false,
       );
     return apiSuccess(
       submission,

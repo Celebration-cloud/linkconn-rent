@@ -5,7 +5,11 @@ import {
   isListingDecision,
   paystackAmountMatches,
 } from "@/lib/admin-lifecycle";
-import { canReviewQueues, canSanctionUsers } from "@/lib/admin-permissions";
+import {
+  canAccessPrivateVerificationDocuments,
+  canReviewQueues,
+  canSanctionUsers,
+} from "@/lib/admin-permissions";
 import {
   disputeActionSchema,
   listingModerationSchema,
@@ -25,6 +29,9 @@ describe("administrative permissions", () => {
     expect(canSanctionUsers("Admin")).toBe(true);
     expect(canSanctionUsers("SuperAdmin")).toBe(true);
     expect(canReviewQueues("Tenant")).toBe(false);
+    expect(canAccessPrivateVerificationDocuments("Moderator")).toBe(false);
+    expect(canAccessPrivateVerificationDocuments("Admin")).toBe(true);
+    expect(canAccessPrivateVerificationDocuments("SuperAdmin")).toBe(true);
   });
 });
 

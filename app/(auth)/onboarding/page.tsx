@@ -90,8 +90,8 @@ export default function OnboardingPage() {
       ];
 
   return (
-    <main id="main-content" className="min-h-[100dvh] bg-sand-50">
-      <header className="border-b border-line bg-white">
+    <main id="main-content" className="min-h-[100dvh] overflow-x-clip bg-sand-50 pb-8">
+      <header className="sticky top-0 z-40 border-b border-line bg-white/95 backdrop-blur">
         <div className="stitch-container flex h-16 items-center justify-between">
           <Link href="/" className="flex items-center" aria-label="LinkConn Rent home">
             <Logo variant="lockup" priority className="h-12 w-auto" sizes="102px" />
@@ -107,8 +107,8 @@ export default function OnboardingPage() {
           </button>
         </div>
       </header>
-      <div className="stitch-container grid gap-8 py-8 lg:grid-cols-[17rem_1fr] lg:py-12">
-        <aside>
+      <div className="stitch-container grid min-w-0 gap-8 py-6 lg:grid-cols-[17rem_minmax(0,1fr)] lg:py-12">
+        <aside className="hidden lg:sticky lg:top-24 lg:block lg:max-h-[calc(100dvh-7rem)] lg:overflow-y-auto lg:pr-2">
           <p className="text-xs font-bold uppercase tracking-[0.16em] text-forest-700">Verification</p>
           <h1 className="mt-2 text-2xl font-extrabold tracking-tight text-ink">Set up your {role.toLowerCase()} profile</h1>
           <p className="mt-3 text-sm leading-6 text-muted">We verify the details that keep applications and rent transactions safer.</p>
@@ -141,7 +141,7 @@ export default function OnboardingPage() {
           </div>
         </aside>
 
-        <section className="h-fit rounded-xl border border-line bg-white p-5 shadow-[0_8px_30px_rgba(18,55,42,0.07)] sm:p-7">
+        <section className="h-fit min-w-0 rounded-xl border border-line bg-white p-5 shadow-[0_8px_30px_rgba(18,55,42,0.07)] sm:p-7">
           <div className="mb-6 border-b border-line pb-5">
             <div>
               <span className="text-xs font-bold uppercase tracking-[0.16em] text-forest-700">Identity verification</span>

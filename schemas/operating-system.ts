@@ -193,7 +193,7 @@ export const verificationDraftSchema = z.object({
         size: z.number().int().nonnegative().optional(),
       }),
     )
-    .max(12)
+      .max(6)
     .default([]),
   submit: z.boolean().default(false),
 });

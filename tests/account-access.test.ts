@@ -20,7 +20,7 @@ function profile(
 }
 
 describe("post-login account routing", () => {
-  it("routes pending and unsubmitted public accounts directly to review", () => {
+  it("routes pending accounts to review and unsubmitted accounts to onboarding", () => {
     expect(getPostLoginDestination(profile(), "/dashboard")).toBe(
       "/account-review",
     );
@@ -29,7 +29,7 @@ describe("post-login account routing", () => {
         profile({ accountReviewStatus: "NotSubmitted" }),
         "/dashboard",
       ),
-    ).toBe("/account-review");
+    ).toBe("/onboarding");
   });
 
   it("preserves the requested destination only for approved accounts", () => {
@@ -49,6 +49,14 @@ describe("post-login account routing", () => {
       getAccountGateDestination(profile({ accountStatus: "Suspended" })),
     ).toBe("/forbidden");
     expect(getPostLoginDestination(null, "/dashboard")).toBe("/onboarding");
+  });
+
+  it("does not trust a stale completed flag when the latest review is a draft", () => {
+    expect(
+      getAccountGateDestination(
+        profile({ onboardingComplete: true, accountReviewStatus: "Draft" }),
+      ),
+    ).toBe("/onboarding");
   });
 
   it.each(["Admin", "SuperAdmin"] as const)(

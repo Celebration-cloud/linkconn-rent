@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { documentReferenceSchema } from "@/features/onboarding/schemas/document-upload";
 
 // ─────────────────────────────────────────────────────────────
 // Shared enums
@@ -95,12 +96,13 @@ export const NIGERIAN_BANKS = [
 // ─────────────────────────────────────────────────────────────
 
 export const personalDetailsSchema = z.object({
-  firstName: z.string().min(2, "Enter your first name"),
-  lastName: z.string().min(2, "Enter your last name"),
+  firstName: z.string().trim().min(2, "Enter your first name"),
+  lastName: z.string().trim().min(2, "Enter your last name"),
   phone: z
     .string()
     .min(10, "Enter a valid phone number")
-    .regex(/^[+\d\s\-()]+$/, "Invalid phone number format"),
+    .regex(/^[+\d\s\-()]+$/, "Invalid phone number format")
+    .transform((value) => value.replace(/[\s\-()]/g, "")),
   nin: z
     .string()
     .length(11, "NIN must be 11 digits")
@@ -109,24 +111,51 @@ export const personalDetailsSchema = z.object({
 
 export type PersonalDetailsData = z.infer<typeof personalDetailsSchema>;
 
+const optionalNonNegativeNumber = z
+  .number({ invalid_type_error: "Enter a valid amount" })
+  .finite("Enter a valid amount")
+  .min(0, "Amount cannot be negative")
+  .optional();
+
+function isTodayOrLater(value: string) {
+  const parsed = new Date(`${value}T00:00:00.000Z`);
+  if (Number.isNaN(parsed.getTime()) || parsed.toISOString().slice(0, 10) !== value) return false;
+  return value >= new Date().toISOString().slice(0, 10);
+}
+
 // ─────────────────────────────────────────────────────────────
 // Step 2 — Tenant Housing Preferences
 // ─────────────────────────────────────────────────────────────
 
-export const tenantPreferencesSchema = z.object({
-  preferredLocations: z
-    .array(z.string())
-    .min(1, "Select at least one preferred location"),
-  preferredTypes: z
-    .array(z.string())
-    .min(1, "Select at least one property type"),
-  budgetMin: z.coerce.number().min(0).optional(),
-  budgetMax: z.coerce
-    .number()
-    .min(1, "Enter your maximum monthly budget")
-    .optional(),
-  moveInDate: z.string().optional(),
-});
+export const tenantPreferencesSchema = z
+  .object({
+    preferredLocations: z
+      .array(z.string())
+      .min(1, "Select at least one preferred location"),
+    preferredTypes: z
+      .array(z.string())
+      .min(1, "Select at least one property type"),
+    budgetMin: optionalNonNegativeNumber,
+    budgetMax: optionalNonNegativeNumber,
+    moveInDate: z
+      .string()
+      .refine((value) => value === "" || /^\d{4}-\d{2}-\d{2}$/.test(value), "Enter a valid date")
+      .refine((value) => value === "" || isTodayOrLater(value), "Move-in date cannot be in the past")
+      .optional(),
+  })
+  .superRefine((value, context) => {
+    if (
+      value.budgetMin !== undefined &&
+      value.budgetMax !== undefined &&
+      value.budgetMax < value.budgetMin
+    ) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["budgetMax"],
+        message: "Maximum budget cannot be below minimum budget",
+      });
+    }
+  });
 
 export type TenantPreferencesData = z.infer<typeof tenantPreferencesSchema>;
 
@@ -184,6 +213,7 @@ export const completeTenantOnboardingSchema = z.object({
   personal: personalDetailsSchema,
   preferences: tenantPreferencesSchema,
   employment: tenantEmploymentSchema,
+  documents: z.array(documentReferenceSchema).max(6),
 });
 
 export const completeLandlordOnboardingSchema = z.object({
@@ -191,6 +221,7 @@ export const completeLandlordOnboardingSchema = z.object({
   personal: personalDetailsSchema,
   business: landlordBusinessSchema,
   payout: landlordPayoutSchema,
+  documents: z.array(documentReferenceSchema).max(6),
 });
 
 export const completeOnboardingSchema = z.discriminatedUnion("role", [
@@ -209,8 +240,8 @@ const personalDraftSchema = z.object({
 const tenantPreferencesDraftSchema = z.object({
   preferredLocations: z.array(z.string().max(80)).max(20).optional(),
   preferredTypes: z.array(z.string().max(80)).max(20).optional(),
-  budgetMin: z.coerce.number().min(0).optional(),
-  budgetMax: z.coerce.number().min(0).optional(),
+  budgetMin: optionalNonNegativeNumber,
+  budgetMax: optionalNonNegativeNumber,
   moveInDate: z.string().max(30).optional(),
 });
 const tenantEmploymentDraftSchema = z.object({
@@ -233,17 +264,19 @@ const landlordPayoutDraftSchema = z.object({
 export const onboardingDraftSchema = z.discriminatedUnion("role", [
   z.object({
     role: z.literal("Tenant"),
-    currentStep: z.number().int().min(0).max(2),
+    currentStep: z.number().int().min(0).max(3),
     personal: personalDraftSchema.optional(),
     preferences: tenantPreferencesDraftSchema.optional(),
     employment: tenantEmploymentDraftSchema.optional(),
+    documents: z.array(documentReferenceSchema).max(6).optional(),
   }),
   z.object({
     role: z.literal("Landlord"),
-    currentStep: z.number().int().min(0).max(2),
+    currentStep: z.number().int().min(0).max(3),
     personal: personalDraftSchema.optional(),
     business: landlordBusinessDraftSchema.optional(),
     payout: landlordPayoutDraftSchema.optional(),
+    documents: z.array(documentReferenceSchema).max(6).optional(),
   }),
 ]);
 

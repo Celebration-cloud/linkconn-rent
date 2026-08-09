@@ -6,7 +6,6 @@ const mocks = vi.hoisted(() => ({
   tenantUpsert: vi.fn(),
   landlordUpsert: vi.fn(),
   reviewFindFirst: vi.fn(),
-  reviewCreate: vi.fn(),
   reviewUpdate: vi.fn(),
 }));
 
@@ -23,8 +22,16 @@ vi.mock("@/lib/security/rate-limiter", () => ({
   checkRateLimit: () => ({ allowed: true, resetTime: Date.now() + 60_000 }),
 }));
 
+vi.mock("@/services/storage/document-storage", () => ({
+  getDocumentStorage: () => ({
+    configured: true,
+    inspect: async (pathname: string) => ({ pathname, contentType: "application/pdf", size: 10 }),
+  }),
+}));
+
 vi.mock("@/lib/db/client", () => ({
   prisma: {
+    verificationSubmission: { findFirst: mocks.reviewFindFirst },
     // eslint-disable-next-line no-unused-vars
     $transaction: vi.fn(async (callback: (tx: unknown) => Promise<unknown>) =>
       callback({
@@ -33,7 +40,6 @@ vi.mock("@/lib/db/client", () => ({
         landlordProfile: { upsert: mocks.landlordUpsert },
         verificationSubmission: {
           findFirst: mocks.reviewFindFirst,
-          create: mocks.reviewCreate,
           update: mocks.reviewUpdate,
         },
       }),
@@ -62,7 +68,21 @@ const payload = {
     jobTitle: "Designer",
     incomeRange: "Above500k",
   },
+  documents: [
+    { id: "11111111-1111-4111-8111-111111111111", kind: "GovernmentId" },
+    { id: "22222222-2222-4222-8222-222222222222", kind: "Selfie" },
+    { id: "33333333-3333-4333-8333-333333333333", kind: "ProofOfAddress" },
+    { id: "44444444-4444-4444-8444-444444444444", kind: "EmploymentEvidence" },
+  ],
 };
+
+const uploadedDocuments = payload.documents.map((document) => ({
+  ...document,
+  storageKey: `private-verifications/review-1/${document.id}/upload.pdf`,
+  uploadIntentId: null,
+  mimeType: "application/pdf",
+  size: 10,
+}));
 
 function request() {
   return new Request("http://localhost/api/onboarding/complete", {
@@ -89,12 +109,14 @@ describe("post-onboarding account review", () => {
     });
     mocks.profileUpsert.mockResolvedValue({});
     mocks.tenantUpsert.mockResolvedValue({});
-    mocks.reviewCreate.mockResolvedValue({ id: "review-1" });
     mocks.reviewUpdate.mockResolvedValue({ id: "review-1" });
   });
 
-  it("creates one pending identity review after onboarding completes", async () => {
-    mocks.reviewFindFirst.mockResolvedValue(null);
+  it("submits the completed private-document draft after onboarding completes", async () => {
+    mocks.reviewFindFirst.mockResolvedValue({
+      id: "review-1",
+      documents: uploadedDocuments,
+    });
 
     const response = await POST(request());
     const body = await response.json();
@@ -112,33 +134,25 @@ describe("post-onboarding account review", () => {
         update: expect.objectContaining({ onboardingComplete: true }),
       }),
     );
-    expect(mocks.reviewCreate).toHaveBeenCalledWith({
+    expect(mocks.reviewUpdate).toHaveBeenCalledWith({
+      where: { id: "review-1" },
       data: expect.objectContaining({
-        ownerId: "tenant-1",
-        type: "Identity",
         status: "Pending",
       }),
     });
   });
 
-  it("resubmits a rejected review instead of creating a duplicate", async () => {
+  it("blocks completion when a required document is missing", async () => {
     mocks.reviewFindFirst.mockResolvedValue({
       id: "review-1",
-      status: "Rejected",
+      documents: uploadedDocuments.slice(0, 3),
     });
 
     const response = await POST(request());
+    const body = await response.json();
 
-    expect(response.status).toBe(200);
-    expect(mocks.reviewCreate).not.toHaveBeenCalled();
-    expect(mocks.reviewUpdate).toHaveBeenCalledWith({
-      where: { id: "review-1" },
-      data: expect.objectContaining({
-        status: "Pending",
-        assignedToId: null,
-        reviewedById: null,
-        decisionReason: null,
-      }),
-    });
+    expect(response.status).toBe(409);
+    expect(body.message).toContain("Employment evidence");
+    expect(mocks.reviewUpdate).not.toHaveBeenCalled();
   });
 });

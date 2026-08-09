@@ -13,6 +13,9 @@ const mocks = vi.hoisted(() => {
     adminAuditEvent: {
       create: vi.fn(),
     },
+    verificationDocument: {
+      updateMany: vi.fn(),
+    },
   };
   return {
     tx,
@@ -49,6 +52,7 @@ describe("administrator account review decisions", () => {
     });
     mocks.tx.profile.update.mockResolvedValue({});
     mocks.tx.adminAuditEvent.create.mockResolvedValue({});
+    mocks.tx.verificationDocument.updateMany.mockResolvedValue({ count: 3 });
   });
 
   it("approves an identity review, verifies the account, and writes an audit event", async () => {
@@ -71,6 +75,13 @@ describe("administrator account review decisions", () => {
     expect(mocks.tx.profile.update).toHaveBeenCalledWith({
       where: { id: "tenant-1" },
       data: { verificationLevel: "FullyVerified" },
+    });
+    expect(mocks.tx.verificationDocument.updateMany).toHaveBeenCalledWith({
+      where: { submissionId: "review-1", storageKey: { not: null }, deletedAt: null },
+      data: {
+        deleteAfter: expect.any(Date),
+        deletionError: null,
+      },
     });
     expect(mocks.tx.adminAuditEvent.create).toHaveBeenCalledWith({
       data: expect.objectContaining({

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { connection } from "next/server";
 import {
   AlertTriangle,
   ArrowRight,
@@ -12,6 +13,7 @@ import {
 import { AdministrationRepository } from "@/repositories/administration.repository";
 
 export default async function AdminOverviewPage() {
+  await connection();
   const overview = await AdministrationRepository.getOverview();
   const metrics = [
     ["Users", overview.users, Users],

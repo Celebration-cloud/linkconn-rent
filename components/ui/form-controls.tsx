@@ -58,6 +58,7 @@ export type InputProps = InputHTMLAttributes<HTMLInputElement> & {
 };
 
 export type CheckboxProps = Omit<InputHTMLAttributes<HTMLInputElement>, "type">;
+export type RadioProps = Omit<InputHTMLAttributes<HTMLInputElement>, "type">;
 
 export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
   function Checkbox({ className, ...props }, ref) {
@@ -67,6 +68,22 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
         type="checkbox"
         className={cn(
           "size-4 shrink-0 rounded border-line accent-forest-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+          className,
+        )}
+        {...props}
+      />
+    );
+  },
+);
+
+export const Radio = forwardRef<HTMLInputElement, RadioProps>(
+  function Radio({ className, ...props }, ref) {
+    return (
+      <input
+        ref={ref}
+        type="radio"
+        className={cn(
+          "size-4 shrink-0 border-line accent-forest-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
           className,
         )}
         {...props}
