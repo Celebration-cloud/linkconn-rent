@@ -456,8 +456,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { ok: true };
       }
       toastSuccess("Welcome back", "You are signed in.");
-      router.push(resData.data.url || "/dashboard");
-      router.refresh();
+      // Start the protected workspace with a fresh document request so the
+      // server sees the session cookie created by the login response.
+      window.location.assign(resData.data.url || "/dashboard");
       return { ok: true };
     } catch (error) {
       toastError("Sign in failed", error instanceof Error ? error.message : "Unable to sign in");

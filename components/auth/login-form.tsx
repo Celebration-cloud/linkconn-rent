@@ -74,7 +74,10 @@ export default function LoginForm({
         return;
       }
 
-      router.replace(result.data?.url || next);
+      // Authentication changes the session cookie. A document navigation makes
+      // the first protected request read that new cookie instead of reusing a
+      // stale prefetched RSC/session response from the login page.
+      window.location.replace(result.data?.url || next);
     } catch (error) {
       setError(error instanceof Error ? error.message : "Unable to sign in");
       setLoading(false);

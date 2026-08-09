@@ -44,7 +44,8 @@ describe("portal-aware password recovery", () => {
       expect(response.status).toBe(200);
       expect(mocks.requestPasswordReset).toHaveBeenCalledWith({
         email: "person@example.com",
-        redirectTo: "/admin/reset-password?next=%2Fadmin%2Flogin",
+        redirectTo:
+          "http://localhost/admin/reset-password?next=%2Fadmin%2Flogin",
       });
     },
   );
@@ -56,7 +57,7 @@ describe("portal-aware password recovery", () => {
     expect(response.status).toBe(200);
     expect(mocks.requestPasswordReset).toHaveBeenCalledWith({
       email: "auth-decoy@example.com",
-      redirectTo: "/reset-password",
+      redirectTo: "http://localhost/reset-password",
     });
     expect(await response.json()).toMatchObject({
       success: true,
@@ -73,7 +74,7 @@ describe("portal-aware password recovery", () => {
       expect(response.status).toBe(200);
       expect(mocks.requestPasswordReset).toHaveBeenCalledWith({
         email: "auth-decoy@example.com",
-        redirectTo: "/admin/reset-password",
+        redirectTo: "http://localhost/admin/reset-password",
       });
     },
   );

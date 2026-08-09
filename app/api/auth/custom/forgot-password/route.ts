@@ -58,11 +58,17 @@ export async function POST(req: Request) {
     const accountRole = await getAccountRoleByEmail(email);
     const administrator = isAdministratorRole(accountRole);
     const eligibleForPortal = portal === "admin" ? administrator : !administrator;
+    const resetPath =
+      redirectTo ||
+      (portal === "admin" ? "/admin/reset-password" : "/reset-password");
+    const resetUrl = new URL(resetPath, new URL(req.url).origin).toString();
 
     // 4. Request Password Reset via Neon Auth
     const result = await auth.requestPasswordReset({
       email: eligibleForPortal ? email : PASSWORD_RESET_DECOY_EMAIL,
-      redirectTo: redirectTo || (portal === "admin" ? "/admin/reset-password" : "/reset-password"),
+      // Neon validates this callback before redirecting from the emailed link
+      // and requires a complete URL rather than an application-relative path.
+      redirectTo: resetUrl,
     });
 
     if (result.error) {
