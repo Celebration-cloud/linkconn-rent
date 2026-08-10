@@ -5,10 +5,10 @@ import {
 } from "@/lib/env/neon-environment";
 
 describe("Neon environment resolution", () => {
-  it("prefers the connected LinkConn Vercel integration variables", () => {
+  it("prefers canonical variables over a different connected integration", () => {
     const environment = resolveNeonEnvironment({
-      DATABASE_URL: "postgresql://stale-database",
-      NEON_AUTH_BASE_URL: "https://stale-auth.example",
+      DATABASE_URL: "postgresql://canonical-database",
+      NEON_AUTH_BASE_URL: "https://canonical-auth.example",
       linkcon_rent_DATABASE_URL: "postgresql://connected-database",
       linkcon_rent_POSTGRES_URL_NON_POOLING: "postgresql://connected-direct",
       linkcon_rent_NEON_AUTH_BASE_URL: "https://connected-auth.example",
@@ -16,10 +16,24 @@ describe("Neon environment resolution", () => {
     });
 
     expect(environment).toEqual({
+      databaseUrl: "postgresql://canonical-database",
+      directUrl: "postgresql://connected-direct",
+      authBaseUrl: "https://canonical-auth.example",
+      authCookieSecret: "secret",
+    });
+  });
+
+  it("uses integration-prefixed variables when canonical values are absent", () => {
+    expect(
+      resolveNeonEnvironment({
+        linkcon_rent_DATABASE_URL: "postgresql://connected-database",
+        linkcon_rent_POSTGRES_URL_NON_POOLING: "postgresql://connected-direct",
+        linkcon_rent_NEON_AUTH_BASE_URL: "https://connected-auth.example",
+      }),
+    ).toMatchObject({
       databaseUrl: "postgresql://connected-database",
       directUrl: "postgresql://connected-direct",
       authBaseUrl: "https://connected-auth.example",
-      authCookieSecret: "secret",
     });
   });
 

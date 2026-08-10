@@ -14,19 +14,20 @@ export function resolveNeonEnvironment(
   environment: Environment = process.env,
 ) {
   return {
-    // Prefer the currently connected Vercel Neon resource. Canonical names
-    // remain supported for local development and manual deployments.
+    // Canonical application variables are authoritative. Integration-prefixed
+    // values are fallback-only because a newly connected Vercel resource may
+    // point at a different Neon project with a different Auth user store.
     databaseUrl: firstDefined(environment, [
-      `${INTEGRATION_PREFIX}DATABASE_URL`,
       "DATABASE_URL",
+      `${INTEGRATION_PREFIX}DATABASE_URL`,
     ]),
     directUrl: firstDefined(environment, [
-      `${INTEGRATION_PREFIX}POSTGRES_URL_NON_POOLING`,
       "DIRECT_URL",
+      `${INTEGRATION_PREFIX}POSTGRES_URL_NON_POOLING`,
     ]),
     authBaseUrl: firstDefined(environment, [
-      `${INTEGRATION_PREFIX}NEON_AUTH_BASE_URL`,
       "NEON_AUTH_BASE_URL",
+      `${INTEGRATION_PREFIX}NEON_AUTH_BASE_URL`,
     ]),
     authCookieSecret: firstDefined(environment, ["NEON_AUTH_COOKIE_SECRET"]),
   };
