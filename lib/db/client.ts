@@ -2,6 +2,7 @@ import "server-only";
 
 import { PrismaNeon } from "@prisma/adapter-neon";
 import { PrismaClient } from "@prisma/client";
+import { resolveNeonEnvironment } from "@/lib/env/neon-environment";
 
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
 
@@ -29,7 +30,7 @@ function resolveDatabaseUrl(rawUrl: string | undefined): string | undefined {
   }
 }
 
-const databaseUrl = resolveDatabaseUrl(process.env.DATABASE_URL);
+const databaseUrl = resolveDatabaseUrl(resolveNeonEnvironment().databaseUrl);
 
 function createPrismaClient(): PrismaClient {
   const log = process.env.NODE_ENV === "development" ? (["query"] as const) : [];

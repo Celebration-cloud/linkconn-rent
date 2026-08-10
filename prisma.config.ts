@@ -1,13 +1,17 @@
 import { loadEnvConfig } from "@next/env";
 import { PrismaPg } from "@prisma/adapter-pg";
 import type { PrismaConfig } from "prisma";
+import { resolveNeonEnvironment } from "./lib/env/neon-environment";
 
 loadEnvConfig(process.cwd());
 
 function requireMigrationUrl() {
-  const connectionString = process.env.DIRECT_URL ?? process.env.DATABASE_URL;
+  const environment = resolveNeonEnvironment();
+  const connectionString = environment.directUrl ?? environment.databaseUrl;
   if (!connectionString) {
-    throw new Error("DIRECT_URL or DATABASE_URL is required for Prisma commands");
+    throw new Error(
+      "A Neon direct or pooled database URL is required for Prisma commands",
+    );
   }
   return connectionString;
 }
