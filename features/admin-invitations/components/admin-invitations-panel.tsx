@@ -77,9 +77,9 @@ export function AdminInvitationsPanel({ initialInvitations }: { initialInvitatio
 
   return (
     <div className="space-y-6">
-      <form onSubmit={create} className="rounded-2xl border border-line bg-white p-5 sm:p-6">
+      <form onSubmit={create} className="border border-line bg-white p-5 sm:p-6">
         <div className="flex items-start gap-3">
-          <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-forest-100 text-forest-800">
+          <span className="grid size-10 shrink-0 place-items-center bg-forest-100 text-forest-800">
             <UserPlus className="size-5" aria-hidden />
           </span>
           <div>
@@ -98,7 +98,7 @@ export function AdminInvitationsPanel({ initialInvitations }: { initialInvitatio
             required
             className="flex-1"
           />
-          <button disabled={creating} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-forest-700 px-5 text-sm font-bold text-white hover:bg-forest-800 disabled:opacity-60">
+          <button disabled={creating} className="inline-flex min-h-11 items-center justify-center gap-2 bg-forest-700 px-5 text-sm font-bold text-white hover:bg-forest-800 disabled:opacity-60">
             <Send className="size-4" aria-hidden /> {creating ? "Creating…" : "Create and copy link"}
           </button>
         </div>
@@ -109,7 +109,7 @@ export function AdminInvitationsPanel({ initialInvitations }: { initialInvitatio
         )}
       </form>
 
-      <section className="overflow-hidden rounded-2xl border border-line bg-white">
+      <section className="overflow-hidden border border-line bg-white">
         <div className="border-b border-line px-5 py-4">
           <h2 className="font-extrabold text-ink">Invitation history</h2>
           <p className="mt-1 text-xs text-muted">Raw invitation tokens are never stored or shown again.</p>
@@ -137,10 +137,10 @@ export function AdminInvitationsPanel({ initialInvitations }: { initialInvitatio
                 </div>
                 {invitation.status === "Pending" && (
                   <div className="flex gap-2">
-                    <button disabled={busyId === invitation.id} onClick={() => void rotate(invitation.id)} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-line px-3 text-xs font-bold text-forest-800 hover:bg-forest-50 disabled:opacity-60">
+                    <button disabled={busyId === invitation.id} onClick={() => void rotate(invitation.id)} className="inline-flex min-h-11 items-center gap-2 border border-line px-3 text-xs font-bold text-forest-800 hover:bg-forest-50 disabled:opacity-60">
                       <RefreshCw className="size-4" aria-hidden /> Rotate
                     </button>
-                    <button disabled={busyId === invitation.id} onClick={() => void revoke(invitation.id)} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-red-200 px-3 text-xs font-bold text-red-700 hover:bg-red-50 disabled:opacity-60">
+                    <button disabled={busyId === invitation.id} onClick={() => void revoke(invitation.id)} className="inline-flex min-h-11 items-center gap-2 border border-red-200 px-3 text-xs font-bold text-red-700 hover:bg-red-50 disabled:opacity-60">
                       <Trash2 className="size-4" aria-hidden /> Revoke
                     </button>
                   </div>

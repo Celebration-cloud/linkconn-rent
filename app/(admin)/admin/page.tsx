@@ -1,130 +1,47 @@
 import Link from "next/link";
 import { connection } from "next/server";
-import {
-  AlertTriangle,
-  ArrowRight,
-  Banknote,
-  Building2,
-  CheckCircle2,
-  Eye,
-  ShieldCheck,
-  Users,
-} from "lucide-react";
+import { AlertTriangle, ArrowUpRight, Banknote, Building2, Headphones, ShieldCheck, Users, Wrench } from "lucide-react";
 import { AdministrationRepository } from "@/repositories/administration.repository";
 
 export default async function AdminOverviewPage() {
   await connection();
   const overview = await AdministrationRepository.getOverview();
-  const metrics = [
-    ["Users", overview.users, Users],
-    ["Listings", overview.listings, Building2],
-    ["Pending verification", overview.pendingVerifications, ShieldCheck],
-    ["Flagged listings", overview.flaggedListings, AlertTriangle],
-    ["Payment issues", overview.paymentIssues, Banknote],
-    ["Open disputes", overview.openDisputes, AlertTriangle],
-    ["Completed viewings", overview.completedViewings, Eye],
-    ["Successful tenancies", overview.successfulTenancies, CheckCircle2],
+  const urgent = [
+    { href: "/admin/verifications?status=Pending", label: "Identity and ownership reviews", count: overview.pendingVerifications, icon: ShieldCheck, tone: "amber" },
+    { href: "/admin/moderation", label: "Listings requiring moderation", count: overview.flaggedListings, icon: AlertTriangle, tone: "red" },
+    { href: "/admin/disputes?status=Open", label: "Open or investigating disputes", count: overview.openDisputes, icon: AlertTriangle, tone: "red" },
+    { href: "/admin/support", label: "Support conversations in progress", count: overview.openSupport, icon: Headphones, tone: "green" },
+    { href: "/admin/maintenance", label: "Active maintenance requests", count: overview.activeMaintenance, icon: Wrench, tone: "green" },
+    { href: "/admin/payments", label: "Failed or overdue payments", count: overview.paymentIssues, icon: Banknote, tone: "red" },
   ] as const;
+  const totals = [
+    { label: "People", value: overview.users, href: "/admin/users", icon: Users },
+    { label: "Properties", value: overview.listings, href: "/admin/properties", icon: Building2 },
+    { label: "Completed viewings", value: overview.completedViewings, href: "/admin/properties", icon: ShieldCheck },
+    { label: "Successful tenancies", value: overview.successfulTenancies, href: "/admin/users", icon: Users },
+  ];
 
-  return (
-    <div className="p-4 pb-24 sm:p-7 md:pb-8">
-      <div className="mx-auto max-w-7xl">
-        <div className="rounded-3xl bg-forest-950 p-7 text-white sm:p-10">
-          <p className="text-xs font-bold tracking-[0.14em] text-lime">
-            Trust operations
-          </p>
-          <h1 className="mt-3 text-4xl font-extrabold tracking-[-0.05em]">
-            What needs human attention.
-          </h1>
-          <p className="mt-3 max-w-2xl text-sm leading-6 text-forest-100">
-            Verification, moderation, payments and disputes remain connected
-            to their evidence and audit history.
-          </p>
-        </div>
+  return <div className="admin-canvas">
+    <header className="admin-page-heading">
+      <div><h1>Operations overview</h1><p>A live working surface for the records that need a human decision, not a decorative report.</p></div>
+      <Link href="/admin/verifications?status=Pending" className="stitch-button">Start queue review <ArrowUpRight className="size-4" /></Link>
+    </header>
 
-        <section className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {metrics.map(([label, value, Icon]) => (
-            <article
-              key={label}
-              className="rounded-2xl border border-line bg-white p-5"
-            >
-              <Icon className="size-5 text-forest-700" />
-              <p className="mt-7 text-xs font-bold text-muted">{label}</p>
-              <p className="mt-1 text-3xl font-extrabold tabular-nums text-ink">
-                {value}
-              </p>
-            </article>
-          ))}
-        </section>
+    <section aria-label="Platform totals" className="mt-4 grid border border-[#d6ddd5] bg-white sm:grid-cols-2 xl:grid-cols-4">
+      {totals.map(({ label, value, href, icon: Icon }, index) => <Link key={label} href={href} className={`group flex min-h-28 items-end justify-between gap-4 p-4 hover:bg-[#f7f9f6] ${index ? "border-t border-[#e1e6e0] sm:border-l sm:border-t-0" : ""} ${index === 2 ? "sm:border-l-0 xl:border-l" : ""}`}><div><p className="text-xs font-bold text-muted">{label}</p><p className="mt-2 text-3xl font-extrabold tabular-nums tracking-[-0.03em]">{value}</p></div><Icon className="size-5 text-forest-700 transition-transform group-hover:-translate-y-1" /></Link>)}
+    </section>
 
-        <section className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {[
-            [
-              "/admin/verifications",
-              "Review verification",
-              "Inspect submitted evidence and record a manual decision.",
-            ],
-            [
-              "/admin/disputes",
-              "Open fraud and disputes",
-              "Review parties, messages, payment records and evidence.",
-            ],
-            [
-              "/admin/moderation",
-              "Moderate users and listings",
-              "Act on reports with a reason and a complete audit event.",
-            ],
-            [
-              "/admin/users",
-              "Manage users",
-              "Inspect roles, onboarding, verification, and account state.",
-            ],
-            [
-              "/admin/properties",
-              "Review properties",
-              "Search every listing and inspect its moderation history.",
-            ],
-            [
-              "/admin/payments",
-              "Inspect payments",
-              "Review provider-controlled payment and failure records.",
-            ],
-            [
-              "/admin/audit",
-              "Open audit log",
-              "Trace administrator decisions and before/after state.",
-            ],
-          ].map(([href, title, copy]) => (
-            <Link
-              key={href}
-              href={href}
-              className="group rounded-2xl bg-sand-200 p-6 transition hover:-translate-y-1 hover:bg-forest-100"
-            >
-              <h2 className="text-xl font-extrabold text-ink">{title}</h2>
-              <p className="mt-2 text-sm leading-6 text-muted">{copy}</p>
-              <span className="mt-8 inline-flex items-center gap-2 text-sm font-bold text-forest-700">
-                Open workspace{" "}
-                <ArrowRight className="size-4 transition group-hover:translate-x-1" />
-              </span>
-            </Link>
-          ))}
-        </section>
+    <div className="mt-4 grid min-w-0 gap-4 xl:grid-cols-[minmax(0,1.35fr)_minmax(20rem,.65fr)]">
+      <section className="border border-[#d6ddd5] bg-white">
+        <div className="flex items-center justify-between gap-4 border-b border-[#d6ddd5] px-4 py-3"><div><h2 className="text-base font-extrabold">Attention queue</h2><p className="mt-1 text-xs text-muted">Ordered by operational risk and recency.</p></div><span className="text-xs font-bold text-muted">{urgent.reduce((sum, item) => sum + item.count, 0)} open</span></div>
+        <div>{urgent.map(({ href, label, count, icon: Icon, tone }) => <Link key={href} href={href} className="group grid min-h-16 grid-cols-[2.5rem_minmax(0,1fr)_auto] items-center gap-3 border-b border-[#e3e8e2] px-4 last:border-b-0 hover:bg-[#f7f9f6]"><span className={`grid size-9 place-items-center ${tone === "red" ? "bg-red-50 text-red-700" : tone === "amber" ? "bg-amber-50 text-amber-800" : "bg-forest-50 text-forest-800"}`}><Icon className="size-4" /></span><strong className="truncate text-sm">{label}</strong><span className="flex items-center gap-3"><b className="min-w-8 text-right text-lg tabular-nums">{count}</b><ArrowUpRight className="size-4 text-muted transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" /></span></Link>)}</div>
+      </section>
 
-        <section className="mt-6 rounded-2xl border border-line bg-white p-5 sm:p-6">
-          <div className="flex items-center justify-between gap-3">
-            <div><p className="text-xs font-bold uppercase tracking-[.14em] text-forest-700">Neon activity</p><h2 className="mt-1 text-xl font-extrabold">Recent administrator actions</h2></div>
-            <Link href="/admin/audit" className="text-sm font-bold text-forest-700">View all</Link>
-          </div>
-          <div className="mt-5 divide-y divide-line">
-            {overview.recentActivity.length ? overview.recentActivity.map((event) => (
-              <article key={event.id} className="flex flex-col gap-2 py-4 sm:flex-row sm:items-start sm:justify-between">
-                <div className="min-w-0"><p className="break-words text-sm font-bold text-ink">{event.action}</p><p className="mt-1 break-words text-xs text-muted">{event.actor.firstName} {event.actor.lastName} · {event.targetType} · {event.reason}</p></div>
-                <time className="shrink-0 text-xs text-muted">{event.createdAt.toLocaleString()}</time>
-              </article>
-            )) : <p className="py-8 text-center text-sm text-muted">No administrator activity has been recorded yet.</p>}
-          </div>
-        </section>
-      </div>
+      <section className="border border-[#d6ddd5] bg-forest-950 text-white">
+        <div className="border-b border-white/10 px-4 py-3"><h2 className="text-base font-extrabold">Decision ledger</h2><p className="mt-1 text-xs text-forest-200">Latest accountable administrator actions.</p></div>
+        <div className="divide-y divide-white/10">{overview.recentActivity.length ? overview.recentActivity.map((event) => <article key={event.id} className="p-4"><div className="flex items-start justify-between gap-3"><strong className="break-words text-xs">{event.action.replaceAll(".", " ")}</strong><time className="shrink-0 text-[10px] text-forest-300">{event.createdAt.toLocaleDateString("en-NG")}</time></div><p className="mt-2 break-words text-xs leading-5 text-forest-200">{event.actor.firstName} {event.actor.lastName} · {event.targetType}</p><p className="mt-1 line-clamp-2 text-xs leading-5 text-forest-300">{event.reason}</p></article>) : <p className="p-8 text-center text-sm text-forest-200">No administrator activity has been recorded.</p>}</div>
+        <Link href="/admin/audit" className="flex min-h-12 items-center justify-between border-t border-white/10 px-4 text-xs font-bold text-lime">Open the complete ledger <ArrowUpRight className="size-4" /></Link>
+      </section>
     </div>
-  );
+  </div>;
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useEffect, useId, useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Search, ShieldCheck, X } from "lucide-react";
@@ -66,17 +66,16 @@ type AuditItem = {
 
 function WorkspaceHeader({ title, description, count }: { title: string; description: string; count: number }) {
   return (
-    <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+    <header className="admin-page-heading">
       <div>
-        <p className="text-xs font-bold uppercase tracking-[.14em] text-forest-700">Administration</p>
-        <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-ink">{title}</h1>
-        <p className="mt-2 max-w-2xl text-sm text-muted">{description}</p>
+        <h1>{title}</h1>
+        <p>{description}</p>
       </div>
-      <div className="rounded-xl bg-forest-800 px-5 py-4 text-white">
-        <p className="text-[10px] font-bold uppercase tracking-wider text-lime-300">Total records</p>
-        <p className="mt-1 text-3xl font-extrabold tabular-nums">{count}</p>
+      <div className="admin-record-count">
+        <span>Total records</span>
+        <strong>{count}</strong>
       </div>
-    </div>
+    </header>
   );
 }
 
@@ -89,7 +88,7 @@ function Filters({
 }) {
   const searchParams = useSearchParams();
   return (
-    <form method="get" className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_12rem_auto]">
+    <form method="get" className="admin-filter-bar !mt-0 sm:grid sm:grid-cols-[minmax(0,1fr)_12rem_auto]">
       <label>
         <span className="sr-only">Search</span>
         <Input
@@ -208,7 +207,7 @@ export function UsersWorkspace({
         description="Inspect Neon Auth profile mirrors, roles, verification, onboarding, and account status."
         count={data.pagination.totalItems}
       />
-      <section className="mt-6 rounded-xl border border-line bg-white p-4">
+      <section className="admin-ledger p-3">
         <Filters
           placeholder="Search name or email..."
           options={{
@@ -316,7 +315,7 @@ export function PropertiesWorkspace({ data }: { data: PageData<PropertyItem> }) 
         description="Review every listing state and its owner, moderation decision, and public visibility."
         count={data.pagination.totalItems}
       />
-      <section className="mt-6 rounded-xl border border-line bg-white p-4">
+      <section className="admin-ledger p-3">
         <Filters
           placeholder="Search listing, city, owner..."
           options={{ name: "status", label: "Statuses", values: ["PendingReview", "Approved", "Flagged", "Removed"] }}
@@ -401,7 +400,7 @@ export function PaymentsWorkspace({ data }: { data: PageData<PaymentItem> }) {
         description="Inspect protected-payment records and linked disputes. Financial status remains provider-controlled."
         count={data.pagination.totalItems}
       />
-      <section className="mt-6 rounded-xl border border-line bg-white p-4">
+      <section className="admin-ledger p-3">
         <Filters
           placeholder="Search reference, tenant or property..."
           options={{ name: "status", label: "Statuses", values: ["Paid", "Due", "Overdue", "Processing", "Failed"] }}
@@ -483,7 +482,7 @@ export function AuditWorkspace({ data }: { data: PageData<AuditItem> }) {
         description="Trace administrator actions with actors, targets, reasons, and before/after state."
         count={data.pagination.totalItems}
       />
-      <section className="mt-6 rounded-xl border border-line bg-white p-4">
+      <section className="admin-ledger p-3">
         <Filters
           placeholder="Search action, reason, target or actor..."
           options={{
@@ -494,7 +493,7 @@ export function AuditWorkspace({ data }: { data: PageData<AuditItem> }) {
         />
         <div className="mt-4 space-y-3">
           {data.items.map((item) => (
-            <details key={item.id} className="rounded-xl border border-line bg-sand-50 p-4">
+            <details key={item.id} className="border border-line bg-sand-50 p-4">
               <summary className="cursor-pointer list-none">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
@@ -549,7 +548,7 @@ export function AdminPasswordForm() {
     }
   }
   return (
-    <form onSubmit={(event) => void submit(event)} className="rounded-xl border border-line bg-white p-5">
+    <form onSubmit={(event) => void submit(event)} className="border border-line bg-white p-5">
       <h2 className="text-lg font-extrabold">Change password</h2>
       <p className="mt-1 text-sm text-muted">Other Neon Auth sessions are revoked after a successful change.</p>
       <div className="mt-5 grid gap-4">
@@ -585,7 +584,7 @@ export function AdminPasswordForm() {
 }
 
 function Canvas({ children }: { children: React.ReactNode }) {
-  return <div className="mx-auto w-full max-w-[90rem] p-4 pb-28 sm:p-6 md:pb-8 lg:p-8">{children}</div>;
+  return <div className="admin-canvas">{children}</div>;
 }
 function State({ label, value }: { label: string; value: unknown }) {
   return (
@@ -610,15 +609,37 @@ function DecisionDialog({
 }) {
   const [reason, setReason] = useState("");
   const dialogRef = useRef<HTMLElement>(null);
+  const titleId = useId();
   useEffect(() => {
     const previous = document.activeElement as HTMLElement | null;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
     dialogRef.current?.focus();
-    const closeOnEscape = (event: KeyboardEvent) => {
+    const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") onClose();
+      if (event.key !== "Tab" || !dialogRef.current) return;
+      const focusable = Array.from(dialogRef.current.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      ));
+      if (!focusable.length) {
+        event.preventDefault();
+        dialogRef.current.focus();
+        return;
+      }
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
     };
-    window.addEventListener("keydown", closeOnEscape);
+    window.addEventListener("keydown", handleKeyDown);
     return () => {
-      window.removeEventListener("keydown", closeOnEscape);
+      window.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = previousOverflow;
       previous?.focus();
     };
   }, [onClose]);
@@ -632,12 +653,12 @@ function DecisionDialog({
         tabIndex={-1}
         role="dialog"
         aria-modal="true"
-        aria-labelledby="decision-title"
+        aria-labelledby={titleId}
         onMouseDown={(event) => event.stopPropagation()}
         className="max-h-[92dvh] w-full max-w-lg overflow-y-auto rounded-t-2xl bg-white p-6 outline-none sm:rounded-2xl"
       >
         <div className="flex items-center justify-between gap-3">
-          <h2 id="decision-title" className="text-xl font-extrabold">
+          <h2 id={titleId} className="text-xl font-extrabold">
             {title}
           </h2>
           <button

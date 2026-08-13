@@ -6,6 +6,7 @@ import { verifyCsrf } from "@/lib/security/csrf";
 import { internalRedirectSchema } from "@/lib/security/internal-redirect";
 import { getAccountRoleByEmail } from "@/lib/auth/account-access";
 import { isAdministratorRole } from "@/lib/auth/review-access";
+import { adminRateLimitResponse, checkAdminRateLimit } from "@/lib/security/admin-rate-limiter";
 
 const schema = z.object({
   email: z.string().email("Enter a valid email address").max(254),
@@ -55,6 +56,10 @@ export async function POST(req: Request) {
     }
 
     const { email, redirectTo, portal } = parsed.data;
+    if (portal === "admin") {
+      const adminLimit = await checkAdminRateLimit(req, "admin-password-recovery", email, 3, 15 * 60 * 1000);
+      if (!adminLimit.allowed) return adminRateLimitResponse("Too many administrator recovery requests. Try again later.", adminLimit.resetTime);
+    }
     const accountRole = await getAccountRoleByEmail(email);
     const administrator = isAdministratorRole(accountRole);
     const eligibleForPortal = portal === "admin" ? administrator : !administrator;

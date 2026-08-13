@@ -4,6 +4,7 @@ import { getCurrentProfile, isAccountOperational } from "@/lib/auth/current-prof
 import { AdministrationRepository } from "@/repositories/administration.repository";
 import { userModerationSchema } from "@/schemas/administration";
 import { verifyCsrf } from "@/lib/security/csrf";
+import { adminRateLimitResponse, checkAdminRateLimit } from "@/lib/security/admin-rate-limiter";
 
 export async function PATCH(request: Request, context: { params: Promise<{ id: string }> }) {
   try {
@@ -11,6 +12,8 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
     const profile = await getCurrentProfile();
     if (!profile) return apiError("Authentication required", 401);
     if (!isAccountOperational(profile)) return apiError("Account access unavailable", 403);
+    const limit = await checkAdminRateLimit(request, "admin-user-moderation", profile.id, 40, 60 * 60 * 1000);
+    if (!limit.allowed) return adminRateLimitResponse("Too many account moderation actions. Try again later.", limit.resetTime);
     const input = userModerationSchema.parse(await request.json());
     const { id } = await context.params;
     return apiSuccess(await AdministrationRepository.moderateUser(profile, id, input.status, input.reason), "Account status updated");

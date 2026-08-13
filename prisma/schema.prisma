@@ -171,6 +171,7 @@ enum AdminAuditTarget {
   Property
   Payment
   Maintenance
+  Support
   AdminInvitation
 }
 
@@ -230,6 +231,8 @@ model Profile {
   moderationReviews       Property[]               @relation("PropertyReviewer")
   maintenanceActivities   MaintenanceActivity[]
   supportTickets          SupportTicket[]
+  assignedSupportTickets  SupportTicket[]         @relation("SupportTicketAssignee")
+  supportTicketActivities SupportTicketActivity[]
   sentAdminInvitations    AdminInvitation[]         @relation("AdminInvitationInviter")
   acceptedAdminInvitations AdminInvitation[]         @relation("AdminInvitationAcceptor")
 
@@ -661,10 +664,44 @@ model SupportTicket {
   subject   String
   message   String
   status    SupportTicketStatus @default(Open)
+  assignedToId String?
+  assignedTo   Profile?            @relation("SupportTicketAssignee", fields: [assignedToId], references: [id], onDelete: SetNull)
+  activities   SupportTicketActivity[]
   createdAt DateTime            @default(now())
   updatedAt DateTime            @updatedAt
 
   @@index([profileId, createdAt])
   @@index([email, createdAt])
+  @@index([status, assignedToId, updatedAt])
   @@map("support_tickets")
+}
+
+model SupportTicketActivity {
+  id         String              @id @default(uuid())
+  ticketId   String
+  ticket     SupportTicket       @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  actorId    String
+  actor      Profile             @relation(fields: [actorId], references: [id])
+  fromStatus SupportTicketStatus?
+  toStatus   SupportTicketStatus?
+  note       String?
+  createdAt  DateTime            @default(now())
+
+  @@index([ticketId, createdAt])
+  @@map("support_ticket_activities")
+}
+
+model AdminRateLimitBucket {
+  id          String   @id @default(uuid())
+  scope       String
+  keyHash     String
+  windowStart DateTime
+  count       Int      @default(1)
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([scope, keyHash, windowStart])
+  @@index([expiresAt])
+  @@map("admin_rate_limit_buckets")
 }

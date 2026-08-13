@@ -13,7 +13,6 @@ type AdminAuthShellProps = {
 };
 
 export function AdminAuthShell({
-  eyebrow,
   title,
   description,
   footerHref,
@@ -21,24 +20,22 @@ export function AdminAuthShell({
   children,
 }: AdminAuthShellProps) {
   return (
-    <main id="main-content" className="min-h-[100dvh] bg-sand-50 px-4 py-8 sm:px-6 lg:py-12">
-      <div className="mx-auto grid min-h-[calc(100dvh-6rem)] w-full max-w-5xl overflow-hidden rounded-2xl border border-forest-100 bg-white shadow-[0_24px_80px_rgba(18,55,42,0.14)] lg:grid-cols-[0.9fr_1.1fr]">
-        <aside className="flex flex-col justify-between bg-forest-950 p-7 text-sand-50 sm:p-10">
+    <main id="main-content" className="min-h-[100dvh] bg-[#eef2ed] p-3 sm:p-5 lg:p-8">
+      <div className="mx-auto grid min-h-[calc(100dvh-2rem)] w-full max-w-6xl overflow-hidden border border-forest-900 bg-white shadow-[0_24px_70px_rgba(18,55,42,0.16)] lg:grid-cols-[minmax(20rem,.82fr)_minmax(0,1.18fr)]">
+        <aside className="relative flex min-h-[22rem] flex-col justify-between overflow-hidden bg-forest-950 p-6 text-sand-50 sm:p-9">
           <Link href="/" className="inline-flex min-h-11 w-fit items-center" aria-label="LinkConn Rent home">
             <Logo variant="lockup" priority className="h-16 w-auto brightness-0 invert" sizes="134px" />
           </Link>
 
-          <div className="py-12">
-            <span className="grid size-12 place-items-center rounded-xl bg-lime-300 text-forest-950">
+          <div className="relative z-10 py-10 lg:py-16">
+            <span className="grid size-12 place-items-center bg-lime text-forest-950">
               <ShieldCheck className="size-6" aria-hidden />
             </span>
-            <p className="mt-6 text-xs font-bold uppercase tracking-[0.18em] text-lime-200">
-              Restricted system
-            </p>
-            <h2 className="mt-3 text-3xl font-extrabold tracking-tight">LinkConn administration</h2>
+            <h2 className="mt-7 max-w-sm text-4xl font-extrabold tracking-[-0.03em]">A controlled workspace for accountable decisions.</h2>
             <p className="mt-4 max-w-sm text-sm leading-7 text-sand-200">
-              This portal is reserved for authorized Admin and Super Admin accounts. Access attempts are authenticated and audited.
+              Authorized operators review identity, listings, payments, support, maintenance, and disputes with every consequential action recorded.
             </p>
+            <div className="mt-8 grid grid-cols-3 border border-white/15 text-center text-[10px] font-bold text-forest-100"><span className="border-r border-white/15 p-3">Authenticated</span><span className="border-r border-white/15 p-3">Authorized</span><span className="p-3">Audited</span></div>
           </div>
 
           <p className="flex items-center gap-2 text-xs text-sand-300">
@@ -47,10 +44,9 @@ export function AdminAuthShell({
           </p>
         </aside>
 
-        <section className="grid place-items-center p-6 sm:p-10 lg:p-12">
+        <section className="grid place-items-center p-6 sm:p-10 lg:p-14">
           <div className="w-full max-w-md">
-            <p className="text-xs font-bold uppercase tracking-[0.16em] text-forest-700">{eyebrow}</p>
-            <h1 className="mt-2 text-3xl font-extrabold tracking-[-0.04em] text-ink">{title}</h1>
+            <h1 className="text-3xl font-extrabold tracking-[-0.035em] text-ink sm:text-4xl">{title}</h1>
             <p className="mt-3 text-sm leading-6 text-muted">{description}</p>
             <div className="mt-7">{children}</div>
             <div className="mt-7 border-t border-line pt-5 text-center text-sm text-muted">

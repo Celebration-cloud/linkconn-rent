@@ -9,6 +9,7 @@ import {
   getPostLoginDestination,
 } from "@/lib/auth/account-access";
 import { isAdministratorRole } from "@/lib/auth/review-access";
+import { adminRateLimitResponse, checkAdminRateLimit } from "@/lib/security/admin-rate-limiter";
 
 const loginSchema = z.object({
   email: z.string().email("Enter a valid email address").max(254),
@@ -58,6 +59,10 @@ export async function POST(req: Request) {
     }
 
     const { email, password, callbackURL, portal } = parsed.data;
+    if (portal === "admin") {
+      const adminLimit = await checkAdminRateLimit(req, "admin-login", email, 5, 15 * 60 * 1000);
+      if (!adminLimit.allowed) return adminRateLimitResponse("Too many administrator sign-in attempts. Try again later.", adminLimit.resetTime);
+    }
 
     // 4. Authenticate via Neon Auth
     const result = await auth.signIn.email({

@@ -5,6 +5,8 @@ import type {
   DisputeStatus,
   ModerationStatus,
   Prisma,
+  RequestStatus,
+  SupportTicketStatus,
 } from "@prisma/client";
 import { prisma } from "@/lib/db/client";
 import {
@@ -41,7 +43,33 @@ function requireSanctioner(role: AppRole) {
   if (!canSanctionUsers(role)) throw new Error("FORBIDDEN");
 }
 
+const SUPPORT_TRANSITIONS: Record<SupportTicketStatus, SupportTicketStatus[]> = {
+  Open: ["InProgress", "WaitingOnCustomer", "Resolved", "Closed"],
+  InProgress: ["WaitingOnCustomer", "Resolved", "Closed"],
+  WaitingOnCustomer: ["InProgress", "Resolved", "Closed"],
+  Resolved: ["InProgress", "Closed"],
+  Closed: ["InProgress"],
+};
+
+const MAINTENANCE_TRANSITIONS: Record<RequestStatus, RequestStatus[]> = {
+  Pending: ["InProgress", "Completed", "Closed"],
+  InProgress: ["Completed", "Closed"],
+  Completed: ["InProgress", "Closed"],
+  Closed: ["InProgress"],
+};
+
 export class AdministrationRepository {
+  static async getNavigationCounts() {
+    const [verifications, disputes, moderation, support, maintenance] = await Promise.all([
+      prisma.verificationSubmission.count({ where: { status: "Pending" } }),
+      prisma.disputeCase.count({ where: { status: { in: ["Open", "Investigating"] } } }),
+      prisma.property.count({ where: { moderationStatus: { in: ["PendingReview", "Flagged"] } } }),
+      prisma.supportTicket.count({ where: { status: { in: ["Open", "InProgress", "WaitingOnCustomer"] } } }),
+      prisma.maintenanceRequest.count({ where: { status: { in: ["Pending", "InProgress"] } } }),
+    ]);
+    return { verifications, disputes, moderation, support, maintenance };
+  }
+
   static async getOverview() {
     const [
       users,
@@ -52,6 +80,8 @@ export class AdministrationRepository {
       openDisputes,
       completedViewings,
       successfulTenancies,
+      openSupport,
+      activeMaintenance,
       recentActivity,
     ] = await Promise.all([
       prisma.profile.count(),
@@ -66,6 +96,8 @@ export class AdministrationRepository {
       }),
       prisma.viewing.count({ where: { status: "Completed" } }),
       prisma.application.count({ where: { status: "Accepted" } }),
+      prisma.supportTicket.count({ where: { status: { in: ["Open", "InProgress", "WaitingOnCustomer"] } } }),
+      prisma.maintenanceRequest.count({ where: { status: { in: ["Pending", "InProgress"] } } }),
       prisma.adminAuditEvent.findMany({
         select: {
           id: true, action: true, reason: true, targetType: true, createdAt: true,
@@ -85,6 +117,8 @@ export class AdministrationRepository {
       openDisputes,
       completedViewings,
       successfulTenancies,
+      openSupport,
+      activeMaintenance,
       recentActivity,
     };
   }
@@ -194,7 +228,7 @@ export class AdministrationRepository {
     actor: { id: string; role: AppRole },
     id: string,
     input:
-      | { action: "assign"; assigneeId: string }
+      | { action: "assign" }
       | { action: "approve" | "reject"; reason: string; notes?: string },
   ) {
     requireReviewer(actor.role);
@@ -202,17 +236,17 @@ export class AdministrationRepository {
       const current = await tx.verificationSubmission.findUnique({ where: { id } });
       if (!current) throw new Error("NOT_FOUND");
       if (input.action === "assign") {
-        if (current.assignedToId && current.assignedToId !== input.assigneeId) {
+        if (current.assignedToId && current.assignedToId !== actor.id) {
           throw new Error("ASSIGNMENT_CONFLICT");
         }
         const assignee = await tx.profile.findFirst({
-          where: { id: input.assigneeId, role: { in: [...REVIEWER_ROLES] } },
+          where: { id: actor.id, role: { in: [...REVIEWER_ROLES] }, accountStatus: { not: "Suspended" } },
           select: { id: true },
         });
         if (!assignee) throw new Error("INVALID_ASSIGNEE");
         const updated = await tx.verificationSubmission.update({
           where: { id },
-          data: { assignedToId: input.assigneeId },
+          data: { assignedToId: actor.id },
         });
         await tx.adminAuditEvent.create({
           data: {
@@ -221,7 +255,7 @@ export class AdministrationRepository {
             targetType: "Verification",
             targetId: id,
             previousState: { assignedToId: current.assignedToId },
-            resultingState: { assignedToId: input.assigneeId },
+            resultingState: { assignedToId: actor.id },
             reason: "Reviewer assignment",
           },
         });
@@ -329,7 +363,7 @@ export class AdministrationRepository {
     actor: { id: string; role: AppRole },
     id: string,
     input:
-      | { action: "assign"; assigneeId: string }
+      | { action: "assign" }
       | { action: "investigate" | "resolve" | "dismiss"; reason: string }
       | { action: "note"; body: string; internal: boolean },
   ) {
@@ -343,17 +377,17 @@ export class AdministrationRepository {
         });
       }
       if (input.action === "assign") {
-        if (current.assignedToId && current.assignedToId !== input.assigneeId) {
+        if (current.assignedToId && current.assignedToId !== actor.id) {
           throw new Error("ASSIGNMENT_CONFLICT");
         }
         const assignee = await tx.profile.findFirst({
-          where: { id: input.assigneeId, role: { in: [...REVIEWER_ROLES] }, accountStatus: { not: "Suspended" } },
+          where: { id: actor.id, role: { in: [...REVIEWER_ROLES] }, accountStatus: { not: "Suspended" } },
           select: { id: true },
         });
         if (!assignee) throw new Error("INVALID_ASSIGNEE");
         const updated = await tx.disputeCase.update({
           where: { id },
-          data: { assignedToId: input.assigneeId },
+          data: { assignedToId: actor.id },
         });
         await tx.adminAuditEvent.create({
           data: {
@@ -362,7 +396,7 @@ export class AdministrationRepository {
             targetType: "Dispute",
             targetId: id,
             previousState: { assignedToId: current.assignedToId },
-            resultingState: { assignedToId: input.assigneeId },
+            resultingState: { assignedToId: actor.id },
             reason: "Investigator assignment",
           },
         });
@@ -543,6 +577,175 @@ export class AdministrationRepository {
       prisma.adminAuditEvent.count({ where }),
     ]);
     return pageResult(items, totalItems, filters.page, filters.pageSize);
+  }
+
+  static async listSupportTickets(filters: AdminQueueFilters) {
+    const where: Prisma.SupportTicketWhereInput = {
+      ...(filters.status ? { status: filters.status as SupportTicketStatus } : {}),
+      ...(filters.assignee === "unassigned"
+        ? { assignedToId: null }
+        : filters.assignee
+          ? { assignedToId: filters.assignee }
+          : {}),
+      ...(filters.category ? { category: filters.category } : {}),
+      ...(filters.query
+        ? {
+            OR: [
+              { reference: { contains: filters.query, mode: "insensitive" } },
+              { subject: { contains: filters.query, mode: "insensitive" } },
+              { name: { contains: filters.query, mode: "insensitive" } },
+              { email: { contains: filters.query, mode: "insensitive" } },
+            ],
+          }
+        : {}),
+    };
+    const [items, totalItems] = await Promise.all([
+      prisma.supportTicket.findMany({
+        where,
+        include: {
+          profile: { select: { id: true, firstName: true, lastName: true, role: true } },
+          assignedTo: { select: { id: true, firstName: true, lastName: true } },
+          activities: {
+            include: { actor: { select: { firstName: true, lastName: true } } },
+            orderBy: { createdAt: "asc" },
+          },
+        },
+        orderBy: { createdAt: filters.sort === "oldest" ? "asc" : "desc" },
+        skip: (filters.page - 1) * filters.pageSize,
+        take: filters.pageSize,
+      }),
+      prisma.supportTicket.count({ where }),
+    ]);
+    return pageResult(items, totalItems, filters.page, filters.pageSize);
+  }
+
+  static async actOnSupportTicket(
+    actor: { id: string; role: AppRole },
+    id: string,
+    input:
+      | { action: "assign" }
+      | { action: "status"; status: SupportTicketStatus; reason: string }
+      | { action: "note"; note: string },
+  ) {
+    requireReviewer(actor.role);
+    return prisma.$transaction(async (tx) => {
+      const current = await tx.supportTicket.findUnique({ where: { id } });
+      if (!current) throw new Error("NOT_FOUND");
+      if (input.action === "assign") {
+        if (current.assignedToId && current.assignedToId !== actor.id) throw new Error("ASSIGNMENT_CONFLICT");
+        const assignee = await tx.profile.findFirst({
+          where: { id: actor.id, role: { in: [...REVIEWER_ROLES] }, accountStatus: { not: "Suspended" } },
+          select: { id: true },
+        });
+        if (!assignee) throw new Error("INVALID_ASSIGNEE");
+        const updated = await tx.supportTicket.update({ where: { id }, data: { assignedToId: actor.id } });
+        await tx.adminAuditEvent.create({
+          data: {
+            actorId: actor.id,
+            action: "support.assigned",
+            targetType: "Support",
+            targetId: id,
+            previousState: { assignedToId: current.assignedToId },
+            resultingState: { assignedToId: actor.id },
+            reason: "Support owner assignment",
+          },
+        });
+        return updated;
+      }
+      if (input.action === "note") {
+        const activity = await tx.supportTicketActivity.create({
+          data: { ticketId: id, actorId: actor.id, note: input.note },
+        });
+        await tx.adminAuditEvent.create({
+          data: { actorId: actor.id, action: "support.note.added", targetType: "Support", targetId: id, reason: input.note },
+        });
+        return activity;
+      }
+      if (!SUPPORT_TRANSITIONS[current.status].includes(input.status)) throw new Error("INVALID_TRANSITION");
+      const updated = await tx.supportTicket.update({ where: { id }, data: { status: input.status } });
+      await tx.supportTicketActivity.create({
+        data: { ticketId: id, actorId: actor.id, fromStatus: current.status, toStatus: input.status, note: input.reason },
+      });
+      await tx.adminAuditEvent.create({
+        data: {
+          actorId: actor.id,
+          action: "support.status.updated",
+          targetType: "Support",
+          targetId: id,
+          previousState: { status: current.status },
+          resultingState: { status: input.status },
+          reason: input.reason,
+        },
+      });
+      return updated;
+    });
+  }
+
+  static async listMaintenanceRequests(filters: AdminQueueFilters) {
+    const where: Prisma.MaintenanceRequestWhereInput = {
+      ...(filters.status ? { status: filters.status as RequestStatus } : {}),
+      ...(filters.priority && filters.priority !== "Critical" ? { priority: filters.priority } : {}),
+      ...(filters.query
+        ? {
+            OR: [
+              { title: { contains: filters.query, mode: "insensitive" } },
+              { property: { title: { contains: filters.query, mode: "insensitive" } } },
+              { requester: { email: { contains: filters.query, mode: "insensitive" } } },
+            ],
+          }
+        : {}),
+    };
+    const [items, totalItems] = await Promise.all([
+      prisma.maintenanceRequest.findMany({
+        where,
+        include: {
+          property: { select: { id: true, title: true, location: true, owner: { select: { firstName: true, lastName: true } } } },
+          requester: { select: { id: true, firstName: true, lastName: true, email: true } },
+          activities: {
+            include: { actor: { select: { firstName: true, lastName: true } } },
+            orderBy: { createdAt: "asc" },
+          },
+        },
+        orderBy: filters.sort === "oldest" ? { createdAt: "asc" } : { updatedAt: "desc" },
+        skip: (filters.page - 1) * filters.pageSize,
+        take: filters.pageSize,
+      }),
+      prisma.maintenanceRequest.count({ where }),
+    ]);
+    return pageResult(items, totalItems, filters.page, filters.pageSize);
+  }
+
+  static async actOnMaintenanceRequest(
+    actor: { id: string; role: AppRole },
+    id: string,
+    status: RequestStatus,
+    reason: string,
+  ) {
+    requireReviewer(actor.role);
+    return prisma.$transaction(async (tx) => {
+      const current = await tx.maintenanceRequest.findUnique({ where: { id } });
+      if (!current) throw new Error("NOT_FOUND");
+      if (!MAINTENANCE_TRANSITIONS[current.status].includes(status)) throw new Error("INVALID_TRANSITION");
+      const updated = await tx.maintenanceRequest.update({
+        where: { id },
+        data: { status, closedAt: status === "Closed" ? new Date() : status === "InProgress" ? null : undefined },
+      });
+      await tx.maintenanceActivity.create({
+        data: { requestId: id, actorId: actor.id, fromStatus: current.status, toStatus: status, note: reason },
+      });
+      await tx.adminAuditEvent.create({
+        data: {
+          actorId: actor.id,
+          action: "maintenance.status.updated",
+          targetType: "Maintenance",
+          targetId: id,
+          previousState: { status: current.status },
+          resultingState: { status },
+          reason,
+        },
+      });
+      return updated;
+    });
   }
 
   static async moderateUser(
