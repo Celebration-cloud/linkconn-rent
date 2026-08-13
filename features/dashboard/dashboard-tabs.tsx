@@ -135,7 +135,10 @@ export function OverviewTab() {
           <div className="mt-4 space-y-2">
             {isLandlord || isAdmin ? (
               <>
-                <button onClick={() => alert("Opening relevant flow...")} className="flex w-full items-center gap-2 rounded-xl bg-brandgreen-500 px-3 py-2.5 text-sm font-bold text-white hover:bg-brandgreen-600 cursor-pointer">
+                <button
+                  onClick={() => router.push(isLandlord ? "/dashboard/properties/new" : "/admin/verifications")}
+                  className="flex w-full items-center gap-2 rounded-xl bg-brandgreen-500 px-3 py-2.5 text-sm font-bold text-white hover:bg-brandgreen-600 cursor-pointer"
+                >
                   <Plus className="size-4" aria-hidden="true" /> {isLandlord ? "Add new property" : "Review verifications"}
                 </button>
                 <button onClick={() => go("applications")} className="flex w-full items-center gap-2 rounded-xl bg-white/10 px-3 py-2.5 text-sm font-bold text-white hover:bg-white/20 cursor-pointer">

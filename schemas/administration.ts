@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const queueFiltersSchema = z.object({
-  status: z.enum(["Draft", "Pending", "Approved", "Rejected", "Open", "Investigating", "Resolved", "Dismissed", "Active", "Restricted", "Suspended", "PendingReview", "Flagged", "Removed", "Paid", "Due", "Overdue", "Processing", "Failed", "InProgress", "WaitingOnCustomer", "Completed", "Closed"]).optional(),
+  status: z.enum(["Draft", "Pending", "Approved", "Rejected", "NeedsChanges", "Open", "Investigating", "Resolved", "Dismissed", "Active", "Restricted", "Suspended", "PendingReview", "Flagged", "Removed", "Paid", "Due", "Overdue", "Processing", "Failed", "InProgress", "WaitingOnCustomer", "Completed", "Closed"]).optional(),
   priority: z.enum(["Low", "Medium", "High", "Critical"]).optional(),
   query: z.string().trim().max(120).optional(),
   role: z.enum(["Tenant", "Landlord", "PropertyManager", "Moderator", "Admin", "SuperAdmin"]).optional(),
@@ -18,14 +18,32 @@ export const queueFiltersSchema = z.object({
 
 export type AdminQueueFilters = z.infer<typeof queueFiltersSchema>;
 
+const verificationFindingSchema = z.object({
+  key: z.enum(["identity_match", "document_validity", "profile_consistency", "ownership_evidence", "property_match"]),
+  status: z.enum(["Approved", "NeedsChanges"]),
+  note: z.string().trim().min(2).max(1000).optional(),
+});
+
+const verificationDecisionBase = z.object({
+  reason: z.string().trim().min(8).max(1000),
+  notes: z.string().trim().max(2000).optional(),
+  findings: z.array(verificationFindingSchema).min(1).max(5),
+});
+
 export const verificationReviewSchema = z.discriminatedUnion("action", [
   z.object({ action: z.literal("assign") }),
-  z.object({
-    action: z.enum(["approve", "reject"]),
-    reason: z.string().trim().min(8).max(1000),
-    notes: z.string().trim().max(2000).optional(),
+  verificationDecisionBase.extend({ action: z.enum(["approve", "reject"]) }),
+  verificationDecisionBase.extend({
+    action: z.literal("request_changes"),
+    correctionInstructions: z.string().trim().min(12).max(2000),
   }),
 ]);
+
+export type VerificationReviewInput = z.infer<typeof verificationReviewSchema>;
+
+export const verificationRouteParamsSchema = z.object({
+  id: z.string().uuid(),
+});
 
 export const disputeCreateSchema = z.object({
   title: z.string().trim().min(4).max(160),

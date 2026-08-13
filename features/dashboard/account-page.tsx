@@ -1,293 +1,656 @@
 "use client";
 
-import { Suspense, useMemo } from "react";
+import { useState } from "react";
 import Link from "next/link";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import {
-  Bell,
+  AlertTriangle,
+  ArrowRight,
+  ArrowUpRight,
+  BadgeAlert,
+  BadgeCheck,
   Building2,
+  Calendar,
   CalendarDays,
+  CheckCircle2,
+  ChevronRight,
   CircleDollarSign,
   ClipboardList,
+  Clock,
+  ExternalLink,
+  Eye,
+  FileCheck2,
+  FileSignature,
+  FileText,
   Gauge,
+  Heart,
   Home,
-  LogOut,
+  Layers,
+  MapPin,
   MessageSquare,
+  Phone,
   Plus,
-  Settings,
+  Receipt,
+  ShieldAlert,
   ShieldCheck,
+  Sparkles,
+  TrendingUp,
+  UserCheck,
   Users,
+  Wallet,
   Wrench,
 } from "lucide-react";
-import { useAuth } from "@/providers/auth-provider";
-import {
-  ApplicationsTab,
-  MaintenanceTab,
-  PaymentsTab,
-  ProfileTab,
-  SavedTab,
-  SecurityTab,
-  VerificationTab,
-} from "./dashboard-tabs";
 import type { DashboardSnapshot } from "@/domain/types/operating-system";
 import { formatNaira } from "@/utils/map-property";
-import { Logo } from "@/components/shared/icons";
+import { useAuth } from "@/providers/auth-provider";
+import { toastSuccess } from "@/stores/toast-store";
 
-function DashboardContent({
-  initialSnapshot,
-}: {
-  initialSnapshot: DashboardSnapshot;
-}) {
-  const { user, logout } = useAuth();
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const activeTab = searchParams.get("tab") || "overview";
-  const setTab = (tab: string) => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("tab", tab);
-    router.replace(`${pathname}?${params.toString()}`);
-  };
-
-  const isLandlord = user?.role === "Landlord" || user?.role === "Property Manager";
-  const nav = useMemo(
-    () =>
-      isLandlord
-        ? [
-            { label: "Dashboard", tab: "overview", icon: Gauge },
-            { label: "My properties", href: "/dashboard/properties", icon: Building2 },
-            { label: "Viewings", tab: "applications", icon: CalendarDays },
-            { label: "Applicants", href: "/dashboard/applicants", icon: Users },
-            { label: "Messages", href: "/messages", icon: MessageSquare },
-            { label: "Verification", href: "/verification", icon: ShieldCheck },
-          ]
-        : [
-            { label: "Dashboard", tab: "overview", icon: Gauge },
-            { label: "Applications", tab: "applications", icon: ClipboardList },
-            { label: "Saved homes", tab: "saved", icon: Home },
-            { label: "Messages", href: "/messages", icon: MessageSquare },
-            { label: "Payments", tab: "payments", icon: CircleDollarSign },
-            { label: "Maintenance", href: "/dashboard/maintenance", icon: Wrench },
-          ],
-    [isLandlord],
-  );
-
-  if (!user) return null;
-  const initials = `${user.firstName[0] || ""}${user.lastName[0] || ""}`.toUpperCase();
-
-  const secondaryContent =
-    activeTab === "profile" ? <ProfileTab /> :
-    activeTab === "verification" ? <VerificationTab /> :
-    activeTab === "saved" ? <SavedTab /> :
-    activeTab === "applications" ? <ApplicationsTab /> :
-    activeTab === "payments" ? <PaymentsTab /> :
-    activeTab === "maintenance" ? <MaintenanceTab /> :
-    activeTab === "security" ? <SecurityTab /> : null;
-
-  return (
-    <main id="main-content" className="min-h-[100dvh] bg-sand-50 md:grid md:grid-cols-[16rem_1fr]">
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-line bg-sand-50 p-4 md:flex">
-        <Link href="/" className="flex items-center px-2 py-2" aria-label="LinkConn Rent home">
-          <Logo variant="lockup" priority className="h-14 w-auto" sizes="118px" />
-        </Link>
-
-        <nav className="mt-8 flex-1 space-y-1">
-          {nav.map((item) => {
-            const Icon = item.icon;
-            const active = item.tab ? activeTab === item.tab : pathname === item.href;
-            const classes = `flex min-h-11 w-full items-center gap-3 rounded-lg px-3 text-sm font-bold transition ${
-              active ? "bg-forest-100 text-forest-900" : "text-muted hover:bg-sand-200 hover:text-forest-900"
-            }`;
-            if (item.href) {
-              return <Link key={item.label} href={item.href} className={classes}><Icon className="h-4 w-4" />{item.label}</Link>;
-            }
-            return <button key={item.label} onClick={() => setTab(item.tab || "overview")} className={classes}><Icon className="h-4 w-4" />{item.label}</button>;
-          })}
-        </nav>
-
-        {isLandlord && (
-          <Link href="/dashboard/properties/new" className="stitch-button mb-4 w-full">
-            <Plus className="h-4 w-4" /> Add new property
-          </Link>
-        )}
-        <button onClick={() => setTab("profile")} className="flex min-h-11 items-center gap-3 rounded-lg px-3 text-sm font-bold text-muted hover:bg-sand-200">
-          <Settings className="h-4 w-4" /> Settings
-        </button>
-        <button onClick={logout} className="flex min-h-11 items-center gap-3 rounded-lg px-3 text-sm font-bold text-red-700 hover:bg-red-50">
-          <LogOut className="h-4 w-4" /> Log out
-        </button>
-      </aside>
-
-      <section className="min-w-0 md:col-start-2">
-        <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-line bg-sand-50/95 px-4 backdrop-blur sm:px-7">
-          <div className="flex min-w-0 items-center gap-3">
-            <Link href="/" className="grid size-10 shrink-0 place-items-center rounded-lg hover:bg-sand-100 md:hidden" aria-label="LinkConn Rent home"><Logo variant="mark" priority className="size-8" sizes="32px" /></Link>
-            <div className="min-w-0">
-            <h1 className="text-xl font-extrabold tracking-tight text-ink">{activeTab === "overview" ? "Overview" : activeTab[0].toUpperCase() + activeTab.slice(1)}</h1>
-            <p className="hidden text-xs text-muted sm:block">Welcome back, {user.firstName}. Here is what needs your attention.</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <button className="relative grid h-10 w-10 place-items-center rounded-full bg-sand-200 text-forest-900" aria-label="Notifications">
-              <Bell className="h-4 w-4" />
-              <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-red-500" />
-            </button>
-            <button onClick={() => setTab("profile")} className="grid h-10 w-10 place-items-center rounded-full bg-forest-700 text-xs font-extrabold text-white" aria-label="Open profile">
-              {initials}
-            </button>
-          </div>
-        </header>
-
-        <div className="p-4 pb-24 sm:p-7 md:pb-8">
-          {activeTab === "overview" ? (
-            <DashboardOverview snapshot={initialSnapshot} landlord={isLandlord} />
-          ) : (
-            <div className="mx-auto max-w-5xl">{secondaryContent}</div>
-          )}
-        </div>
-      </section>
-
-      <nav className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-4 border-t border-line bg-white px-2 pb-[max(env(safe-area-inset-bottom),0.4rem)] pt-2 md:hidden">
-        {nav.slice(0, 4).map((item) => {
-          const Icon = item.icon;
-          const active = item.tab ? activeTab === item.tab : pathname === item.href;
-          const content = <><Icon className="h-5 w-5" /><span className="text-[10px] font-bold">{item.label}</span></>;
-          return item.href ? (
-            <Link key={item.label} href={item.href} className={`flex min-h-12 flex-col items-center justify-center gap-1 ${active ? "text-forest-700" : "text-muted"}`}>{content}</Link>
-          ) : (
-            <button key={item.label} onClick={() => setTab(item.tab || "overview")} className={`flex min-h-12 flex-col items-center justify-center gap-1 ${active ? "text-forest-700" : "text-muted"}`}>{content}</button>
-          );
-        })}
-      </nav>
-    </main>
-  );
-}
-
-function Metric({
+function MetricCard({
   label,
   value,
   icon: Icon,
-  accent = false,
+  trend,
+  tone = "default",
+  href,
 }: {
   label: string;
   value: string;
   icon: typeof Home;
-  accent?: boolean;
+  trend?: string;
+  tone?: "default" | "accent" | "warning" | "success";
+  href?: string;
 }) {
-  return (
-    <article className={`rounded-xl border p-4 ${accent ? "border-forest-200 bg-forest-50" : "border-line bg-sand-100"}`}>
+  const toneClasses = {
+    default: "border-line bg-white text-ink hover:border-forest-400",
+    accent: "border-forest-300 bg-forest-50/60 text-forest-950 hover:border-forest-500",
+    warning: "border-amber-200 bg-amber-50/50 text-amber-950 hover:border-amber-400",
+    success: "border-forest-200 bg-forest-50/50 text-forest-950 hover:border-forest-400",
+  };
+
+  const Content = (
+    <div className={`rounded-2xl border p-5 transition-all shadow-xs ${toneClasses[tone]}`}>
       <div className="flex items-center justify-between">
-        <span className="grid h-8 w-8 place-items-center rounded-lg bg-white text-forest-700"><Icon className="h-4 w-4" /></span>
-        <span className="text-[11px] font-bold text-forest-700">Live</span>
+        <span className="grid size-10 place-items-center rounded-xl bg-white text-forest-700 shadow-xs border border-line">
+          <Icon className="size-5" />
+        </span>
+        {trend && (
+          <span className="inline-flex items-center gap-1 text-[11px] font-bold text-forest-700 bg-forest-100/80 px-2 py-0.5 rounded-full">
+            <TrendingUp className="size-3" /> {trend}
+          </span>
+        )}
       </div>
-      <p className="mt-4 text-xs font-semibold text-muted">{label}</p>
-      <p className="mt-1 text-2xl font-extrabold tabular-nums tracking-tight text-ink">{value}</p>
-    </article>
+      <p className="mt-4 text-xs font-bold uppercase tracking-wider text-muted">{label}</p>
+      <p className="mt-1 text-2xl font-black tabular-nums tracking-tight text-ink">{value}</p>
+    </div>
+  );
+
+  return href ? (
+    <Link href={href} className="block transition-transform hover:-translate-y-0.5">
+      {Content}
+    </Link>
+  ) : (
+    Content
   );
 }
 
-function DashboardOverview({
-  snapshot,
-  landlord,
-}: {
-  snapshot: DashboardSnapshot;
-  landlord: boolean;
-}) {
-  const metrics = landlord
-    ? [
-        ["Total portfolio value", formatNaira(snapshot.portfolioValue), Building2],
-        ["Occupancy rate", `${Math.round(snapshot.occupancyRate)}%`, Gauge],
-        ["Active listings", String(snapshot.activeListings), Home],
-        ["Pending applications", String(snapshot.pendingApplications), ClipboardList],
-      ] as const
-    : [
-        ["Saved homes", String(snapshot.savedHomes), Home],
-        ["Active applications", String(snapshot.pendingApplications), ClipboardList],
-        ["Next payment", snapshot.nextPayment ? formatNaira(snapshot.nextPayment.amount) : "No payment due", CircleDollarSign],
-        ["Open requests", String(snapshot.openMaintenance), Wrench],
-      ] as const;
+export function TenantOverview({ snapshot }: { snapshot: DashboardSnapshot }) {
+  const { user } = useAuth();
+  const router = useRouter();
+  const isVerified = user?.verificationLevel === "Fully Verified" || user?.verificationLevel === "Trusted";
 
   return (
-    <div className="mx-auto max-w-6xl">
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {metrics.map(([label, value, icon], index) => (
-          <Metric key={label} label={label} value={value} icon={icon} accent={index === 1} />
-        ))}
-      </div>
+    <div className="mx-auto max-w-6xl space-y-6">
+      {/* Welcome Hero Banner */}
+      <header className="rounded-3xl border border-line bg-gradient-to-r from-forest-900 via-forest-800 to-forest-950 p-6 md:p-8 text-white shadow-sm">
+        <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+          <div className="space-y-2">
+            <div className="inline-flex items-center gap-2 rounded-full bg-forest-700/70 px-3 py-1 text-xs font-bold text-forest-100 backdrop-blur-xs">
+              <Sparkles className="size-3.5 text-lime" />
+              <span>Tenant Control Center</span>
+            </div>
+            <h1 className="text-2xl font-extrabold tracking-tight sm:text-3xl">
+              Welcome back, {user?.firstName ?? "there"}
+            </h1>
+            <p className="text-sm text-forest-200 max-w-xl">
+              Manage your active lease, track pending rental applications, schedule viewing visits, and dispatch maintenance with verified escrow protection.
+            </p>
+          </div>
 
-      <div className="mt-6 grid gap-6 xl:grid-cols-[1fr_22rem]">
+          <div className="flex flex-wrap items-center gap-3">
+            <Link
+              href="/dashboard/maintenance"
+              className="inline-flex items-center gap-2 rounded-xl bg-white/10 px-4 py-2.5 text-xs font-bold text-white backdrop-blur-xs border border-white/20 hover:bg-white/20 transition-colors"
+            >
+              <Wrench className="size-4" /> Request repair
+            </Link>
+            <Link
+              href="/#discover"
+              className="inline-flex items-center gap-2 rounded-xl bg-lime px-4 py-2.5 text-xs font-extrabold text-forest-950 shadow-sm hover:bg-lime/90 transition-all active:scale-[0.98]"
+            >
+              <Home className="size-4" /> Explore listings
+            </Link>
+          </div>
+        </div>
+      </header>
+
+      {/* KYC / Verification Status Reminder Banner */}
+      {!isVerified && (
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between rounded-2xl border border-amber-200 bg-amber-50/90 p-4 text-amber-950 shadow-xs">
+          <div className="flex items-center gap-3">
+            <div className="grid size-10 place-items-center rounded-xl bg-amber-100 text-amber-800 shrink-0">
+              <ShieldAlert className="size-5" />
+            </div>
+            <div>
+              <strong className="text-sm font-extrabold">Complete your tenant verification</strong>
+              <p className="text-xs text-amber-900/80">
+                Verified tenants get approved 3x faster by verified landlords and can sign leases online.
+              </p>
+            </div>
+          </div>
+          <Link
+            href="/dashboard/verification"
+            className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-amber-800 px-4 py-2 text-xs font-extrabold text-white hover:bg-amber-900 transition-colors shrink-0"
+          >
+            Verify profile <ArrowRight className="size-3.5" />
+          </Link>
+        </div>
+      )}
+
+      {/* 4 Tenant Key Metrics */}
+      <section aria-label="Key tenant metrics" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <MetricCard
+          label="Saved homes"
+          value={String(snapshot.savedHomes)}
+          icon={Heart}
+          href="/dashboard/saved"
+        />
+        <MetricCard
+          label="Active applications"
+          value={String(snapshot.pendingApplications)}
+          icon={ClipboardList}
+          tone="accent"
+          href="/dashboard/applications"
+        />
+        <MetricCard
+          label="Next payment due"
+          value={snapshot.nextPayment ? formatNaira(snapshot.nextPayment.amount) : "₦0 due"}
+          icon={CircleDollarSign}
+          tone={snapshot.nextPayment ? "warning" : "default"}
+          href="/dashboard/payments"
+        />
+        <MetricCard
+          label="Open maintenance"
+          value={String(snapshot.openMaintenance)}
+          icon={Wrench}
+          href="/dashboard/maintenance"
+        />
+      </section>
+
+      {/* Main Tenant Workspaces Split */}
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
+        {/* Left Column: Active Tenancy & Application Pipeline */}
         <div className="space-y-6">
-          <section className="rounded-xl border border-line bg-white p-5">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-extrabold text-ink">{landlord ? "Recent applications" : "Application progress"}</h2>
-              <Link href={landlord ? "/dashboard/applicants" : "/dashboard?tab=applications"} className="text-xs font-bold text-forest-700">View all</Link>
-            </div>
-            <div className="mt-4 divide-y divide-line">
-              {snapshot.applications.length ? snapshot.applications.slice(0, 3).map((application) => (
-                <div key={application.id} className="flex items-center gap-3 py-4">
-                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-sand-200 text-xs font-extrabold text-forest-900">
-                    {application.tenantName.split(" ").map((part) => part[0]).join("").slice(0, 2)}
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-bold text-ink">{application.tenantName}</p>
-                    <p className="truncate text-xs text-muted">{application.propertyTitle}</p>
-                  </div>
-                  <span className="rounded-md bg-forest-50 px-2 py-1 text-[11px] font-bold text-forest-800">{application.status}</span>
+          {/* Active Tenancy Card */}
+          <section className="rounded-2xl border border-line bg-white p-6 shadow-xs">
+            <div className="flex items-center justify-between border-b border-line pb-4">
+              <div className="flex items-center gap-2.5">
+                <span className="grid size-9 place-items-center rounded-xl bg-forest-100 text-forest-800">
+                  <FileSignature className="size-5" />
+                </span>
+                <div>
+                  <h2 className="text-base font-extrabold text-ink">My Tenancy & Lease</h2>
+                  <p className="text-xs text-muted">Active agreement terms and payment schedules</p>
                 </div>
-              )) : <EmptyRow label={landlord ? "No applications need review." : "You have no active applications."} />}
+              </div>
+              <Link
+                href="/dashboard/leases"
+                className="text-xs font-bold text-forest-700 hover:text-forest-900 inline-flex items-center gap-1"
+              >
+                View agreement <ArrowUpRight className="size-3.5" />
+              </Link>
             </div>
+
+            {snapshot.nextPayment ? (
+              <div className="mt-5 space-y-4">
+                <div className="rounded-xl border border-forest-200 bg-forest-50/70 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div>
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-forest-800">
+                      Upcoming installment
+                    </span>
+                    <p className="mt-1 text-2xl font-black text-forest-950">
+                      {formatNaira(snapshot.nextPayment.amount)}
+                    </p>
+                    <p className="mt-0.5 text-xs text-forest-700">
+                      Due by {new Date(snapshot.nextPayment.dueDate).toLocaleDateString("en-NG", { dateStyle: "medium" })}
+                    </p>
+                  </div>
+                  <Link
+                    href="/dashboard/payments"
+                    className="stitch-button justify-center text-xs font-extrabold shrink-0"
+                  >
+                    <CircleDollarSign className="size-4" /> Pay rent now
+                  </Link>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 text-xs">
+                  <div className="rounded-xl border border-line bg-sand-50 p-3">
+                    <span className="text-muted font-medium">Protection</span>
+                    <p className="mt-1 font-bold text-ink flex items-center gap-1">
+                      <ShieldCheck className="size-3.5 text-forest-700" /> Escrow secured
+                    </p>
+                  </div>
+                  <div className="rounded-xl border border-line bg-sand-50 p-3">
+                    <span className="text-muted font-medium">Receipt status</span>
+                    <p className="mt-1 font-bold text-ink">Automated e-receipt</p>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="mt-5 rounded-xl border border-dashed border-line bg-sand-50/50 p-6 text-center">
+                <Home className="mx-auto size-7 text-muted" />
+                <p className="mt-2 text-sm font-bold text-ink">No active tenancy agreement yet</p>
+                <p className="mt-1 text-xs text-muted">
+                  Once your rental application is approved and you sign your lease, your tenancy terms and rent countdown will appear here.
+                </p>
+                <Link href="/#discover" className="stitch-button-secondary mt-4 inline-flex text-xs">
+                  Browse available homes
+                </Link>
+              </div>
+            )}
           </section>
 
-          <section className="rounded-xl border border-line bg-white p-5">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-extrabold text-ink">Maintenance overview</h2>
-              <Wrench className="h-4 w-4 text-muted" />
+          {/* Application Pipeline */}
+          <section className="rounded-2xl border border-line bg-white p-6 shadow-xs">
+            <div className="flex items-center justify-between border-b border-line pb-4">
+              <div>
+                <h2 className="text-base font-extrabold text-ink">Recent applications</h2>
+                <p className="text-xs text-muted">Live progress of your submitted rental requests</p>
+              </div>
+              <Link
+                href="/dashboard/applications"
+                className="text-xs font-bold text-forest-700 hover:text-forest-900 inline-flex items-center gap-1"
+              >
+                View all ({snapshot.applications.length}) <ArrowUpRight className="size-3.5" />
+              </Link>
             </div>
-            <div className="mt-4 grid gap-3 sm:grid-cols-2">
-              {snapshot.maintenance.length ? snapshot.maintenance.slice(0, 2).map((item) => (
-                <article key={item.id} className={`border-l-2 p-4 ${item.priority === "High" ? "border-red-500 bg-red-50" : "border-forest-500 bg-forest-50"}`}>
-                  <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted">{item.priority}</p>
-                  <h3 className="mt-1 text-sm font-extrabold text-ink">{item.title}</h3>
-                  <p className="mt-1 text-xs text-muted">{item.propertyTitle}</p>
-                </article>
-              )) : <EmptyRow label="No open maintenance requests." />}
+
+            <div className="mt-4 divide-y divide-line">
+              {snapshot.applications.length ? (
+                snapshot.applications.slice(0, 3).map((app) => (
+                  <div key={app.id} className="py-4 flex items-center justify-between gap-4">
+                    <div className="min-w-0">
+                      <strong className="block truncate text-sm font-bold text-ink">
+                        {app.propertyTitle}
+                      </strong>
+                      <span className="text-xs text-muted">Submitted to landlord for review</span>
+                    </div>
+                    <span className="rounded-full bg-forest-50 px-2.5 py-1 text-xs font-extrabold text-forest-800 shrink-0">
+                      {app.status}
+                    </span>
+                  </div>
+                ))
+              ) : (
+                <div className="py-8 text-center text-xs text-muted">
+                  <ClipboardList className="mx-auto size-6 text-muted mb-2" />
+                  You have no active rental applications.
+                </div>
+              )}
             </div>
           </section>
         </div>
 
-        <section className="h-fit rounded-xl border border-line bg-white p-5">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-extrabold text-ink">Upcoming viewings</h2>
-            <CalendarDays className="h-4 w-4 text-forest-700" />
-          </div>
-          <div className="mt-4 space-y-4">
-            {snapshot.viewings.length ? snapshot.viewings.slice(0, 4).map((viewing) => (
-              <article key={viewing.id} className="relative border-l border-forest-300 pl-4">
-                <span className="absolute -left-1.5 top-1 h-3 w-3 rounded-full border-2 border-white bg-forest-600" />
-                <p className="text-xs font-bold text-forest-800">{new Date(viewing.scheduledAt).toLocaleString("en-NG", { weekday: "short", hour: "numeric", minute: "2-digit" })}</p>
-                <p className="mt-1 text-sm font-bold text-ink">{viewing.propertyTitle}</p>
-                <p className="mt-1 text-xs text-muted">{viewing.status}</p>
-              </article>
-            )) : <EmptyRow label="No viewings scheduled." />}
-          </div>
-        </section>
+        {/* Right Column: Viewings & Fast Maintenance Dispatch */}
+        <div className="space-y-6">
+          {/* Upcoming Viewings */}
+          <section className="rounded-2xl border border-line bg-white p-6 shadow-xs">
+            <div className="flex items-center justify-between border-b border-line pb-4">
+              <div className="flex items-center gap-2">
+                <CalendarDays className="size-4 text-forest-700" />
+                <h2 className="text-sm font-extrabold text-ink">Upcoming viewings</h2>
+              </div>
+              <Link href="/dashboard/viewings" className="text-xs font-bold text-forest-700 hover:underline">
+                All visits
+              </Link>
+            </div>
+
+            <div className="mt-4 space-y-3">
+              {snapshot.viewings.length ? (
+                snapshot.viewings.slice(0, 3).map((v) => (
+                  <div key={v.id} className="rounded-xl border border-line bg-sand-50 p-3.5 text-xs">
+                    <div className="flex items-center justify-between font-bold text-forest-900">
+                      <span>
+                        {new Date(v.scheduledAt).toLocaleString("en-NG", {
+                          weekday: "short",
+                          month: "short",
+                          day: "numeric",
+                          hour: "numeric",
+                          minute: "2-digit",
+                        })}
+                      </span>
+                      <span className="rounded-full bg-sand-200 px-2 py-0.5 text-[10px] text-ink font-bold">
+                        {v.status}
+                      </span>
+                    </div>
+                    <p className="mt-1 font-semibold text-ink truncate">{v.propertyTitle}</p>
+                  </div>
+                ))
+              ) : (
+                <div className="py-6 text-center text-xs text-muted">
+                  <Calendar className="mx-auto size-6 text-muted mb-2" />
+                  No upcoming property visits scheduled.
+                </div>
+              )}
+            </div>
+          </section>
+
+          {/* Maintenance Quick Status */}
+          <section className="rounded-2xl border border-line bg-white p-6 shadow-xs">
+            <div className="flex items-center justify-between border-b border-line pb-4">
+              <div className="flex items-center gap-2">
+                <Wrench className="size-4 text-forest-700" />
+                <h2 className="text-sm font-extrabold text-ink">Maintenance issues</h2>
+              </div>
+              <Link href="/dashboard/maintenance" className="text-xs font-bold text-forest-700 hover:underline">
+                New issue
+              </Link>
+            </div>
+
+            <div className="mt-4 space-y-3">
+              {snapshot.maintenance.length ? (
+                snapshot.maintenance.slice(0, 3).map((item) => (
+                  <div
+                    key={item.id}
+                    className={`rounded-xl border p-3.5 text-xs ${
+                      item.priority === "High"
+                        ? "border-red-200 bg-red-50/50"
+                        : "border-line bg-sand-50"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="font-extrabold text-ink truncate">{item.title}</span>
+                      <span
+                        className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
+                          item.priority === "High" ? "bg-red-100 text-red-800" : "bg-sand-200 text-ink"
+                        }`}
+                      >
+                        {item.priority}
+                      </span>
+                    </div>
+                    <p className="mt-1 text-muted truncate">{item.propertyTitle}</p>
+                  </div>
+                ))
+              ) : (
+                <div className="py-6 text-center text-xs text-muted">
+                  <CheckCircle2 className="mx-auto size-6 text-forest-700/60 mb-2" />
+                  No open repairs or maintenance tickets.
+                </div>
+              )}
+            </div>
+          </section>
+        </div>
       </div>
     </div>
   );
 }
 
-function EmptyRow({ label }: { label: string }) {
-  return <p className="py-8 text-center text-sm text-muted">{label}</p>;
+export function LandlordOverview({ snapshot }: { snapshot: DashboardSnapshot }) {
+  const { user } = useAuth();
+
+  return (
+    <div className="mx-auto max-w-6xl space-y-6">
+      {/* Landlord Header Banner */}
+      <header className="rounded-3xl border border-line bg-gradient-to-r from-forest-900 via-forest-800 to-forest-950 p-6 md:p-8 text-white shadow-sm">
+        <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+          <div className="space-y-2">
+            <div className="inline-flex items-center gap-2 rounded-full bg-forest-700/70 px-3 py-1 text-xs font-bold text-forest-100 backdrop-blur-xs">
+              <Building2 className="size-3.5 text-lime" />
+              <span>Property Manager & Landlord Hub</span>
+            </div>
+            <h1 className="text-2xl font-extrabold tracking-tight sm:text-3xl">
+              Portfolio Overview, {user?.firstName ?? "Owner"}
+            </h1>
+            <p className="text-sm text-forest-200 max-w-xl">
+              Track your property occupancy, evaluate verified tenant applications, monitor rent collection payouts, and oversee maintenance dispatch.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3">
+            <Link
+              href="/dashboard/properties/new"
+              className="inline-flex items-center gap-2 rounded-xl bg-lime px-4 py-2.5 text-xs font-extrabold text-forest-950 shadow-sm hover:bg-lime/90 transition-all active:scale-[0.98]"
+            >
+              <Plus className="size-4" /> Add new property
+            </Link>
+          </div>
+        </div>
+      </header>
+
+      {/* 4 Landlord Key Metrics */}
+      <section aria-label="Portfolio metrics" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <MetricCard
+          label="Portfolio value"
+          value={formatNaira(snapshot.portfolioValue)}
+          icon={Building2}
+          tone="accent"
+          href="/dashboard/properties"
+        />
+        <MetricCard
+          label="Occupancy rate"
+          value={`${Math.round(snapshot.occupancyRate)}%`}
+          icon={Gauge}
+          trend={snapshot.occupancyRate > 70 ? "+12% vs last quarter" : undefined}
+          href="/dashboard/properties"
+        />
+        <MetricCard
+          label="Active listings"
+          value={String(snapshot.activeListings)}
+          icon={Home}
+          href="/dashboard/properties"
+        />
+        <MetricCard
+          label="Pending applicants"
+          value={String(snapshot.pendingApplications)}
+          icon={Users}
+          tone={snapshot.pendingApplications > 0 ? "warning" : "default"}
+          href="/dashboard/applicants"
+        />
+      </section>
+
+      {/* Main Landlord Workspaces Split */}
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,0.7fr)]">
+        {/* Left Column: Pending Applicants & Urgent Maintenance */}
+        <div className="space-y-6">
+          {/* Applicants Vetting Queue */}
+          <section className="rounded-2xl border border-line bg-white p-6 shadow-xs">
+            <div className="flex items-center justify-between border-b border-line pb-4">
+              <div>
+                <h2 className="text-base font-extrabold text-ink">Applicant Vetting Queue</h2>
+                <p className="text-xs text-muted">Review verified tenant credentials and draft leases</p>
+              </div>
+              <Link
+                href="/dashboard/applicants"
+                className="text-xs font-bold text-forest-700 hover:text-forest-900 inline-flex items-center gap-1"
+              >
+                View all ({snapshot.applications.length}) <ArrowUpRight className="size-3.5" />
+              </Link>
+            </div>
+
+            <div className="mt-4 divide-y divide-line">
+              {snapshot.applications.length ? (
+                snapshot.applications.slice(0, 4).map((app) => (
+                  <div key={app.id} className="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <div className="grid size-10 place-items-center rounded-full bg-forest-100 font-extrabold text-forest-800 text-xs shrink-0">
+                        {app.tenantName.split(" ").map((n) => n[0]).join("").slice(0, 2)}
+                      </div>
+                      <div className="min-w-0">
+                        <strong className="block text-sm font-bold text-ink truncate">
+                          {app.tenantName}
+                        </strong>
+                        <span className="block text-xs text-muted truncate">{app.propertyTitle}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 self-end sm:self-center">
+                      <span className="rounded-full bg-sand-200 px-2.5 py-1 text-xs font-bold text-ink">
+                        {app.status}
+                      </span>
+                      <Link
+                        href="/dashboard/applicants"
+                        className="stitch-button-secondary text-xs py-1 px-3"
+                      >
+                        Review
+                      </Link>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="py-8 text-center text-xs text-muted">
+                  <Users className="mx-auto size-6 text-muted mb-2" />
+                  No pending tenant applications requiring review.
+                </div>
+              )}
+            </div>
+          </section>
+
+          {/* Maintenance Oversight */}
+          <section className="rounded-2xl border border-line bg-white p-6 shadow-xs">
+            <div className="flex items-center justify-between border-b border-line pb-4">
+              <div>
+                <h2 className="text-base font-extrabold text-ink">Maintenance & Repairs</h2>
+                <p className="text-xs text-muted">Incoming repair reports from your tenants</p>
+              </div>
+              <Link
+                href="/dashboard/maintenance"
+                className="text-xs font-bold text-forest-700 hover:text-forest-900 inline-flex items-center gap-1"
+              >
+                Manage repairs <ArrowUpRight className="size-3.5" />
+              </Link>
+            </div>
+
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              {snapshot.maintenance.length ? (
+                snapshot.maintenance.slice(0, 4).map((item) => (
+                  <div
+                    key={item.id}
+                    className={`rounded-xl border p-4 text-xs ${
+                      item.priority === "High" ? "border-red-200 bg-red-50/50" : "border-line bg-sand-50"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="font-extrabold text-ink truncate">{item.title}</span>
+                      <span
+                        className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
+                          item.priority === "High" ? "bg-red-100 text-red-800" : "bg-sand-200 text-ink"
+                        }`}
+                      >
+                        {item.priority}
+                      </span>
+                    </div>
+                    <p className="mt-1 text-muted truncate">{item.propertyTitle}</p>
+                  </div>
+                ))
+              ) : (
+                <div className="col-span-2 py-6 text-center text-xs text-muted">
+                  <CheckCircle2 className="mx-auto size-6 text-forest-700/60 mb-2" />
+                  All properties in good standing. No open repair tickets.
+                </div>
+              )}
+            </div>
+          </section>
+        </div>
+
+        {/* Right Column: Viewing Calendar & Shortcuts */}
+        <div className="space-y-6">
+          {/* Scheduled Property Viewings */}
+          <section className="rounded-2xl border border-line bg-white p-6 shadow-xs">
+            <div className="flex items-center justify-between border-b border-line pb-4">
+              <div className="flex items-center gap-2">
+                <CalendarDays className="size-4 text-forest-700" />
+                <h2 className="text-sm font-extrabold text-ink">Upcoming visits</h2>
+              </div>
+              <Link href="/dashboard/calendar" className="text-xs font-bold text-forest-700 hover:underline">
+                Calendar
+              </Link>
+            </div>
+
+            <div className="mt-4 space-y-3">
+              {snapshot.viewings.length ? (
+                snapshot.viewings.slice(0, 4).map((v) => (
+                  <div key={v.id} className="rounded-xl border border-line bg-sand-50 p-3.5 text-xs">
+                    <div className="flex items-center justify-between font-bold text-forest-900">
+                      <span>
+                        {new Date(v.scheduledAt).toLocaleString("en-NG", {
+                          weekday: "short",
+                          hour: "numeric",
+                          minute: "2-digit",
+                        })}
+                      </span>
+                      <span className="rounded bg-sand-200 px-1.5 py-0.5 text-[10px] text-ink">
+                        {v.status}
+                      </span>
+                    </div>
+                    <p className="mt-1 font-semibold text-ink truncate">{v.propertyTitle}</p>
+                  </div>
+                ))
+              ) : (
+                <div className="py-6 text-center text-xs text-muted">
+                  <Calendar className="mx-auto size-6 text-muted mb-2" />
+                  No property viewings scheduled this week.
+                </div>
+              )}
+            </div>
+          </section>
+
+          {/* Quick Operations Links */}
+          <section className="rounded-2xl border border-line bg-white p-6 shadow-xs space-y-3">
+            <h2 className="text-sm font-extrabold text-ink">Management shortcuts</h2>
+            <div className="space-y-2">
+              <Link
+                href="/dashboard/properties"
+                className="flex items-center justify-between rounded-xl border border-line bg-sand-50 p-3 text-xs font-bold text-ink hover:bg-white hover:border-forest-400 transition-all"
+              >
+                <span className="flex items-center gap-2">
+                  <Building2 className="size-4 text-forest-700" /> Manage property portfolio
+                </span>
+                <ChevronRight className="size-4 text-muted" />
+              </Link>
+              <Link
+                href="/dashboard/leases"
+                className="flex items-center justify-between rounded-xl border border-line bg-sand-50 p-3 text-xs font-bold text-ink hover:bg-white hover:border-forest-400 transition-all"
+              >
+                <span className="flex items-center gap-2">
+                  <FileSignature className="size-4 text-forest-700" /> Digital leases & agreements
+                </span>
+                <ChevronRight className="size-4 text-muted" />
+              </Link>
+              <Link
+                href="/dashboard/payments"
+                className="flex items-center justify-between rounded-xl border border-line bg-sand-50 p-3 text-xs font-bold text-ink hover:bg-white hover:border-forest-400 transition-all"
+              >
+                <span className="flex items-center gap-2">
+                  <Wallet className="size-4 text-forest-700" /> Payout ledger & banking
+                </span>
+                <ChevronRight className="size-4 text-muted" />
+              </Link>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default function AccountPage({
   initialSnapshot,
+  landlord,
 }: {
   initialSnapshot: DashboardSnapshot;
+  landlord: boolean;
 }) {
-  return (
-    <Suspense fallback={<div className="min-h-[100dvh] animate-pulse bg-sand-200" />}>
-      <DashboardContent initialSnapshot={initialSnapshot} />
-    </Suspense>
+  return landlord ? (
+    <LandlordOverview snapshot={initialSnapshot} />
+  ) : (
+    <TenantOverview snapshot={initialSnapshot} />
   );
 }

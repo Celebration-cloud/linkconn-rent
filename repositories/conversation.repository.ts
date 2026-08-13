@@ -21,29 +21,31 @@ export class ConversationRepository {
     });
     if (!property) throw new Error("NOT_FOUND");
     if (property.ownerId === tenantId) throw new Error("OWN_PROPERTY");
-    const existing = await prisma.conversation.findFirst({
-      where: { tenantId, landlordId: property.ownerId, propertyId },
+    const conversation = await prisma.conversation.upsert({
+      where: { tenantId_landlordId_propertyId: { tenantId, landlordId: property.ownerId, propertyId } },
+      update: applicationId ? { applicationId } : {},
+      create: { tenantId, landlordId: property.ownerId, propertyId, applicationId },
+      select: { id: true, propertyId: true, applicationId: true, leaseId: true, tenantId: true, landlordId: true, lastMessageAt: true },
     });
-    if (existing) return existing;
-    return prisma.conversation.create({
-      data: { tenantId, landlordId: property.ownerId, propertyId, applicationId },
-    });
+    return { ...conversation, lastMessageAt: conversation.lastMessageAt.toISOString() };
   }
 
-  static list(profileId: string) {
-    return prisma.conversation.findMany({
+  static async list(profileId: string) {
+    const rows = await prisma.conversation.findMany({
       where: {
         OR: [
           { tenantId: profileId, archivedByTenant: false },
           { landlordId: profileId, archivedByLandlord: false },
         ],
       },
-      include: {
-        property: true,
+      select: {
+        id: true, tenantId: true, landlordId: true, lastMessageAt: true,
+        property: { select: { id: true, title: true, location: true } },
         tenant: profileCard,
         landlord: profileCard,
-        application: true,
-        messages: { orderBy: { createdAt: "desc" }, take: 1 },
+        application: { select: { id: true, status: true } },
+        lease: { select: { id: true } },
+        messages: { select: { id: true, body: true, senderId: true, readAt: true, createdAt: true }, orderBy: { createdAt: "desc" }, take: 1 },
         _count: {
           select: {
             messages: { where: { readAt: null, senderId: { not: profileId } } },
@@ -52,6 +54,7 @@ export class ConversationRepository {
       },
       orderBy: { lastMessageAt: "desc" },
     });
+    return rows.map((row) => ({ ...row, lastMessageAt: row.lastMessageAt.toISOString(), messages: row.messages.map((message) => ({ ...message, readAt: message.readAt?.toISOString() ?? null, createdAt: message.createdAt.toISOString() })) }));
   }
 
   static async listMessages(profileId: string, conversationId: string, cursor?: Date, limit = 40) {
@@ -62,7 +65,7 @@ export class ConversationRepository {
     if (!conversation) throw new Error("NOT_FOUND");
     const messages = await prisma.message.findMany({
       where: { conversationId, ...(cursor ? { createdAt: { lt: cursor } } : {}) },
-      include: { sender: profileCard },
+      select: { id: true, senderId: true, type: true, body: true, attachmentName: true, attachmentUrl: true, readAt: true, createdAt: true, sender: profileCard },
       orderBy: { createdAt: "desc" },
       take: limit,
     });
@@ -70,7 +73,7 @@ export class ConversationRepository {
       where: { conversationId, senderId: { not: profileId }, readAt: null },
       data: { readAt: new Date() },
     });
-    return messages.reverse();
+    return messages.reverse().map((message) => ({ ...message, readAt: message.readAt?.toISOString() ?? null, createdAt: message.createdAt.toISOString() }));
   }
 
   static async sendMessage(profileId: string, conversationId: string, body: string) {
@@ -87,7 +90,20 @@ export class ConversationRepository {
         where: { id: conversationId },
         data: { lastMessageAt: message.createdAt },
       });
-      return message;
+      const recipientId = conversation.tenantId === profileId
+        ? conversation.landlordId
+        : conversation.tenantId;
+      await transaction.notification.create({
+        data: {
+          profileId: recipientId,
+          kind: "Message",
+          title: "New message",
+          body: body.length > 120 ? `${body.slice(0, 117)}…` : body,
+          href: `/messages?conversation=${conversationId}`,
+          idempotencyKey: `message:${message.id}:notification`,
+        },
+      });
+      return { id: message.id, senderId: message.senderId, type: message.type, body: message.body, attachmentName: message.attachmentName, attachmentUrl: message.attachmentUrl, readAt: message.readAt?.toISOString() ?? null, createdAt: message.createdAt.toISOString(), sender: message.sender };
     });
   }
 

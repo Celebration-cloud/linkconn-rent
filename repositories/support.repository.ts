@@ -8,19 +8,22 @@ function createReference() {
 }
 
 export class SupportRepository {
-  static create(input: SupportTicketInput, profileId?: string) {
-    return prisma.supportTicket.create({
-      data: {
-        ...input,
-        profileId,
-        reference: createReference(),
-      },
-      select: {
-        id: true,
-        reference: true,
-        status: true,
-        createdAt: true,
-      },
+  static create(profile: { id: string; firstName: string; lastName: string; email: string }, input: SupportTicketInput) {
+    return prisma.$transaction(async (tx) => {
+      const ticket = await tx.supportTicket.create({
+        data: {
+          category: input.category,
+          subject: input.subject,
+          message: input.message,
+          profileId: profile.id,
+          name: `${profile.firstName} ${profile.lastName}`.trim(),
+          email: profile.email,
+          reference: createReference(),
+        },
+        select: { id: true, reference: true, status: true, createdAt: true },
+      });
+      await tx.supportTicketActivity.create({ data: { ticketId: ticket.id, actorId: profile.id, toStatus: "Open", note: "Support request created" } });
+      return ticket;
     });
   }
 
@@ -36,6 +39,17 @@ export class SupportRepository {
         status: true,
         createdAt: true,
         updatedAt: true,
+      },
+    });
+  }
+
+  static detailForProfile(profileId: string, id: string) {
+    return prisma.supportTicket.findFirst({
+      where: { id, profileId },
+      select: {
+        id: true, reference: true, category: true, subject: true, message: true, status: true, createdAt: true, updatedAt: true,
+        assignedTo: { select: { firstName: true, lastName: true } },
+        activities: { orderBy: { createdAt: "asc" }, select: { id: true, fromStatus: true, toStatus: true, note: true, createdAt: true, actor: { select: { firstName: true, lastName: true } } } },
       },
     });
   }

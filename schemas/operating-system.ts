@@ -107,6 +107,7 @@ export const savedPropertySchema = z.object({
 export const applicationCreateSchema = z.object({
   propertyId: z.string().uuid(),
   message: z.string().trim().max(800).optional(),
+  idempotencyKey: z.string().trim().min(8).max(100),
 });
 
 export const applicationDecisionSchema = z.object({
@@ -119,6 +120,7 @@ export const viewingCreateSchema = z.object({
     message: "Viewing time must be in the future",
   }),
   note: z.string().trim().max(500).optional(),
+  idempotencyKey: z.string().trim().min(8).max(100),
 });
 
 export const conversationCreateSchema = z.object({
@@ -198,6 +200,12 @@ export const verificationDraftSchema = z.object({
   submit: z.boolean().default(false),
 });
 
+export const verificationResubmitSchema = z.object({
+  action: z.literal("resubmit"),
+  submissionId: z.string().uuid(),
+  reviewRound: z.number().int().positive(),
+});
+
 export const supportTicketSchema = z.object({
   name: z.string().trim().min(2).max(100),
   email: z.string().trim().email().max(180),
@@ -220,4 +228,5 @@ export type PropertySearchInput = z.infer<typeof propertySearchSchema>;
 export type PropertyDraftInput = z.infer<typeof propertyDraftSchema>;
 export type PropertyFeesInput = z.infer<typeof propertyFeesSchema>;
 export type VerificationDraftInput = z.infer<typeof verificationDraftSchema>;
+export type VerificationResubmitInput = z.infer<typeof verificationResubmitSchema>;
 export type SupportTicketInput = z.infer<typeof supportTicketSchema>;

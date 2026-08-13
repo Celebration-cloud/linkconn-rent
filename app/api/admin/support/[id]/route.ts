@@ -23,6 +23,7 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
     if (error instanceof Error && error.message === "NOT_FOUND") return apiError("Support ticket not found", 404);
     if (error instanceof Error && error.message === "ASSIGNMENT_CONFLICT") return apiError("Ticket is already assigned", 409);
     if (error instanceof Error && ["INVALID_TRANSITION", "INVALID_ASSIGNEE"].includes(error.message)) return apiError("Invalid support action", 409);
+    if (error instanceof Error && error.message === "OPERATION_CONFLICT") return apiError("This support ticket changed. Refresh and try again", 409);
     console.error("[PATCH /api/admin/support/:id]", error);
     return apiError("Unable to update support ticket", 500);
   }

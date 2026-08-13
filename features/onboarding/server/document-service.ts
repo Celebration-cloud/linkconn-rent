@@ -50,7 +50,7 @@ function documentDto(document: {
 export async function listOnboardingDocuments(profile: DocumentOwner) {
   assertOnboardingRole(profile);
   const submission = await prisma.verificationSubmission.findFirst({
-    where: { ownerId: profile.id, type: "Identity", status: "Draft" },
+    where: { ownerId: profile.id, type: "Identity", status: { in: ["Draft", "NeedsChanges"] } },
     orderBy: { createdAt: "desc" },
     include: { documents: { orderBy: { createdAt: "asc" } } },
   });
@@ -63,10 +63,11 @@ export async function listOnboardingDocuments(profile: DocumentOwner) {
 
 async function getOrCreateDraftSubmission(ownerId: string) {
   const current = await prisma.verificationSubmission.findFirst({
-    where: { ownerId, type: "Identity", status: "Draft" },
+    where: { ownerId, type: "Identity", status: { in: ["Draft", "NeedsChanges"] } },
     orderBy: { createdAt: "desc" },
   });
   if (current) {
+    if (current.status === "NeedsChanges") return current;
     await prisma.profile.updateMany({
       where: { id: ownerId, onboardingComplete: true },
       data: { onboardingComplete: false },
@@ -133,7 +134,7 @@ export async function prepareOnboardingDocument(
 
   const submission = await getOrCreateDraftSubmission(profile.id);
   const existing = await prisma.verificationDocument.findFirst({
-    where: { submissionId: submission.id, kind: input.kind },
+    where: { submissionId: submission.id, kind: input.kind, supersededAt: null, deletedAt: null },
     orderBy: { createdAt: "desc" },
   });
   if (!existing) {
@@ -145,7 +146,8 @@ export async function prepareOnboardingDocument(
   const documentId = existing?.id ?? randomUUID();
   const extension = EXTENSIONS[input.mimeType];
   const pathname = `private-verifications/${submission.id}/${documentId}/${uploadIntentId}.${extension}`;
-  const document = existing
+  const replaceWithRevision = submission.status === "NeedsChanges" && existing;
+  const document = existing && !replaceWithRevision
     ? await prisma.verificationDocument.update({
         where: { id: existing.id },
         data: {
@@ -166,6 +168,7 @@ export async function prepareOnboardingDocument(
           mimeType: input.mimeType,
           size: input.size,
           uploadIntentId,
+          revision: existing ? existing.revision + 1 : 1,
         },
       });
 
@@ -214,7 +217,7 @@ export async function completeOnboardingDocumentUpload(input: {
     throw new Error("UPLOAD_INTENT_INVALID");
   }
   if (input.ownerId && document.submission.ownerId !== input.ownerId) throw new Error("FORBIDDEN");
-  if (document.submission.status !== "Draft") throw new Error("SUBMISSION_LOCKED");
+  if (document.submission.status !== "Draft" && document.submission.status !== "NeedsChanges") throw new Error("SUBMISSION_LOCKED");
 
   const expectedPrefix = `private-verifications/${document.submissionId}/${document.id}/${input.uploadIntentId}.`;
   const metadata = await storage.inspect(input.pathname);
@@ -240,27 +243,22 @@ export async function completeOnboardingDocumentUpload(input: {
     throw new Error("FILE_SIGNATURE_INVALID");
   }
 
-  const previousStorageKey = document.storageKey;
-  const updated = await prisma.verificationDocument.updateMany({
-    where: { id: document.id, uploadIntentId: input.uploadIntentId },
-    data: {
-      storageKey: input.pathname,
-      uploadIntentId: null,
-      deletedAt: null,
-      deleteAfter: null,
-      deletionError: null,
-    },
-  });
-  if (updated.count !== 1) {
-    await storage.remove(input.pathname).catch(() => undefined);
-    throw new Error("UPLOAD_INTENT_INVALID");
-  }
-  if (previousStorageKey && previousStorageKey !== input.pathname) {
-    await storage.remove(previousStorageKey).catch((error) => {
-      console.error("[document replacement cleanup]", error);
+  const completedAt = new Date();
+  const saved = await prisma.$transaction(async (tx) => {
+    const updated = await tx.verificationDocument.updateMany({
+      where: { id: document.id, uploadIntentId: input.uploadIntentId },
+      data: { storageKey: input.pathname, uploadIntentId: null, deletedAt: null, deleteAfter: null, deletionError: null },
     });
-  }
-  const saved = await prisma.verificationDocument.findUniqueOrThrow({ where: { id: document.id } });
+    if (updated.count !== 1) throw new Error("UPLOAD_INTENT_INVALID");
+    await tx.verificationDocument.updateMany({
+      where: { submissionId: document.submissionId, kind: document.kind, id: { not: document.id }, supersededAt: null, deletedAt: null },
+      data: { supersededAt: completedAt },
+    });
+    return tx.verificationDocument.findUniqueOrThrow({ where: { id: document.id } });
+  }).catch(async (error) => {
+    await storage.remove(input.pathname).catch(() => undefined);
+    throw error;
+  });
   return documentDto(saved);
 }
 
@@ -271,6 +269,7 @@ export async function removeOnboardingDocument(profile: DocumentOwner, documentI
     include: { submission: { select: { ownerId: true, status: true } } },
   });
   if (!document || document.submission.ownerId !== profile.id) throw new Error("NOT_FOUND");
+  if (document.submission.status === "NeedsChanges") throw new Error("REPLACEMENT_REQUIRED");
   if (document.submission.status !== "Draft") throw new Error("SUBMISSION_LOCKED");
   if (document.storageKey) await getDocumentStorage().remove(document.storageKey);
   await prisma.verificationDocument.delete({ where: { id: document.id } });

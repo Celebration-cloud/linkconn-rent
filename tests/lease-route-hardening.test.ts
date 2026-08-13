@@ -1,0 +1,15 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
+const mocks = vi.hoisted(() => ({ profile: vi.fn(), csrf: vi.fn(), fresh: vi.fn(), accept: vi.fn(), detail: vi.fn() }));
+vi.mock("@/lib/auth/current-profile",()=>({getCurrentProfile:mocks.profile,isAccountOperational:(profile:{accountStatus:string})=>profile.accountStatus!=="Suspended"}));
+vi.mock("@/lib/auth/fresh-auth",()=>({hasFreshAuthentication:mocks.fresh}));
+vi.mock("@/lib/security/csrf",()=>({verifyCsrf:mocks.csrf}));
+vi.mock("@/lib/security/rate-limiter",()=>({checkRateLimit:()=>({allowed:true}),getClientIp:()=>"127.0.0.1"}));
+vi.mock("@/repositories/lease.repository",()=>({LeaseRepository:{accept:mocks.accept,detail:mocks.detail}}));
+import { POST as accept } from "@/app/api/leases/[id]/accept/route";
+import { GET as document } from "@/app/api/leases/[id]/document/route";
+const ID="11111111-1111-4111-8111-111111111111";
+const body={legalName:"Teni Tenant",consentVersion:"lease-consent-v1",expectedVersion:2,expectedHash:"a".repeat(64)};
+describe("lease route hardening",()=>{beforeEach(()=>{vi.clearAllMocks();mocks.profile.mockResolvedValue({id:"tenant-1",role:"Tenant",accountStatus:"Active"});mocks.csrf.mockReturnValue(true);mocks.fresh.mockResolvedValue(true);});
+it("fails closed when evidence hashing secret is absent",async()=>{delete process.env.LEASE_EVIDENCE_SECRET;delete process.env.AUTH_SECRET;delete process.env.BETTER_AUTH_SECRET;const response=await accept(new Request(`http://localhost/api/leases/${ID}/accept`,{method:"POST",body:JSON.stringify(body)}),{params:Promise.resolve({id:ID})});expect(response.status).toBe(503);expect(mocks.accept).not.toHaveBeenCalled();});
+it("maps an actual Prisma P2002 acceptance race to conflict",async()=>{process.env.LEASE_EVIDENCE_SECRET="test-secret";mocks.accept.mockRejectedValue({code:"P2002",meta:{target:["leaseVersionId","party"]}});const response=await accept(new Request(`http://localhost/api/leases/${ID}/accept`,{method:"POST",body:JSON.stringify(body)}),{params:Promise.resolve({id:ID})});expect(response.status).toBe(409);});
+it("validates and serves an explicitly requested authorized version",async()=>{mocks.detail.mockResolvedValue({id:ID,versions:[{id:"v2",version:2,renderedAgreement:"v2"},{id:"v1",version:1,renderedAgreement:"v1"}]});const response=await document(new Request(`http://localhost/api/leases/${ID}/document?version=1`),{params:Promise.resolve({id:ID})});expect(response.status).toBe(200);expect(await response.text()).toContain("v1");expect(response.headers.get("content-disposition")).toContain("v1");const invalid=await document(new Request(`http://localhost/api/leases/${ID}/document?version=nope`),{params:Promise.resolve({id:ID})});expect(invalid.status).toBe(400);});});

@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
-  ArrowLeft,
   CalendarDays,
   CheckCircle2,
   Clock3,
@@ -12,7 +11,6 @@ import {
   Plus,
 } from "lucide-react";
 import type { DashboardSnapshot } from "@/domain/types/operating-system";
-import { Logo } from "@/components/shared/icons";
 import {
   ApplicationsTab,
   PaymentsTab,
@@ -59,39 +57,8 @@ export function DashboardWorkspacePage({
     };
   }, []);
 
-  const title = {
-    saved: "Saved homes",
-    applications: "Applications",
-    payments: "Rent and payments",
-    viewings: "Your viewings",
-    calendar: "Viewing calendar",
-    leases: "Leases and agreements",
-  }[mode];
-
   return (
-    <main id="main-content" className="min-h-[100dvh] bg-sand-50 pb-24">
-      <header className="border-b border-line bg-forest-950 text-white">
-        <div className="stitch-container py-8">
-          <div className="flex items-center justify-between gap-4">
-            <Link
-              href="/dashboard"
-              className="inline-flex items-center gap-2 text-xs font-bold text-forest-200 hover:text-white"
-            >
-              <ArrowLeft className="size-4" /> Dashboard
-            </Link>
-            <Link href="/" className="rounded-lg bg-sand-50 px-2 py-1" aria-label="LinkConn Rent home"><Logo variant="lockup" priority className="h-10 w-auto" sizes="86px" /></Link>
-          </div>
-          <h1 className="mt-5 text-4xl font-extrabold tracking-[-0.05em]">
-            {title}
-          </h1>
-          <p className="mt-2 max-w-xl text-sm leading-6 text-forest-100">
-            Every important action stays connected to the property,
-            conversation, documents, and activity history.
-          </p>
-        </div>
-      </header>
-
-      <div className="stitch-container py-8">
+    <div className="mx-auto max-w-6xl">
         {mode === "saved" ? <SavedTab /> : null}
         {mode === "applications" ? <ApplicationsTab /> : null}
         {mode === "payments" ? <PaymentsTab /> : null}
@@ -103,8 +70,7 @@ export function DashboardWorkspacePage({
           />
         ) : null}
         {mode === "leases" ? <LeaseWorkspace /> : null}
-      </div>
-    </main>
+    </div>
   );
 }
 

@@ -5,12 +5,19 @@ const mocks = vi.hoisted(() => {
     verificationSubmission: {
       findUnique: vi.fn(),
       update: vi.fn(),
+      updateMany: vi.fn(),
     },
     profile: {
       update: vi.fn(),
       findFirst: vi.fn(),
     },
     adminAuditEvent: {
+      create: vi.fn(),
+    },
+    verificationReviewFinding: {
+      upsert: vi.fn(),
+    },
+    notification: {
       create: vi.fn(),
     },
     verificationDocument: {
@@ -45,13 +52,17 @@ describe("administrator account review decisions", () => {
       type: "Identity",
       status: "Pending",
       assignedToId: "admin-1",
+      reviewRound: 1,
     });
     mocks.tx.verificationSubmission.update.mockResolvedValue({
       id: "review-1",
       status: "Approved",
     });
+    mocks.tx.verificationSubmission.updateMany.mockResolvedValue({ count: 1 });
     mocks.tx.profile.update.mockResolvedValue({});
     mocks.tx.adminAuditEvent.create.mockResolvedValue({});
+    mocks.tx.verificationReviewFinding.upsert.mockResolvedValue({});
+    mocks.tx.notification.create.mockResolvedValue({});
     mocks.tx.verificationDocument.updateMany.mockResolvedValue({ count: 3 });
   });
 
@@ -62,11 +73,21 @@ describe("administrator account review decisions", () => {
       {
         action: "approve",
         reason: "Identity signals and submitted details were verified.",
+        findings: [
+          { key: "identity_match", status: "Approved" },
+          { key: "document_validity", status: "Approved" },
+          { key: "profile_consistency", status: "Approved" },
+        ],
       },
     );
 
-    expect(mocks.tx.verificationSubmission.update).toHaveBeenCalledWith({
-      where: { id: "review-1" },
+    expect(mocks.tx.verificationSubmission.updateMany).toHaveBeenCalledWith({
+      where: {
+        id: "review-1",
+        status: "Pending",
+        reviewRound: 1,
+        assignedToId: "admin-1",
+      },
       data: expect.objectContaining({
         status: "Approved",
         reviewedById: "admin-1",

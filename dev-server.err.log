@@ -1,0 +1,255 @@
+⨯ TypeError: fetch failed
+    at async Object.read (services\storage\document-storage.ts:69:22)
+    at async GET (app\api\admin\verifications\[id]\documents\[documentId]\route.ts:22:18)
+  67 |     async read(storageKey) {
+  68 |       const { get } = await import("@vercel/blob");
+> 69 |       const result = await get(storageKey, {
+     |                      ^
+  70 |         access: "private",
+  71 |         token,
+  72 |         useCache: false, {
+  [cause]: Error: getaddrinfo EAI_AGAIN jafo54qglrttibfw.private.blob.vercel-storage.com
+      at ignore-listed frames {
+    errno: -3001,
+    code: 'EAI_AGAIN',
+    syscall: 'getaddrinfo',
+    hostname: 'jafo54qglrttibfw.private.blob.vercel-storage.com'
+  }
+}
+[instrumentation:onRequestError] {
+  digest: undefined,
+  message: 'fetch failed',
+  path: '/api/admin/verifications/aa015b70-5550-41aa-bd04-0dbd179ffec2/documents/f1889890-b882-4df7-82ba-5968d051075e',
+  method: 'GET',
+  routeType: 'route'
+}
+[browser] Uncaught Error: ./features/verifications/components/admin-verification-workspace.tsx:603:23
+Expected '</', got 'ident'
+  601 |                 <div>
+  602 |                   <h3 className="mt-3 text-xs font-extrabold uppercase tracking-wider tex...
+> 603 |                   <dl className="grid grid-cols-2 gap-2 text-xs">
+      |                       ^^^^^^^^^
+  604 |                     <div className="border border-line rounded-lg p-2 bg-sand-50">
+  605 |                       <dt className="font-bold text-muted uppercase text-[10px]">Properti...
+  606 |                       <dd className="mt-0.5 text-sm font-extrabold text-ink">{detail.link...
+
+Parsing ecmascript source code failed
+
+Generated code of loaders [next/dist/build/babel/loader] transform of file content of features/verifications/components/admin-verification-workspace.tsx:
+./features/verifications/components/admin-verification-workspace.tsx:603:23
+  601 |                 <div>
+  602 |                   <h3 className="mt-3 text-xs font-extrabold uppercase tracking-wider tex...
+> 603 |                   <dl className="grid grid-cols-2 gap-2 text-xs">
+      |                       ^^^^^^^^^
+  604 |                     <div className="border border-line rounded-lg p-2 bg-sand-50">
+  605 |                       <dt className="font-bold text-muted uppercase text-[10px]">Properti...
+  606 |                       <dd className="mt-0.5 text-sm font-extrabold text-ink">{detail.link...
+
+Import trace:
+  Server Component:
+    ./features/verifications/components/admin-verification-workspace.tsx
+    ./app/(admin)/admin/verifications/page.tsx
+
+
+    at <unknown> (Error: ./features/verifications/components/admin-verification-workspace.tsx:603:23)
+    at <unknown> (./features/verifications/components/admin-verification-workspace.tsx:603:23)
+    at <unknown> (Error: (./features/verifications/components/admin-verification-workspace.tsx:603:23)
+    at <unknown> (./features/verifications/components/admin-verification-workspace.tsx:603:23)
+[browser] Uncaught Error: ./features/verifications/components/admin-verification-workspace.tsx:603:23
+Expected '</', got 'ident'
+  601 |                 <div>
+  602 |                   <h3 className="mt-3 text-xs font-extrabold uppercase tracking-wider tex...
+> 603 |                   <dl className="grid grid-cols-2 gap-2 text-xs">
+      |                       ^^^^^^^^^
+  604 |                     <div className="border border-line rounded-lg p-2 bg-sand-50">
+  605 |                       <dt className="font-bold text-muted uppercase text-[10px]">Properti...
+  606 |                       <dd className="mt-0.5 text-sm font-extrabold text-ink">{detail.link...
+
+Parsing ecmascript source code failed
+
+Generated code of loaders [next/dist/build/babel/loader] transform of file content of features/verifications/components/admin-verification-workspace.tsx:
+./features/verifications/components/admin-verification-workspace.tsx:603:23
+  601 |                 <div>
+  602 |                   <h3 className="mt-3 text-xs font-extrabold uppercase tracking-wider tex...
+> 603 |                   <dl className="grid grid-cols-2 gap-2 text-xs">
+      |                       ^^^^^^^^^
+  604 |                     <div className="border border-line rounded-lg p-2 bg-sand-50">
+  605 |                       <dt className="font-bold text-muted uppercase text-[10px]">Properti...
+  606 |                       <dd className="mt-0.5 text-sm font-extrabold text-ink">{detail.link...
+
+Import trace:
+  Server Component:
+    ./features/verifications/components/admin-verification-workspace.tsx
+    ./app/(admin)/admin/verifications/page.tsx
+
+
+    at <unknown> (Error: ./features/verifications/components/admin-verification-workspace.tsx:603:23)
+    at <unknown> (./features/verifications/components/admin-verification-workspace.tsx:603:23)
+    at <unknown> (Error: (./features/verifications/components/admin-verification-workspace.tsx:603:23)
+    at <unknown> (./features/verifications/components/admin-verification-workspace.tsx:603:23)
+[getSessionDataFromCookie] Invalid session cookie: {
+  error: '"exp" claim timestamp check failed',
+  cookieName: '__Secure-neon-auth.local.session_data'
+}
+[getSessionDataFromCookie] Invalid session cookie: {
+  error: '"exp" claim timestamp check failed',
+  cookieName: '__Secure-neon-auth.local.session_data'
+}
+[getSessionDataFromCookie] Invalid session cookie: {
+  error: '"exp" claim timestamp check failed',
+  cookieName: '__Secure-neon-auth.local.session_data'
+}
+[browser] A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+https://react.dev/link/hydration-mismatch
+
+  ...
+    <HotReload globalError={[...]} webSocket={WebSocket} staticIndicatorState={{pathname:null, ...}}>
+      <AppDevOverlayErrorBoundary globalError={[...]}>
+        <ReplaySsrOnlyErrors>
+        <DevRootHTTPAccessFallbackBoundary>
+          <HTTPAccessFallbackBoundary notFound={<NotAllowedRootHTTPFallbackError>}>
+            <HTTPAccessFallbackErrorBoundary pathname="/account-r..." notFound={<NotAllowedRootHTTPFallbackError>} ...>
+              <RedirectBoundary>
+                <RedirectErrorBoundary router={{...}}>
+                  <Head>
+                  <__next_root_layout_boundary__>
+                    <LoadingBoundaryProvider loading={[...]}>
+                      <SegmentViewNode type="layout" pagePath="layout.tsx">
+                        <SegmentTrieNode>
+                        <link>
+                        <script>
+                        <script>
+                        <script>
+                        <script>
+                        <script>
+                        <script>
+                        <script>
+                        <script>
+                        <script>
+                        <script>
+                        <script>
+                        <RootLayout>
+                          <html lang="en" className="manrope_9b..." data-scroll-behavior="smooth">
+                            <body
+                              className="flex min-h-screen flex-col bg-sand-50 font-sans text-ink antialiased"
+-                             data-new-gr-c-s-check-loaded="14.1320.0"
+-                             data-gr-ext-installed=""
+                            >
+                  ...
+ 
+[browser] Uncaught Error: Hydration failed because the server rendered HTML didn't match the client. As a result this tree will be regenerated on the client. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+https://react.dev/link/hydration-mismatch
+
+  ...
+    <RedirectErrorBoundary router={{...}}>
+      <InnerLayoutRouter url="/login" tree={[...]} params={{}} cacheNode={{rsc:Promise, ...}} segmentPath={[...]} ...>
+        <SegmentViewNode type="page" pagePath="(auth)/log...">
+          <SegmentTrieNode>
+          <LoginPage>
+            <AuthPageShell>
+              <main id="main-content" className="min-h-[100...">
+                <section className="grid min-h...">
+                  <div className="w-full max...">
+                    <div>
+                    <div className="rounded-xl...">
+                      <div>
+                      <Suspense fallback={<div>}>
+                        <LoginForm>
+                          <form onSubmit={function submit} className="space-y-4">
+                            <label className="block">
+                              <span>
+                              <Input value="" onChange={function onChange} type="email" autoComplete="email" ...>
+                                <span className="relative b...">
+-                                 <div
+-                                   data-lastpass-icon-root=""
+-                                   style={{position:"relative",height:"0px",width:"0px",display:"initial",float:"left"}}
+-                                 >
+                            ...
+                      ...
+                ...
+        ...
+      ...
+
+    at <unknown> (https://react.dev/link/hydration-mismatch)
+    at span (<anonymous>)
+    at Input (file://C:/Users/hp/Desktop/website-training/My-Portfolio/linkconn-rent/.next/dev/static/chunks/_033_tdz._.js:1110:216)
+    at LoginForm (file://C:/Users/hp/Desktop/website-training/My-Portfolio/linkconn-rent/.next/dev/static/chunks/_033_tdz._.js:1513:223)
+    at LoginPage (app\(auth)\login\page.tsx:16:9)
+  14 |     >
+  15 |       <Suspense fallback={<div className="rounded-2xl border border-navy-100 bg-navy-50 px...
+> 16 |         <LoginForm />
+     |         ^
+  17 |       </Suspense>
+  18 |     </AuthPageShell>
+  19 |   );
+[browser] A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+https://react.dev/link/hydration-mismatch
+
+  ...
+    <HotReload globalError={[...]} webSocket={WebSocket} staticIndicatorState={{pathname:null, ...}}>
+      <AppDevOverlayErrorBoundary globalError={[...]}>
+        <ReplaySsrOnlyErrors>
+        <DevRootHTTPAccessFallbackBoundary>
+          <HTTPAccessFallbackBoundary notFound={<NotAllowedRootHTTPFallbackError>}>
+            <HTTPAccessFallbackErrorBoundary pathname="/dashboard..." notFound={<NotAllowedRootHTTPFallbackError>} ...>
+              <RedirectBoundary>
+                <RedirectErrorBoundary router={{...}}>
+                  <Head>
+                  <__next_root_layout_boundary__>
+                    <LoadingBoundaryProvider loading={[...]}>
+                      <SegmentViewNode type="layout" pagePath="layout.tsx">
+                        <SegmentTrieNode>
+                        <link>
+                        <script>
+                        <script>
+                        <script>
+                        <script>
+                        <script>
+                        <script>
+                        <script>
+                        <script>
+                        <script>
+                        <script>
+                        <script>
+                        <RootLayout>
+                          <html lang="en" className="manrope_9b..." data-scroll-behavior="smooth">
+                            <body
+                              className="flex min-h-screen flex-col bg-sand-50 font-sans text-ink antialiased"
+-                             data-new-gr-c-s-check-loaded="14.1320.0"
+-                             data-gr-ext-installed=""
+                            >
+                  ...
+ 
+[browser] You're attempting to animate multiple children within AnimatePresence, but its mode is set to "wait". This will lead to odd visual behaviour.
+[browser] You're attempting to animate multiple children within AnimatePresence, but its mode is set to "wait". This will lead to odd visual behaviour.
+[browser] You're attempting to animate multiple children within AnimatePresence, but its mode is set to "wait". This will lead to odd visual behaviour.
+[browser] You're attempting to animate multiple children within AnimatePresence, but its mode is set to "wait". This will lead to odd visual behaviour.
+[browser] You're attempting to animate multiple children within AnimatePresence, but its mode is set to "wait". This will lead to odd visual behaviour.
+[browser] You're attempting to animate multiple children within AnimatePresence, but its mode is set to "wait". This will lead to odd visual behaviour.

@@ -7,6 +7,8 @@ import { Search, ShieldCheck, X } from "lucide-react";
 import { Input, Select, Textarea } from "@/components/ui/form-controls";
 import { formatNaira } from "@/utils/map-property";
 import { toastError, toastSuccess } from "@/stores/toast-store";
+import { AdminLinkedDetail } from "@/features/admin/components/admin-linked-detail";
+import { AdminItemLink } from "@/features/admin/admin-item-link";
 
 type Pagination = { page: number; pageSize: number; totalItems: number; totalPages: number };
 type PageData<T> = { items: T[]; pagination: Pagination };
@@ -178,10 +180,12 @@ function reportMutation(result: { success: boolean; message: string }, successTi
 
 export function UsersWorkspace({
   data,
+  detail,
   canSanction,
   currentUserId,
 }: {
   data: PageData<UserItem>;
+  detail?: Record<string, unknown> | null;
   canSanction: boolean;
   currentUserId: string;
 }) {
@@ -216,6 +220,7 @@ export function UsersWorkspace({
             values: ["Tenant", "Landlord", "PropertyManager", "Moderator", "Admin", "SuperAdmin"],
           }}
         />
+        <div className="mt-4"><AdminLinkedDetail kind="user" detail={detail ?? null} /></div>
         <div className="mt-4 overflow-x-auto">
           <table className="w-full min-w-[58rem] text-left text-sm">
             <thead className="bg-sand-100 text-xs text-muted">
@@ -231,9 +236,9 @@ export function UsersWorkspace({
               {data.items.map((item) => (
                 <tr key={item.id}>
                   <td className="px-4 py-4">
-                    <strong className="block">
+                    <AdminItemLink itemId={item.id} className="block font-bold text-forest-700">
                       {item.firstName || "Unnamed"} {item.lastName}
-                    </strong>
+                    </AdminItemLink>
                     <span className="block max-w-64 truncate text-xs text-muted" title={item.email}>
                       {item.email}
                     </span>
@@ -292,7 +297,7 @@ export function UsersWorkspace({
   );
 }
 
-export function PropertiesWorkspace({ data }: { data: PageData<PropertyItem> }) {
+export function PropertiesWorkspace({ data, detail }: { data: PageData<PropertyItem>; detail?: Record<string, unknown> | null }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [action, setAction] = useState<{ item: PropertyItem; status: string }>();
@@ -320,6 +325,7 @@ export function PropertiesWorkspace({ data }: { data: PageData<PropertyItem> }) 
           placeholder="Search listing, city, owner..."
           options={{ name: "status", label: "Statuses", values: ["PendingReview", "Approved", "Flagged", "Removed"] }}
         />
+        <div className="mt-4"><AdminLinkedDetail kind="property" detail={detail ?? null} /></div>
         <div className="mt-4 overflow-x-auto">
           <table className="w-full min-w-[64rem] text-left text-sm">
             <thead className="bg-sand-100 text-xs text-muted">
@@ -335,9 +341,9 @@ export function PropertiesWorkspace({ data }: { data: PageData<PropertyItem> }) 
               {data.items.map((item) => (
                 <tr key={item.id}>
                   <td className="px-4 py-4">
-                    <Link href={`/properties/${item.id}`} className="font-bold text-forest-700">
+                    <AdminItemLink itemId={item.id} className="font-bold text-forest-700">
                       {item.title}
-                    </Link>
+                    </AdminItemLink>
                     <span className="block text-xs text-muted">
                       {item.type} · {item.location}
                     </span>
@@ -392,7 +398,7 @@ export function PropertiesWorkspace({ data }: { data: PageData<PropertyItem> }) 
   );
 }
 
-export function PaymentsWorkspace({ data }: { data: PageData<PaymentItem> }) {
+export function PaymentsWorkspace({ data, detail }: { data: PageData<PaymentItem>; detail?: Record<string, unknown> | null }) {
   return (
     <Canvas>
       <WorkspaceHeader
@@ -405,6 +411,7 @@ export function PaymentsWorkspace({ data }: { data: PageData<PaymentItem> }) {
           placeholder="Search reference, tenant or property..."
           options={{ name: "status", label: "Statuses", values: ["Paid", "Due", "Overdue", "Processing", "Failed"] }}
         />
+        <div className="mt-4"><AdminLinkedDetail kind="payment" detail={detail ?? null} /></div>
         <div className="mt-4 overflow-x-auto">
           <table className="w-full min-w-[58rem] text-left text-sm">
             <thead className="bg-sand-100 text-xs text-muted">
@@ -420,7 +427,7 @@ export function PaymentsWorkspace({ data }: { data: PageData<PaymentItem> }) {
               {data.items.map((item) => (
                 <tr key={item.id}>
                   <td className="px-4 py-4">
-                    <strong className="block">{item.reference ?? "No reference"}</strong>
+                    <AdminItemLink itemId={item.id} className="block font-bold text-forest-700">{item.reference ?? "No reference"}</AdminItemLink>
                     {item.failureReason && (
                       <span className="block max-w-64 text-xs text-red-700">{item.failureReason}</span>
                     )}
@@ -474,7 +481,7 @@ export function PaymentsWorkspace({ data }: { data: PageData<PaymentItem> }) {
   );
 }
 
-export function AuditWorkspace({ data }: { data: PageData<AuditItem> }) {
+export function AuditWorkspace({ data, detail }: { data: PageData<AuditItem>; detail?: Record<string, unknown> | null }) {
   return (
     <Canvas>
       <WorkspaceHeader
@@ -488,13 +495,14 @@ export function AuditWorkspace({ data }: { data: PageData<AuditItem> }) {
           options={{
             name: "targetType",
             label: "Targets",
-            values: ["Verification", "Dispute", "User", "Property", "Payment", "Maintenance", "AdminInvitation"],
+            values: ["Verification", "Dispute", "User", "Property", "Payment", "Maintenance", "Support", "AdminInvitation"],
           }}
         />
+        <div className="mt-4"><AdminLinkedDetail kind="audit" detail={detail ?? null} /></div>
         <div className="mt-4 space-y-3">
           {data.items.map((item) => (
-            <details key={item.id} className="border border-line bg-sand-50 p-4">
-              <summary className="cursor-pointer list-none">
+            <article key={item.id} className="border border-line bg-sand-50 p-4">
+              <AdminItemLink itemId={item.id} className="block">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
                     <strong className="block text-sm">{item.action}</strong>
@@ -505,13 +513,9 @@ export function AuditWorkspace({ data }: { data: PageData<AuditItem> }) {
                   <time className="text-xs text-muted">{new Date(item.createdAt).toLocaleString()}</time>
                 </div>
                 <p className="mt-2 text-sm text-muted">{item.reason}</p>
-              </summary>
-              <div className="mt-4 grid gap-3 border-t border-line pt-4 lg:grid-cols-2">
-                <State label="Previous state" value={item.previousState} />
-                <State label="Resulting state" value={item.resultingState} />
-              </div>
+              </AdminItemLink>
               <p className="mt-3 break-all text-[11px] text-muted">Target: {item.targetId}</p>
-            </details>
+            </article>
           ))}
           {data.items.length === 0 && <Empty message="No audit events found" />}
         </div>

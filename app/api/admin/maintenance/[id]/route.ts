@@ -25,6 +25,7 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
     if (error instanceof Error && error.message === "FORBIDDEN") return apiError("Reviewer access required", 403);
     if (error instanceof Error && error.message === "NOT_FOUND") return apiError("Maintenance request not found", 404);
     if (error instanceof Error && error.message === "INVALID_TRANSITION") return apiError("Invalid maintenance transition", 409);
+    if (error instanceof Error && error.message === "OPERATION_CONFLICT") return apiError("This maintenance request changed. Refresh and try again", 409);
     console.error("[PATCH /api/admin/maintenance/:id]", error);
     return apiError("Unable to update maintenance request", 500);
   }

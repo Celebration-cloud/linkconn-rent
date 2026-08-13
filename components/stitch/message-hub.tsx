@@ -2,14 +2,13 @@
 
 import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { Logo } from "@/components/shared/icons";
+import { useSearchParams } from "next/navigation";
 import {
   Archive,
   ArrowLeft,
-  CalendarDays,
   FileText,
   Home,
-  MoreHorizontal,
+  MessageSquare,
   Search,
   Send,
 } from "lucide-react";
@@ -31,7 +30,8 @@ type ApiConversation = {
   tenant: Person;
   landlord: Person;
   property?: { id: string; title: string; location: string } | null;
-  application?: { status: string } | null;
+  application?: { id: string; status: string } | null;
+  lease?: { id: string } | null;
   messages: Array<{ body: string; createdAt: string; senderId: string; readAt?: string | null }>;
   _count?: { messages: number };
   lastMessageAt: string;
@@ -47,6 +47,7 @@ type ApiMessage = {
 };
 
 export function MessageHub() {
+  const searchParams = useSearchParams();
   const { user } = useAuth();
   const [conversations, setConversations] = useState<ApiConversation[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -64,10 +65,13 @@ export function MessageHub() {
       data?: ApiConversation[];
     };
     if (result.success && result.data) {
-      setConversations(result.data);
-      setActiveId((current) => current || result.data?.[0]?.id || null);
+      const loaded = result.data;
+      setConversations(loaded);
+      setActiveId((current) => current && loaded.some((item) => item.id === current)
+        ? current
+        : selectInitialConversationId(loaded, searchParams.get("conversation")));
     }
-  }, []);
+  }, [searchParams]);
 
   const loadMessages = useCallback(async (conversationId: string) => {
     const response = await fetch(
@@ -91,33 +95,12 @@ export function MessageHub() {
     }
   }, []);
 
-  useEffect(() => {
-    void loadConversations();
-    let timer = 0;
-    const poll = () => {
-      void loadConversations();
-      timer = window.setTimeout(
-        poll,
-        document.visibilityState === "visible" ? 5000 : 20000,
-      );
-    };
-    timer = window.setTimeout(poll, 5000);
-    return () => window.clearTimeout(timer);
-  }, [loadConversations]);
+  useEffect(() => { void loadConversations(); }, [loadConversations]);
 
   useEffect(() => {
     if (!activeId) return;
     void loadMessages(activeId);
-    let timer = 0;
-    const poll = () => {
-      void loadMessages(activeId);
-      timer = window.setTimeout(
-        poll,
-        document.visibilityState === "visible" ? 5000 : 20000,
-      );
-    };
-    timer = window.setTimeout(poll, 5000);
-    return () => window.clearTimeout(timer);
+    return undefined;
   }, [activeId, loadMessages]);
 
   useEffect(() => {
@@ -181,18 +164,10 @@ export function MessageHub() {
   }
 
   return (
-    <main id="main-content" className="min-h-[100dvh] bg-sand-50 p-3 sm:p-6">
-      <div className="mx-auto flex min-h-[calc(100dvh-1.5rem)] max-w-7xl overflow-hidden rounded-2xl border border-line bg-white shadow-sm sm:min-h-[calc(100dvh-3rem)]">
+    <div className="mx-auto flex min-h-[calc(100dvh-10rem)] max-w-7xl overflow-hidden rounded-xl border border-line bg-white shadow-[0_10px_30px_rgba(8,35,26,0.08)]">
         <aside className={`${mobileThread ? "hidden" : "flex"} w-full flex-col border-r border-line md:flex md:w-[22rem]`}>
           <header className="border-b border-line p-5">
-            <div className="flex items-center justify-between">
-              <div>
-                <Link href="/" className="inline-flex items-center" aria-label="LinkConn Rent home"><Logo variant="lockup" priority className="h-10 w-auto" sizes="86px" /></Link>
-                <h1 className="mt-1 text-2xl font-extrabold text-ink">Messages</h1>
-              </div>
-              <Link href="/dashboard" className="grid h-11 w-11 place-items-center rounded-full bg-sand-200 text-forest-900" aria-label="Back to dashboard"><Home className="h-4 w-4" /></Link>
-            </div>
-            <label className="mt-4 block">
+            <label className="block">
               <span className="sr-only">Search conversations</span>
               <Input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search conversations" leadingIcon={Search} />
             </label>
@@ -234,14 +209,13 @@ export function MessageHub() {
                   <p className="truncate text-xs text-muted">{active.property?.title || "General enquiry"}</p>
                 </div>
                 <button onClick={archive} className="grid h-11 w-11 place-items-center rounded-full hover:bg-sand-200" aria-label="Archive conversation"><Archive className="h-4 w-4" /></button>
-                <button className="grid h-11 w-11 place-items-center rounded-full hover:bg-sand-200" aria-label="More options"><MoreHorizontal className="h-4 w-4" /></button>
               </header>
 
               {active.property && (
                 <div className="flex flex-wrap items-center gap-2 border-b border-line bg-sand-100 px-4 py-3 sm:px-6">
                   <Link href={`/properties/${active.property.id}`} className="stitch-button-secondary text-xs"><Home className="h-4 w-4" /> View property</Link>
-                  <button className="stitch-button-secondary text-xs"><CalendarDays className="h-4 w-4" /> Arrange viewing</button>
-                  <button className="stitch-button-secondary text-xs"><FileText className="h-4 w-4" /> Documents</button>
+                  {active.application ? <Link href={`${active.tenantId === user?.id ? "/dashboard/applications" : "/dashboard/applicants"}/${active.application.id}`} className="stitch-button-secondary text-xs"><FileText className="h-4 w-4" />Application</Link> : null}
+                  {active.lease ? <Link href={`/dashboard/leases/${active.lease.id}`} className="stitch-button-secondary text-xs"><FileText className="h-4 w-4" />Lease</Link> : null}
                   {active.application && <span className="ml-auto rounded-md bg-forest-100 px-2 py-1 text-[11px] font-bold text-forest-800">{active.application.status}</span>}
                 </div>
               )}
@@ -272,11 +246,15 @@ export function MessageHub() {
             </div>
           )}
         </section>
-      </div>
-    </main>
+    </div>
   );
 }
 
+export function selectInitialConversationId(conversations: Array<{ id: string }>, requestedId: string | null) {
+  if (requestedId && conversations.some((conversation) => conversation.id === requestedId)) return requestedId;
+  return conversations[0]?.id ?? null;
+}
+
 function MessageSquareIcon() {
-  return <span className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-forest-100 text-3xl text-forest-800">•••</span>;
+  return <span className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-forest-100 text-forest-800"><MessageSquare className="size-7" /></span>;
 }

@@ -6,6 +6,7 @@ import { ListingRepository } from "@/repositories/listing.repository";
 import { PropertyDiscoveryRepository } from "@/repositories/property-discovery.repository";
 import { SavedPropertyRepository } from "@/repositories/saved-property.repository";
 import { VerificationRepository } from "@/repositories/verification.repository";
+import { ViewingRepository } from "@/repositories/viewing.repository";
 
 /**
  * Compatibility façade for established Route Handler imports.
@@ -20,7 +21,7 @@ export class OperatingSystemRepository {
   static createApplication = ApplicationRepository.create;
   static listLandlordApplications = ApplicationRepository.listForLandlord;
   static decideApplication = ApplicationRepository.decide;
-  static createViewing = ApplicationRepository.createViewing;
+  static createViewing = ViewingRepository.create;
   static createOrFindConversation = ConversationRepository.createOrFind;
   static listConversations = ConversationRepository.list;
   static listMessages = ConversationRepository.listMessages;

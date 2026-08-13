@@ -12,6 +12,9 @@ vi.mock("@/lib/auth/current-profile", () => ({
   hasRole: mocks.hasRole,
   isAccountOperational: (profile: { accountStatus: string }) => profile.accountStatus !== "Suspended",
 }));
+vi.mock("@/lib/auth/fresh-auth", () => ({ hasFreshAuthentication: vi.fn().mockResolvedValue(true) }));
+vi.mock("@/lib/security/csrf", () => ({ verifyCsrf: vi.fn().mockReturnValue(true) }));
+vi.mock("@/lib/security/admin-rate-limiter", () => ({ checkAdminRateLimit: vi.fn().mockResolvedValue({ allowed: true }), adminRateLimitResponse: vi.fn() }));
 
 vi.mock("@/repositories/administration.repository", () => ({
   AdministrationRepository: {
