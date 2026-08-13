@@ -7,6 +7,10 @@ export const maintenanceCreateSchema = z.object({
   priority: z.enum(["Low", "Medium", "High"]).default("Medium"),
 });
 
+export const maintenanceListQuerySchema = z.object({
+  status: z.enum(["Pending", "InProgress", "Completed", "Closed"]).optional(),
+});
+
 export const maintenanceUpdateSchema = z.object({
   status: z.enum(["Pending", "InProgress", "Completed", "Closed"]).optional(),
   note: z.string().trim().min(2).max(2000).optional(),
@@ -23,4 +27,3 @@ export const paymentInitializeSchema = z.object({
 export const paymentVerifySchema = z.object({
   reference: z.string().trim().min(6).max(120),
 });
-

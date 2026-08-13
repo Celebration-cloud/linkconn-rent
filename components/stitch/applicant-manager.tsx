@@ -2,9 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Check, Filter, MessageSquare, Search, X } from "lucide-react";
+import { Check, Filter, MessageSquare, Search, X } from "lucide-react";
 import { Input, Select } from "@/components/ui/form-controls";
-import { Logo } from "@/components/shared/icons";
 import { toastError, toastSuccess } from "@/stores/toast-store";
 
 type Applicant = {
@@ -84,20 +83,8 @@ export function ApplicantManager() {
   }
 
   return (
-    <main id="main-content" className="min-h-[100dvh] bg-sand-50">
-      <header className="border-b border-line bg-white">
-        <div className="stitch-container flex min-h-20 items-center gap-4">
-          <Link href="/dashboard" className="grid h-11 w-11 place-items-center rounded-full bg-sand-200" aria-label="Back to dashboard"><ArrowLeft className="h-5 w-5" /></Link>
-          <div className="flex-1">
-            <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-forest-700">Landlord workspace</p>
-            <h1 className="text-xl font-extrabold text-ink">Manage applicants</h1>
-          </div>
-          <Link href="/" className="hidden size-11 place-items-center rounded-lg hover:bg-sand-100 sm:grid" aria-label="LinkConn Rent home"><Logo variant="mark" priority className="size-9" sizes="36px" /></Link>
-          <span className="hidden rounded-full bg-forest-100 px-3 py-1 text-xs font-bold text-forest-800 sm:block">{items.length} total</span>
-        </div>
-      </header>
-
-      <div className="stitch-container py-7">
+    <div className="mx-auto max-w-7xl">
+      <div className="mb-5 flex items-center justify-between gap-4"><p className="max-w-2xl text-sm leading-6 text-muted">Review applicants against their property context and verification status.</p><span className="shrink-0 rounded-full bg-forest-100 px-3 py-1 text-xs font-bold text-forest-800">{items.length} total</span></div>
         <section className="rounded-xl border border-line bg-white p-4">
           <div className="grid gap-3 md:grid-cols-[1fr_13rem]">
             <label>
@@ -149,7 +136,6 @@ export function ApplicantManager() {
             </div>
           )}
         </div>
-      </div>
-    </main>
+    </div>
   );
 }

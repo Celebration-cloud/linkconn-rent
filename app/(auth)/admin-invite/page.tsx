@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import AuthPageShell from "@/components/auth/auth-page-shell";
+import { AdminAuthShell } from "@/components/auth/admin-auth-shell";
 import { AdminInvitationAcceptance } from "@/features/admin-invitations/components/admin-invitation-acceptance";
 
 export const metadata: Metadata = {
@@ -10,16 +10,14 @@ export const metadata: Metadata = {
 
 export default function AdminInvitationPage() {
   return (
-    <AuthPageShell
+    <AdminAuthShell
       eyebrow="Administrator access"
       title="Accept your secure invitation"
       description="Verify the invitation, authenticate with the invited email, and activate your Admin access."
-      footerText="Need a new link?"
       footerHref="mailto:support@linkconn.rent"
       footerLabel="Contact support"
     >
       <AdminInvitationAcceptance />
-    </AuthPageShell>
+    </AdminAuthShell>
   );
 }
-

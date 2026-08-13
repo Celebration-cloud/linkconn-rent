@@ -10,7 +10,7 @@ import { AdminShell } from "@/components/stitch/admin-shell";
 describe("responsive administrator shell", () => {
   it("renders the administrator identity and every operational destination", () => {
     const html = renderToStaticMarkup(
-      <AdminShell viewer={{ id: "admin-1", firstName: "Ada", lastName: "Nwosu", email: "ada@linkconn.rent", role: "SuperAdmin", accountStatus: "Active" }}>
+      <AdminShell counts={{ verifications: 2, disputes: 1, moderation: 4, support: 3, maintenance: 5 }} viewer={{ id: "admin-1", firstName: "Ada", lastName: "Nwosu", email: "ada@linkconn.rent", role: "SuperAdmin", accountStatus: "Active" }}>
         <p>Admin content</p>
       </AdminShell>,
     );
@@ -21,8 +21,11 @@ describe("responsive administrator shell", () => {
     expect(html).toContain("/admin/properties");
     expect(html).toContain("/admin/payments");
     expect(html).toContain("/admin/audit");
+    expect(html).toContain("/admin/support");
+    expect(html).toContain("/admin/maintenance");
     expect(html).toContain("/admin/account");
     expect(html).toContain("Open administrator navigation");
+    expect(html).toContain("Collapse administrator navigation");
     expect(html).toContain("overflow-y-auto");
     expect(html).not.toContain("/dashboard/properties");
   });

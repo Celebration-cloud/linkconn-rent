@@ -194,14 +194,14 @@ export function PropertyDetails({
               <p className="mt-1 text-xs font-semibold text-muted">per {property.period}</p>
               <button
                 disabled={busy === "apply"}
-                onClick={() => run("apply", "/api/applications", { propertyId: property.id, message: "I would like to apply for this property." })}
+                onClick={() => run("apply", "/api/applications", { propertyId: property.id, message: "I would like to apply for this property.", idempotencyKey: crypto.randomUUID() })}
                 className="stitch-button mt-5 w-full disabled:opacity-60"
               >
                 Apply to rent
               </button>
               <button
                 disabled={busy === "viewing"}
-                onClick={() => run("viewing", "/api/viewings", { propertyId: property.id, scheduledAt: new Date(Date.now() + 86400000 * 2).toISOString() })}
+                onClick={() => run("viewing", "/api/viewings", { propertyId: property.id, scheduledAt: new Date(Date.now() + 86400000 * 2).toISOString(), idempotencyKey: crypto.randomUUID() })}
                 className="stitch-button stitch-button-secondary mt-3 w-full disabled:opacity-60"
               >
                 <CalendarDays className="h-4 w-4" /> Book viewing

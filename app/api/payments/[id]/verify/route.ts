@@ -1,7 +1,8 @@
 import { ZodError } from "zod";
 import { paystackAmountMatches } from "@/lib/admin-lifecycle";
 import { apiError, apiSuccess } from "@/lib/api-response";
-import { getCurrentProfile } from "@/lib/auth/current-profile";
+import { getCurrentProfile, isAccountOperational } from "@/lib/auth/current-profile";
+import { verifyCsrf } from "@/lib/security/csrf";
 import { TenantOperationsRepository } from "@/repositories/tenant-operations.repository";
 import { paymentVerifySchema } from "@/schemas/tenant-operations";
 import { verifyRentPayment } from "@/services/payments/paystack-rent";
@@ -10,6 +11,9 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
   try {
     const profile = await getCurrentProfile();
     if (!profile) return apiError("Authentication required", 401);
+    if (!verifyCsrf(request)) return apiError("Security check failed", 403);
+    if (!isAccountOperational(profile)) return apiError("Account access unavailable", 403);
+    if (profile.role !== "Tenant") return apiError("Tenant access required", 403);
     const { id } = await context.params;
     const input = paymentVerifySchema.parse(await request.json());
     const payment = await TenantOperationsRepository.getOwnedPayment(profile.id, id);

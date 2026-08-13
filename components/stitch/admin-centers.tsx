@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useEffect, useId, useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Check, Search, ShieldCheck, X } from "lucide-react";
@@ -129,31 +129,64 @@ function useDialogFocus(onClose: () => void) {
   const dialogRef = useRef<HTMLElement>(null);
   useEffect(() => {
     const previous = document.activeElement as HTMLElement | null;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
     dialogRef.current?.focus();
-    const closeOnEscape = (event: KeyboardEvent) => {
+    const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") onClose();
+      if (event.key !== "Tab" || !dialogRef.current) return;
+      const focusable = Array.from(dialogRef.current.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      ));
+      if (!focusable.length) {
+        event.preventDefault();
+        dialogRef.current.focus();
+        return;
+      }
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
     };
-    window.addEventListener("keydown", closeOnEscape);
+    window.addEventListener("keydown", handleKeyDown);
     return () => {
-      window.removeEventListener("keydown", closeOnEscape);
+      window.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = previousOverflow;
       previous?.focus();
     };
   }, [onClose]);
   return dialogRef;
 }
 
+function useAddressedRecord<T extends { id: string }>(items: T[]) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const params = useSearchParams();
+  const itemId = params.get("item");
+  const selected = itemId ? items.find((item) => item.id === itemId) : undefined;
+  const select = (item?: T) => {
+    const next = new URLSearchParams(params);
+    if (item) next.set("item", item.id);
+    else next.delete("item");
+    router.replace(next.size ? `${pathname}?${next}` : pathname, { scroll: false });
+  };
+  return [selected, select] as const;
+}
+
 function CenterHeader({ title, description, count }: { title: string; description: string; count: number }) {
   return (
-    <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+    <header className="admin-page-heading">
       <div>
-        <h1 className="text-2xl font-extrabold tracking-tight text-ink sm:text-3xl">{title}</h1>
-        <p className="mt-1 max-w-2xl text-sm text-muted">{description}</p>
+        <h1>{title}</h1>
+        <p>{description}</p>
       </div>
-      <article className="w-full rounded-xl bg-forest-800 p-4 text-white sm:w-auto sm:min-w-52">
-        <p className="text-[10px] font-bold uppercase tracking-wider text-lime-300">Total results</p>
-        <p className="mt-1 text-3xl font-extrabold tabular-nums">{count}</p>
-      </article>
-    </div>
+      <div className="admin-record-count"><span>Total results</span><strong>{count}</strong></div>
+    </header>
   );
 }
 
@@ -166,7 +199,7 @@ function QueueFilters({
 }) {
   const searchParams = useSearchParams();
   return (
-    <form className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_12rem_auto]" method="get">
+    <form className="admin-filter-bar !mt-0 sm:grid sm:grid-cols-[minmax(0,1fr)_12rem_auto]" method="get">
       <label>
         <span className="sr-only">Search queue</span>
         <Input
@@ -230,7 +263,7 @@ function PaginationLinks({ pagination }: { pagination: Pagination }) {
 
 function EmptyQueue({ label }: { label: string }) {
   return (
-    <div className="grid min-h-64 place-items-center rounded-xl border border-dashed border-line bg-white p-8 text-center">
+    <div className="grid min-h-64 place-items-center border border-dashed border-line bg-white p-8 text-center">
       <div>
         <ShieldCheck className="mx-auto h-8 w-8 text-forest-600" />
         <p className="mt-3 text-sm font-bold text-ink">{label}</p>
@@ -250,11 +283,11 @@ export function VerificationQueue({
   const { user } = useAuth();
   const router = useRouter();
   const [pending, startTransition] = useTransition();
-  const [selected, setSelected] = useState<VerificationItem>();
+  const [selected, setSelected] = useAddressedRecord(initialData.items);
   const [decision, setDecision] = useState<"approve" | "reject">();
   async function assignToMe() {
     if (!selected || !user?.id) return;
-    const result = await mutate(`/api/admin/verifications/${selected.id}`, { action: "assign", assigneeId: user.id });
+    const result = await mutate(`/api/admin/verifications/${selected.id}`, { action: "assign" });
     reportMutation(result, "Verification updated", "Assignment failed");
     if (result.success) startTransition(() => router.refresh());
   }
@@ -279,7 +312,7 @@ export function VerificationQueue({
         description="Review identity and ownership evidence stored with each Neon-backed submission."
         count={initialData.pagination.totalItems}
       />
-      <section className="mt-6 rounded-xl border border-line bg-white p-4">
+      <section className="admin-ledger p-3">
         <QueueFilters statuses={["Pending", "Approved", "Rejected", "Draft"]} />
         <div className="mt-4 divide-y divide-line">
           {initialData.items.length ? (
@@ -310,7 +343,7 @@ export function VerificationQueue({
         </div>
         <PaginationLinks pagination={initialData.pagination} />
       </section>
-      {selected && (
+      {selected && !decision && (
         <ReviewDialog
           title={`${selected.owner.firstName} ${selected.owner.lastName}`}
           onClose={() => setSelected(undefined)}
@@ -405,11 +438,11 @@ export function DisputeCenter({ initialData }: { initialData: PageData<DisputeIt
   const { user } = useAuth();
   const router = useRouter();
   const [pending, startTransition] = useTransition();
-  const [selected, setSelected] = useState<DisputeItem>();
+  const [selected, setSelected] = useAddressedRecord(initialData.items);
   const [actionName, setActionName] = useState<"investigate" | "resolve" | "dismiss" | "note">();
   async function assignToMe() {
     if (!selected || !user?.id) return;
-    const result = await mutate(`/api/admin/disputes/${selected.id}`, { action: "assign", assigneeId: user.id });
+    const result = await mutate(`/api/admin/disputes/${selected.id}`, { action: "assign" });
     reportMutation(result, "Case updated", "Assignment failed");
     if (result.success) startTransition(() => router.refresh());
   }
@@ -432,7 +465,7 @@ export function DisputeCenter({ initialData }: { initialData: PageData<DisputeIt
         count={initialData.pagination.totalItems}
       />
       <div className="mt-6 grid min-w-0 gap-5 lg:grid-cols-[19rem_minmax(0,1fr)]">
-        <section className="min-w-0 rounded-xl border border-line bg-white p-4">
+        <section className="min-w-0 border border-line bg-white p-4">
           <QueueFilters
             statuses={["Open", "Investigating", "Resolved", "Dismissed"]}
             placeholder="Search case or reference..."
@@ -467,7 +500,7 @@ export function DisputeCenter({ initialData }: { initialData: PageData<DisputeIt
             <PaginationLinks pagination={initialData.pagination} />
           </div>
         </section>
-        <section className="min-w-0 rounded-xl border border-line bg-white p-5">
+        <section className="min-w-0 border border-line bg-white p-5">
           {selected ? (
             <>
               <div className="flex flex-wrap items-start justify-between gap-3">
@@ -572,7 +605,7 @@ export function ModerationCenter({ initialData }: { initialData: ModerationData 
           {initialData.listings.length ? (
             <div className="space-y-3">
               {initialData.listings.map((item) => (
-                <article key={item.id} className="rounded-xl border-l-2 border-red-500 bg-white p-4 shadow-sm">
+                <article key={item.id} className="border border-line bg-white p-4">
                   <div className="flex flex-wrap justify-between gap-3">
                     <div className="min-w-0">
                       <h3 className="break-words font-extrabold text-ink">{item.title}</h3>
@@ -607,7 +640,7 @@ export function ModerationCenter({ initialData }: { initialData: ModerationData 
           <h2 className="mb-3 mt-8 text-lg font-extrabold">Account moderation</h2>
           <div className="space-y-3">
             {initialData.users.map((item) => (
-              <article key={item.id} className="rounded-xl border border-line bg-white p-4">
+              <article key={item.id} className="border border-line bg-white p-4">
                 <div className="flex flex-wrap justify-between gap-3">
                   <div className="min-w-0">
                     <h3 className="break-words font-extrabold">
@@ -637,7 +670,7 @@ export function ModerationCenter({ initialData }: { initialData: ModerationData 
             ))}
           </div>
         </section>
-        <aside className="h-fit rounded-xl border border-line bg-white p-4 xl:sticky xl:top-6">
+        <aside className="h-fit border border-line bg-white p-4 xl:sticky xl:top-20">
           <h2 className="text-sm font-extrabold">Recent audit log</h2>
           <div className="mt-4 space-y-4">
             {initialData.audits.map((audit) => (
@@ -662,7 +695,7 @@ export function ModerationCenter({ initialData }: { initialData: ModerationData 
 }
 
 function AdminCanvas({ children }: { children: React.ReactNode }) {
-  return <div className="mx-auto w-full max-w-7xl p-4 pb-28 sm:p-6 md:pb-8 lg:p-8">{children}</div>;
+  return <div className="admin-canvas">{children}</div>;
 }
 
 function formatReviewValue(value: string) {
@@ -689,7 +722,7 @@ function formatReviewDate(value: Date | null) {
 
 function ReviewFactsSection({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="mt-5 rounded-xl border border-line bg-sand-50 p-4">
+    <section className="mt-5 border border-line bg-sand-50 p-4">
       <h3 className="text-sm font-extrabold text-ink">{title}</h3>
       <dl className="mt-3 grid gap-3 text-sm sm:grid-cols-2">{children}</dl>
     </section>
@@ -706,6 +739,7 @@ function Fact({ label, value }: { label: string; value: string }) {
 }
 function ReviewDialog({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
   const dialogRef = useDialogFocus(onClose);
+  const titleId = useId();
   return (
     <div
       className="fixed inset-0 z-50 grid place-items-end overflow-y-auto bg-forest-950/40 p-0 sm:place-items-center sm:p-4"
@@ -717,12 +751,12 @@ function ReviewDialog({ title, onClose, children }: { title: string; onClose: ()
         tabIndex={-1}
         role="dialog"
         aria-modal="true"
-        aria-labelledby="review-title"
+        aria-labelledby={titleId}
         onMouseDown={(event) => event.stopPropagation()}
         className="max-h-[92dvh] w-full max-w-lg overflow-y-auto rounded-t-2xl bg-white p-6 shadow-2xl outline-none sm:rounded-2xl"
       >
         <div className="flex items-center justify-between gap-3">
-          <h2 id="review-title" className="text-xl font-extrabold">
+          <h2 id={titleId} className="text-xl font-extrabold">
             {title}
           </h2>
           <button

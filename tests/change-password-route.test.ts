@@ -16,6 +16,11 @@ vi.mock("@/lib/security/rate-limiter", () => ({
   getClientIp: () => "127.0.0.1",
   checkRateLimit: () => ({ allowed: true, remaining: 4, resetTime: Date.now() + 1000 }),
 }));
+vi.mock("@/lib/auth/current-profile", () => ({ getCurrentProfile: vi.fn().mockResolvedValue(null) }));
+vi.mock("@/lib/security/admin-rate-limiter", () => ({
+  checkAdminRateLimit: vi.fn(),
+  adminRateLimitResponse: vi.fn(),
+}));
 
 import { POST } from "@/app/api/auth/custom/change-password/route";
 

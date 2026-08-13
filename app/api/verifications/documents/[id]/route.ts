@@ -14,6 +14,7 @@ export async function DELETE(request: Request, context: { params: Promise<{ id: 
   } catch (error) {
     if (error instanceof Error && error.message === "NOT_FOUND") return apiError("Document not found", 404);
     if (error instanceof Error && error.message === "SUBMISSION_LOCKED") return apiError("Submitted documents cannot be changed", 409);
+    if (error instanceof Error && error.message === "REPLACEMENT_REQUIRED") return apiError("Reviewed evidence must be replaced so its revision history remains available", 409);
     if (error instanceof Error && error.message === "ROLE_NOT_SUPPORTED") return apiError("Document onboarding is unavailable for this role", 403);
     console.error("[DELETE /api/verifications/documents/:id]", error);
     return apiError("Unable to remove document", 500);

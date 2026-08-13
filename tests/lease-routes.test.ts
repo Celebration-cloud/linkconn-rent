@@ -1,0 +1,13 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
+const mocks = vi.hoisted(() => ({ profile: vi.fn(), fresh: vi.fn(), list: vi.fn(), detail: vi.fn(), revise: vi.fn(), accept: vi.fn() }));
+vi.mock("@/lib/auth/current-profile", () => ({ getCurrentProfile: mocks.profile, isAccountOperational: () => true }));
+vi.mock("@/lib/auth/fresh-auth", () => ({ hasFreshAuthentication: mocks.fresh }));
+vi.mock("@/repositories/lease.repository", () => ({ LeaseRepository: { list: mocks.list, detail: mocks.detail, revise: mocks.revise, accept: mocks.accept } }));
+vi.mock("@/lib/security/csrf", () => ({ verifyCsrf: () => true }));
+vi.mock("@/lib/security/rate-limiter", () => ({ checkRateLimit: () => ({ allowed: true }), getClientIp: () => "127.0.0.1" }));
+import { GET as list } from "@/app/api/leases/route";
+import { POST as accept } from "@/app/api/leases/[id]/accept/route";
+const ID="11111111-1111-4111-8111-111111111111";
+describe("lease routes",()=>{beforeEach(()=>{vi.clearAllMocks();mocks.profile.mockResolvedValue({id:"tenant-1",role:"Tenant",accountStatus:"Active"});mocks.fresh.mockResolvedValue(true);mocks.list.mockResolvedValue([]);mocks.accept.mockResolvedValue({accepted:true});});
+it("serves personalized leases private and no-store",async()=>{const response=await list();expect(response.status).toBe(200);expect(response.headers.get("cache-control")).toContain("no-store");});
+it("requires fresh auth for legal acceptance",async()=>{mocks.fresh.mockResolvedValue(false);const response=await accept(new Request(`http://localhost/api/leases/${ID}/accept`,{method:"POST",headers:{origin:"http://localhost:3000"},body:JSON.stringify({legalName:"Teni Tenant",consentVersion:"lease-consent-v1",expectedVersion:2,expectedHash:"a".repeat(64)})}),{params:Promise.resolve({id:ID})});expect(response.status).toBe(401);expect(mocks.accept).not.toHaveBeenCalled();});});

@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useEffect, useId, useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Search, ShieldCheck, X } from "lucide-react";
 import { Input, Select, Textarea } from "@/components/ui/form-controls";
 import { formatNaira } from "@/utils/map-property";
 import { toastError, toastSuccess } from "@/stores/toast-store";
+import { AdminLinkedDetail } from "@/features/admin/components/admin-linked-detail";
+import { AdminItemLink } from "@/features/admin/admin-item-link";
 
 type Pagination = { page: number; pageSize: number; totalItems: number; totalPages: number };
 type PageData<T> = { items: T[]; pagination: Pagination };
@@ -66,17 +68,16 @@ type AuditItem = {
 
 function WorkspaceHeader({ title, description, count }: { title: string; description: string; count: number }) {
   return (
-    <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+    <header className="admin-page-heading">
       <div>
-        <p className="text-xs font-bold uppercase tracking-[.14em] text-forest-700">Administration</p>
-        <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-ink">{title}</h1>
-        <p className="mt-2 max-w-2xl text-sm text-muted">{description}</p>
+        <h1>{title}</h1>
+        <p>{description}</p>
       </div>
-      <div className="rounded-xl bg-forest-800 px-5 py-4 text-white">
-        <p className="text-[10px] font-bold uppercase tracking-wider text-lime-300">Total records</p>
-        <p className="mt-1 text-3xl font-extrabold tabular-nums">{count}</p>
+      <div className="admin-record-count">
+        <span>Total records</span>
+        <strong>{count}</strong>
       </div>
-    </div>
+    </header>
   );
 }
 
@@ -89,7 +90,7 @@ function Filters({
 }) {
   const searchParams = useSearchParams();
   return (
-    <form method="get" className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_12rem_auto]">
+    <form method="get" className="admin-filter-bar !mt-0 sm:grid sm:grid-cols-[minmax(0,1fr)_12rem_auto]">
       <label>
         <span className="sr-only">Search</span>
         <Input
@@ -179,10 +180,12 @@ function reportMutation(result: { success: boolean; message: string }, successTi
 
 export function UsersWorkspace({
   data,
+  detail,
   canSanction,
   currentUserId,
 }: {
   data: PageData<UserItem>;
+  detail?: Record<string, unknown> | null;
   canSanction: boolean;
   currentUserId: string;
 }) {
@@ -208,7 +211,7 @@ export function UsersWorkspace({
         description="Inspect Neon Auth profile mirrors, roles, verification, onboarding, and account status."
         count={data.pagination.totalItems}
       />
-      <section className="mt-6 rounded-xl border border-line bg-white p-4">
+      <section className="admin-ledger p-3">
         <Filters
           placeholder="Search name or email..."
           options={{
@@ -217,6 +220,7 @@ export function UsersWorkspace({
             values: ["Tenant", "Landlord", "PropertyManager", "Moderator", "Admin", "SuperAdmin"],
           }}
         />
+        <div className="mt-4"><AdminLinkedDetail kind="user" detail={detail ?? null} /></div>
         <div className="mt-4 overflow-x-auto">
           <table className="w-full min-w-[58rem] text-left text-sm">
             <thead className="bg-sand-100 text-xs text-muted">
@@ -232,9 +236,9 @@ export function UsersWorkspace({
               {data.items.map((item) => (
                 <tr key={item.id}>
                   <td className="px-4 py-4">
-                    <strong className="block">
+                    <AdminItemLink itemId={item.id} className="block font-bold text-forest-700">
                       {item.firstName || "Unnamed"} {item.lastName}
-                    </strong>
+                    </AdminItemLink>
                     <span className="block max-w-64 truncate text-xs text-muted" title={item.email}>
                       {item.email}
                     </span>
@@ -293,7 +297,7 @@ export function UsersWorkspace({
   );
 }
 
-export function PropertiesWorkspace({ data }: { data: PageData<PropertyItem> }) {
+export function PropertiesWorkspace({ data, detail }: { data: PageData<PropertyItem>; detail?: Record<string, unknown> | null }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [action, setAction] = useState<{ item: PropertyItem; status: string }>();
@@ -316,11 +320,12 @@ export function PropertiesWorkspace({ data }: { data: PageData<PropertyItem> }) 
         description="Review every listing state and its owner, moderation decision, and public visibility."
         count={data.pagination.totalItems}
       />
-      <section className="mt-6 rounded-xl border border-line bg-white p-4">
+      <section className="admin-ledger p-3">
         <Filters
           placeholder="Search listing, city, owner..."
           options={{ name: "status", label: "Statuses", values: ["PendingReview", "Approved", "Flagged", "Removed"] }}
         />
+        <div className="mt-4"><AdminLinkedDetail kind="property" detail={detail ?? null} /></div>
         <div className="mt-4 overflow-x-auto">
           <table className="w-full min-w-[64rem] text-left text-sm">
             <thead className="bg-sand-100 text-xs text-muted">
@@ -336,9 +341,9 @@ export function PropertiesWorkspace({ data }: { data: PageData<PropertyItem> }) 
               {data.items.map((item) => (
                 <tr key={item.id}>
                   <td className="px-4 py-4">
-                    <Link href={`/properties/${item.id}`} className="font-bold text-forest-700">
+                    <AdminItemLink itemId={item.id} className="font-bold text-forest-700">
                       {item.title}
-                    </Link>
+                    </AdminItemLink>
                     <span className="block text-xs text-muted">
                       {item.type} · {item.location}
                     </span>
@@ -393,7 +398,7 @@ export function PropertiesWorkspace({ data }: { data: PageData<PropertyItem> }) 
   );
 }
 
-export function PaymentsWorkspace({ data }: { data: PageData<PaymentItem> }) {
+export function PaymentsWorkspace({ data, detail }: { data: PageData<PaymentItem>; detail?: Record<string, unknown> | null }) {
   return (
     <Canvas>
       <WorkspaceHeader
@@ -401,11 +406,12 @@ export function PaymentsWorkspace({ data }: { data: PageData<PaymentItem> }) {
         description="Inspect protected-payment records and linked disputes. Financial status remains provider-controlled."
         count={data.pagination.totalItems}
       />
-      <section className="mt-6 rounded-xl border border-line bg-white p-4">
+      <section className="admin-ledger p-3">
         <Filters
           placeholder="Search reference, tenant or property..."
           options={{ name: "status", label: "Statuses", values: ["Paid", "Due", "Overdue", "Processing", "Failed"] }}
         />
+        <div className="mt-4"><AdminLinkedDetail kind="payment" detail={detail ?? null} /></div>
         <div className="mt-4 overflow-x-auto">
           <table className="w-full min-w-[58rem] text-left text-sm">
             <thead className="bg-sand-100 text-xs text-muted">
@@ -421,7 +427,7 @@ export function PaymentsWorkspace({ data }: { data: PageData<PaymentItem> }) {
               {data.items.map((item) => (
                 <tr key={item.id}>
                   <td className="px-4 py-4">
-                    <strong className="block">{item.reference ?? "No reference"}</strong>
+                    <AdminItemLink itemId={item.id} className="block font-bold text-forest-700">{item.reference ?? "No reference"}</AdminItemLink>
                     {item.failureReason && (
                       <span className="block max-w-64 text-xs text-red-700">{item.failureReason}</span>
                     )}
@@ -475,7 +481,7 @@ export function PaymentsWorkspace({ data }: { data: PageData<PaymentItem> }) {
   );
 }
 
-export function AuditWorkspace({ data }: { data: PageData<AuditItem> }) {
+export function AuditWorkspace({ data, detail }: { data: PageData<AuditItem>; detail?: Record<string, unknown> | null }) {
   return (
     <Canvas>
       <WorkspaceHeader
@@ -483,19 +489,20 @@ export function AuditWorkspace({ data }: { data: PageData<AuditItem> }) {
         description="Trace administrator actions with actors, targets, reasons, and before/after state."
         count={data.pagination.totalItems}
       />
-      <section className="mt-6 rounded-xl border border-line bg-white p-4">
+      <section className="admin-ledger p-3">
         <Filters
           placeholder="Search action, reason, target or actor..."
           options={{
             name: "targetType",
             label: "Targets",
-            values: ["Verification", "Dispute", "User", "Property", "Payment", "Maintenance", "AdminInvitation"],
+            values: ["Verification", "Dispute", "User", "Property", "Payment", "Maintenance", "Support", "AdminInvitation"],
           }}
         />
+        <div className="mt-4"><AdminLinkedDetail kind="audit" detail={detail ?? null} /></div>
         <div className="mt-4 space-y-3">
           {data.items.map((item) => (
-            <details key={item.id} className="rounded-xl border border-line bg-sand-50 p-4">
-              <summary className="cursor-pointer list-none">
+            <article key={item.id} className="border border-line bg-sand-50 p-4">
+              <AdminItemLink itemId={item.id} className="block">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
                     <strong className="block text-sm">{item.action}</strong>
@@ -506,13 +513,9 @@ export function AuditWorkspace({ data }: { data: PageData<AuditItem> }) {
                   <time className="text-xs text-muted">{new Date(item.createdAt).toLocaleString()}</time>
                 </div>
                 <p className="mt-2 text-sm text-muted">{item.reason}</p>
-              </summary>
-              <div className="mt-4 grid gap-3 border-t border-line pt-4 lg:grid-cols-2">
-                <State label="Previous state" value={item.previousState} />
-                <State label="Resulting state" value={item.resultingState} />
-              </div>
+              </AdminItemLink>
               <p className="mt-3 break-all text-[11px] text-muted">Target: {item.targetId}</p>
-            </details>
+            </article>
           ))}
           {data.items.length === 0 && <Empty message="No audit events found" />}
         </div>
@@ -549,7 +552,7 @@ export function AdminPasswordForm() {
     }
   }
   return (
-    <form onSubmit={(event) => void submit(event)} className="rounded-xl border border-line bg-white p-5">
+    <form onSubmit={(event) => void submit(event)} className="border border-line bg-white p-5">
       <h2 className="text-lg font-extrabold">Change password</h2>
       <p className="mt-1 text-sm text-muted">Other Neon Auth sessions are revoked after a successful change.</p>
       <div className="mt-5 grid gap-4">
@@ -585,7 +588,7 @@ export function AdminPasswordForm() {
 }
 
 function Canvas({ children }: { children: React.ReactNode }) {
-  return <div className="mx-auto w-full max-w-[90rem] p-4 pb-28 sm:p-6 md:pb-8 lg:p-8">{children}</div>;
+  return <div className="admin-canvas">{children}</div>;
 }
 function State({ label, value }: { label: string; value: unknown }) {
   return (
@@ -610,15 +613,37 @@ function DecisionDialog({
 }) {
   const [reason, setReason] = useState("");
   const dialogRef = useRef<HTMLElement>(null);
+  const titleId = useId();
   useEffect(() => {
     const previous = document.activeElement as HTMLElement | null;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
     dialogRef.current?.focus();
-    const closeOnEscape = (event: KeyboardEvent) => {
+    const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") onClose();
+      if (event.key !== "Tab" || !dialogRef.current) return;
+      const focusable = Array.from(dialogRef.current.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      ));
+      if (!focusable.length) {
+        event.preventDefault();
+        dialogRef.current.focus();
+        return;
+      }
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
     };
-    window.addEventListener("keydown", closeOnEscape);
+    window.addEventListener("keydown", handleKeyDown);
     return () => {
-      window.removeEventListener("keydown", closeOnEscape);
+      window.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = previousOverflow;
       previous?.focus();
     };
   }, [onClose]);
@@ -632,12 +657,12 @@ function DecisionDialog({
         tabIndex={-1}
         role="dialog"
         aria-modal="true"
-        aria-labelledby="decision-title"
+        aria-labelledby={titleId}
         onMouseDown={(event) => event.stopPropagation()}
         className="max-h-[92dvh] w-full max-w-lg overflow-y-auto rounded-t-2xl bg-white p-6 outline-none sm:rounded-2xl"
       >
         <div className="flex items-center justify-between gap-3">
-          <h2 id="decision-title" className="text-xl font-extrabold">
+          <h2 id={titleId} className="text-xl font-extrabold">
             {title}
           </h2>
           <button

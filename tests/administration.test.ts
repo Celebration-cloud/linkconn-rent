@@ -13,6 +13,9 @@ import {
 import {
   disputeActionSchema,
   listingModerationSchema,
+  maintenanceAdminActionSchema,
+  queueFiltersSchema,
+  supportTicketActionSchema,
   userModerationSchema,
   verificationReviewSchema,
 } from "@/schemas/administration";
@@ -54,6 +57,19 @@ describe("moderation and dispute transitions", () => {
     expect(() => disputeActionSchema.parse({ action: "resolve" })).toThrow();
     expect(() => userModerationSchema.parse({ status: "Suspended", reason: "bad" })).toThrow();
     expect(listingModerationSchema.parse({ status: "Approved", reason: "Evidence reviewed" }).status).toBe("Approved");
+  });
+
+  it("validates connected operations filters and queue actions", () => {
+    expect(queueFiltersSchema.parse({ targetType: "Support", assignee: "unassigned", sort: "oldest" })).toMatchObject({ targetType: "Support", assignee: "unassigned", sort: "oldest" });
+    expect(supportTicketActionSchema.parse({ action: "status", status: "InProgress", reason: "Assigned to the support desk" })).toMatchObject({ action: "status", status: "InProgress" });
+    expect(() => supportTicketActionSchema.parse({ action: "status", status: "Closed", reason: "short" })).toThrow();
+    expect(maintenanceAdminActionSchema.parse({ status: "Completed", reason: "Repair completion was confirmed" }).status).toBe("Completed");
+  });
+
+  it("does not accept a client-selected assignee for self-assignment", () => {
+    expect(verificationReviewSchema.parse({ action: "assign", assigneeId: "another-admin" })).toEqual({ action: "assign" });
+    expect(disputeActionSchema.parse({ action: "assign", assigneeId: "another-admin" })).toEqual({ action: "assign" });
+    expect(supportTicketActionSchema.parse({ action: "assign", assigneeId: "another-admin" })).toEqual({ action: "assign" });
   });
 });
 

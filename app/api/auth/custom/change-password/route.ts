@@ -3,6 +3,9 @@ import { auth } from "@/lib/neon-auth";
 import { verifyCsrf } from "@/lib/security/csrf";
 import { checkRateLimit, getClientIp } from "@/lib/security/rate-limiter";
 import { changePasswordSchema } from "@/features/admin-invitations/schemas";
+import { getCurrentProfile } from "@/lib/auth/current-profile";
+import { isAdministratorRole } from "@/lib/auth/review-access";
+import { adminRateLimitResponse, checkAdminRateLimit } from "@/lib/security/admin-rate-limiter";
 
 export async function POST(request: Request) {
   if (!verifyCsrf(request)) return apiError("Security check failed", 403);
@@ -10,6 +13,11 @@ export async function POST(request: Request) {
   if (!session?.user) return apiError("Unauthorized", 401);
   const rateLimit = checkRateLimit(getClientIp(request), "change-password", 5, 60 * 60 * 1000);
   if (!rateLimit.allowed) return apiError("Too many password attempts. Try again later.", 429);
+  const profile = await getCurrentProfile();
+  if (profile && isAdministratorRole(profile.role)) {
+    const adminLimit = await checkAdminRateLimit(request, "admin-password-change", profile.id, 5, 60 * 60 * 1000);
+    if (!adminLimit.allowed) return adminRateLimitResponse("Too many administrator password attempts. Try again later.", adminLimit.resetTime);
+  }
 
   try {
     const parsed = changePasswordSchema.safeParse(await request.json());

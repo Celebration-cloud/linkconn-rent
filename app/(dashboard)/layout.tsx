@@ -5,6 +5,10 @@ import {
   getAccountAccessProfile,
   getAccountGateDestination,
 } from "@/lib/auth/account-access";
+import { DashboardShell } from "@/features/dashboard/dashboard-shell";
+import { NotificationRepository } from "@/repositories/notification.repository";
+
+const WORKSPACE_ROLES = ["Tenant", "Landlord", "PropertyManager"] as const;
 
 export default async function ProtectedDashboardLayout({
   children,
@@ -21,5 +25,26 @@ export default async function ProtectedDashboardLayout({
     ? getAccountGateDestination(profile)
     : "/onboarding";
   if (destination) redirect(destination);
-  return children;
+  if (!profile || !WORKSPACE_ROLES.includes(profile.role as (typeof WORKSPACE_ROLES)[number])) {
+    return children;
+  }
+
+  const nameParts = (session.user.name || "").trim().split(/\s+/).filter(Boolean);
+  const emailName = session.user.email.split("@")[0] || "LinkConn member";
+  const notifications = await NotificationRepository.list(profile.id);
+
+  return (
+    <DashboardShell
+      viewer={{
+        firstName: nameParts[0] || emailName,
+        lastName: nameParts.slice(1).join(" "),
+        email: session.user.email,
+        role: profile.role,
+        accountStatus: profile.accountStatus,
+      }}
+      initialNotifications={notifications}
+    >
+      {children}
+    </DashboardShell>
+  );
 }

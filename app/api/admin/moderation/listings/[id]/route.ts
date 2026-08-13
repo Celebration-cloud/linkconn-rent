@@ -5,6 +5,7 @@ import { AdministrationRepository } from "@/repositories/administration.reposito
 import { listingModerationSchema } from "@/schemas/administration";
 import { invalidatePropertyCache } from "@/lib/cache/invalidate-property-cache";
 import { verifyCsrf } from "@/lib/security/csrf";
+import { adminRateLimitResponse, checkAdminRateLimit } from "@/lib/security/admin-rate-limiter";
 
 export async function PATCH(request: Request, context: { params: Promise<{ id: string }> }) {
   try {
@@ -12,6 +13,8 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
     const profile = await getCurrentProfile();
     if (!profile) return apiError("Authentication required", 401);
     if (!isAccountOperational(profile)) return apiError("Account access unavailable", 403);
+    const limit = await checkAdminRateLimit(request, "admin-listing-moderation", profile.id, 60, 60 * 60 * 1000);
+    if (!limit.allowed) return adminRateLimitResponse("Too many listing moderation actions. Try again later.", limit.resetTime);
     const input = listingModerationSchema.parse(await request.json());
     const { id } = await context.params;
     const listing = await AdministrationRepository.moderateListing(

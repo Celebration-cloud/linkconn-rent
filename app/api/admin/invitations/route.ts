@@ -8,6 +8,7 @@ import {
   listAdminInvitations,
 } from "@/features/admin-invitations/server/invitation-service";
 import { adminInvitationHttpError } from "@/features/admin-invitations/server/http";
+import { adminRateLimitResponse, checkAdminRateLimit } from "@/lib/security/admin-rate-limiter";
 
 export async function GET() {
   const profile = await getCurrentProfile();
@@ -25,6 +26,8 @@ export async function POST(request: Request) {
   if (!profile) return apiError("Unauthorized", 401);
   const rateLimit = checkRateLimit(getClientIp(request), "admin-invitation-create", 10, 60 * 60 * 1000);
   if (!rateLimit.allowed) return apiError("Too many invitation attempts. Try again later.", 429);
+  const durableLimit = await checkAdminRateLimit(request, "admin-invitation-create", profile.id, 10, 60 * 60 * 1000);
+  if (!durableLimit.allowed) return adminRateLimitResponse("Too many administrator invitation attempts. Try again later.", durableLimit.resetTime);
 
   try {
     const parsed = adminInvitationEmailSchema.safeParse(await request.json());
@@ -42,4 +45,3 @@ export async function POST(request: Request) {
     return adminInvitationHttpError(error);
   }
 }
-

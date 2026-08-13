@@ -1,10 +1,15 @@
 import { PropertiesWorkspace } from "@/features/admin/components/admin-workspaces";
 import { parseAdminSearchParams, type AdminSearchParams } from "@/features/admin/server/admin-page-data";
 import { AdministrationRepository } from "@/repositories/administration.repository";
+import { getCurrentProfile } from "@/lib/auth/current-profile";
+import { canReviewQueues } from "@/lib/admin-permissions";
+import { redirect } from "next/navigation";
 
 export default async function AdminPropertiesPage({ searchParams }: { searchParams: AdminSearchParams }) {
   await connection();
-  const data = await AdministrationRepository.listProperties(await parseAdminSearchParams(searchParams));
-  return <PropertiesWorkspace data={data} />;
+  const [filters, profile] = await Promise.all([parseAdminSearchParams(searchParams), getCurrentProfile()]);
+  if (!profile || !canReviewQueues(profile.role)) redirect("/forbidden");
+  const [data, detail] = await Promise.all([AdministrationRepository.listProperties(filters, profile.role), filters.item ? AdministrationRepository.getPropertyDetail(filters.item, profile.role) : null]);
+  return <PropertiesWorkspace data={data} detail={detail} />;
 }
 import { connection } from "next/server";

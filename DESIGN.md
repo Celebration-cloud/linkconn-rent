@@ -21,6 +21,47 @@ maintenance action must leave a clear record.
 - Meaningful controls are at least 44px tall and always expose a visible focus
   state.
 
+## Admin operations console
+
+The administrator experience is an operator workspace, not a marketing
+dashboard. It uses a compact operations-ledger grammar: white data surfaces on
+the cool sand canvas, one-pixel rules instead of decorative shadows, square
+corners, tabular numerals, and split list/detail arrangements that keep context
+beside the current action.
+
+- Desktop navigation is a deep-forest rail: `16rem` expanded and `4.75rem`
+  collapsed. The expanded rail shows grouped labels, live queue counts and the
+  administrator identity; the compact rail retains icons, accessible names,
+  count dots and hover titles. The active destination uses a white field and a
+  narrow forest marker. Collapse preference persists locally.
+- Navigation groups are Command, Trust & Safety, Operations and Governance.
+  Destinations and controls remain permission-aware; unavailable workspaces
+  must not be hinted at through disabled links.
+- The sticky utility header identifies the active workspace, supplies the
+  `Admin / Workspace` breadcrumb, exposes urgent reviews when present and keeps
+  account/security controls available without competing with the work area.
+- Page headings pair a compact explanation with an optional ruled record-count
+  block. Filters sit in one bordered strip. Tables, record lists, timelines,
+  empty states and action panels share the same rule colour and avoid nested
+  card decoration.
+- Operator labels use short, factual language. Data headings and actions use
+  Manrope at bold or extra-bold weights; supporting metadata uses compact muted
+  text, and IDs, counts, money and dates use tabular numerals where applicable.
+- Status signals always print the status text in addition to colour. Forest is
+  positive or completed, amber is pending or waiting, red is failed, overdue
+  or high-risk, and sand is neutral. Lime is reserved for queue counts,
+  decisive focus and verified emphasis rather than large backgrounds.
+- At desktop widths, queues prefer a ruled list/detail split with an anchored
+  action column. On mobile, tables become scannable record blocks where needed,
+  content clears the bottom utility bar, and Overview, Queues and Menu remain
+  reachable. Menu opens a full-height forest navigation sheet containing every
+  permitted destination and the administrator identity controls.
+- Navigation and consequential controls retain visible focus treatment and a
+  minimum 44px target. Sheets and account menus close with Escape; the mobile
+  sheet moves focus to its close control, prevents background scrolling and
+  restores prior focus on dismissal. Rail movement is limited to the grid
+  transition and is disabled under `prefers-reduced-motion`.
+
 ## Generated image system
 
 Generated assets live in `public/images/generated/linkconn/`. The canonical
