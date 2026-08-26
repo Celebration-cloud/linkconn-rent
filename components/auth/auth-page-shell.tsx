@@ -42,7 +42,10 @@ export default function AuthPageShell({
             {children}
             <div className="mt-6 border-t border-line pt-5 text-center text-sm text-muted">
               {footerText}{" "}
-              <Link className="font-bold text-forest-700 transition hover:text-forest-900 hover:underline" href={footerHref}>
+              <Link
+                className="font-bold text-forest-700 transition hover:text-forest-900 hover:underline"
+                href={footerHref}
+              >
                 {footerLabel}
               </Link>
             </div>

@@ -3,52 +3,77 @@
 import type React from "react";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { BadgeCheck, CheckCircle2, CircleAlert, CreditCard, Gem, ScanFace, ShieldCheck } from "lucide-react";
+import {
+  AlertTriangle,
+  BadgeAlert,
+  BadgeCheck,
+  CheckCircle2,
+  ChevronDown,
+  CircleAlert,
+  CreditCard,
+  FileCheck2,
+  Gem,
+  Lock,
+  MapPin,
+  PhoneCall,
+  Scale,
+  ScanFace,
+  ShieldAlert,
+  ShieldCheck,
+  Sparkles,
+  UserCheck,
+  WalletCards,
+  Zap,
+} from "lucide-react";
 import { Input, Textarea } from "@/components/ui/form-controls";
 
 const verifications = [
   {
     level: "Unverified",
-    color: "text-red-600 bg-red-50 border-red-100",
+    color: "text-amber-700 bg-amber-50 border-amber-200",
     icon: CircleAlert,
-    desc: "Initial listing status. Property details are uploaded but have not undergone physical inspection or document checks. Exercise caution.",
+    tag: "Stage 0",
+    desc: "Initial listing upload. Basic property photos and descriptions submitted, but document audits and physical inspection have not yet completed. Direct escrow caution required.",
   },
   {
     level: "Partially Verified",
-    color: "text-amber-brand-700 bg-amber-brand-50 border-amber-brand-100",
-    icon: CircleAlert,
-    desc: "Landlord identity verified via national NIN/BVN data. Ownership papers uploaded and undergoing audit.",
+    color: "text-blue-700 bg-blue-50 border-blue-200",
+    icon: UserCheck,
+    tag: "Stage 1: Identity Verified",
+    desc: "Landlord identity verified via national NIN/BVN biometric matching. Contact information confirmed against official telecommunications and bank records.",
   },
   {
     level: "Fully Verified",
-    color: "text-brandgreen-700 bg-brandgreen-50 border-brandgreen-100",
+    color: "text-forest-800 bg-forest-50 border-forest-200",
     icon: BadgeCheck,
-    desc: "Land title documents certified by our legal team. High trust listing.",
+    tag: "Stage 2: Title & Premises Audited",
+    desc: "Land title documents (C of O, Deed of Assignment, Governor's Consent) certified by our legal auditing team, and in-person physical inspection completed with GPS geotagging.",
   },
   {
-    level: "Trusted",
-    color: "text-info bg-info-soft border-info/20",
+    level: "Trusted Premier",
+    color: "text-purple-700 bg-purple-50 border-purple-200",
     icon: Gem,
-    desc: "Premium verified landlord status with a 4.8+ rating and 10+ successful, dispute-free tenancies completed via LinkConn Rent.",
+    tag: "Stage 3: Platinum Track Record",
+    desc: "Reserved for top-tier verified landlords maintaining a 4.9+ rating, zero unresolved maintenance or dispute cases, and over 10+ completed tenancies via LinkConn Rent.",
   },
 ];
 
 const safetyFaqs = [
   {
-    q: "How does the Rent Escrow process work?",
-    a: "When you pay rent via LinkConn Rent, the payment is held securely in escrow. It is released to the landlord only 24 hours after your move-in date, once you confirm the property condition matches the listing details. This prevents keyholder runaways and upfront fraud.",
+    q: "How does the Rent Escrow protection keep my money safe?",
+    a: "When you pay rent via LinkConn Rent, your funds are safely locked in a regulated escrow vault. Funds are only disbursed to the landlord 24 hours AFTER you receive keys, enter the property, and confirm that the condition matches the listing details. This prevents fake agent disappearance and keyholder fraud.",
   },
   {
-    q: "Are there any physical inspections?",
-    a: "Yes! Fully Verified properties undergo a physical check by our field inspectors. We verify the location coordinates, check basic utilities (water, power), and confirm the landlord is the actual caretaker.",
+    q: "What happens during the on-site physical inspection by LinkConn?",
+    a: "Our trained field auditors visit the actual property, verify geographic GPS coordinates, verify functioning utilities (water borehole, electricity prepaid meter), ensure the landlord/caretaker holds physical keys, and capture tamper-proof photos for the listing.",
   },
   {
-    q: "Why should I keep all messages in the chat?",
-    a: "LinkConn Rent monitors chats for suspicious links and patterns to prevent fraud. Landlords requesting you to continue on WhatsApp, or offering offline discounts, might be attempting to bypass our escrow safety rules.",
+    q: "Why should I never send money or chat outside LinkConn Rent?",
+    a: "Scammers frequently attempt to take conversations to WhatsApp or offer 'offline discounts' in exchange for immediate direct transfers. If you transact outside LinkConn Rent, you lose the 100% Escrow Protection guarantee and dispute resolution coverage.",
   },
   {
-    q: "How do I report a listing that seems fake?",
-    a: "You can click 'Report Listing' on any property details page, or use the Report Scam form below. Our moderator team audits and removes flagged accounts in under 2 hours.",
+    q: "How does the caution deposit refund process work upon moving out?",
+    a: "At the end of your tenancy, an exit condition inspection is documented. If no tenant damages exist, your caution deposit is refunded directly from escrow within 14 days. Any proposed deductions require legitimate receipts and itemized invoices.",
   },
 ];
 
@@ -56,7 +81,7 @@ export default function TrustAndSafetyClient() {
   const [reportTitle, setReportTitle] = useState("");
   const [reportDesc, setReportDesc] = useState("");
   const [reportSuccess, setReportSuccess] = useState(false);
-  const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [openFaq, setOpenFaq] = useState<number | null>(0);
 
   const handleReportSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,129 +90,154 @@ export default function TrustAndSafetyClient() {
     setReportSuccess(true);
     setReportTitle("");
     setReportDesc("");
-    setTimeout(() => setReportSuccess(false), 5000);
+    setTimeout(() => setReportSuccess(false), 6000);
   };
 
   return (
-    <div className="mx-auto max-w-5xl px-5 py-12 lg:px-8 space-y-16">
-      
+    <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8 space-y-20">
       {/* Header section */}
       <div className="text-center">
-        <span className="text-xs font-bold uppercase tracking-widest text-brandgreen-600 bg-brandgreen-50 px-3.5 py-1.5 rounded-full">
-          Platform Safety
-        </span>
-        <h1 className="mt-4 text-3xl font-extrabold tracking-tight text-navy-950 sm:text-4xl">
-          Trust & Safety Guidelines
+        <div className="inline-flex items-center gap-2 rounded-full border border-forest-600/30 bg-forest-900/10 px-4 py-1.5 text-xs font-bold text-forest-800">
+          <ShieldCheck className="size-4 text-forest-700" />
+          ZERO TOLERANCE FRAUD POLICY
+        </div>
+        <h1 className="mt-4 text-3xl font-black tracking-tight text-ink sm:text-5xl lg:text-6xl">
+          Trust & Safety Center
         </h1>
-        <p className="mt-3 mx-auto max-w-xl text-sm leading-relaxed text-navy-500 font-semibold">
-          Your protection is our highest priority. Learn how we eliminate rental scams and secure transactions in Nigeria.
+        <p className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-muted sm:text-base">
+          How LinkConn Rent eliminates fake landlords, phantom listings, and deposit theft across Nigeria.
         </p>
       </div>
 
       {/* Verification Level cards */}
       <div>
-        <h2 className="text-xl font-extrabold text-navy-950 text-center sm:text-2xl">
-          Verification Tiers Explained
-        </h2>
-        <p className="text-center text-xs text-navy-500 font-semibold mt-1.5 max-w-md mx-auto">
-          We rate every property listing and landlord profile to show you the security level of each listing.
-        </p>
+        <div className="text-center">
+          <span className="text-xs font-bold uppercase tracking-widest text-forest-700">
+            Trust Classification
+          </span>
+          <h2 className="mt-2 text-2xl font-extrabold text-ink sm:text-3xl">
+            Verification Tiers Explained
+          </h2>
+          <p className="mx-auto mt-2 max-w-md text-xs text-muted">
+            Every property listing and landlord profile is clearly badged with its verified audit status.
+          </p>
+        </div>
 
-        <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {verifications.map((v) => (
-            <div
-              key={v.level}
-              className={`rounded-2xl border p-5 bg-white shadow-sm flex flex-col justify-between`}
-            >
-              <div>
-                <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold border ${v.color}`}>
-                  <v.icon className="size-3.5" aria-hidden="true" /> {v.level}
-                </span>
-                <p className="mt-4 text-xs leading-relaxed text-navy-600 font-semibold">
-                  {v.desc}
-                </p>
+        <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {verifications.map((v) => {
+            const ItemIcon = v.icon;
+            return (
+              <div
+                key={v.level}
+                className="rounded-3xl border border-line bg-white p-6 shadow-xs flex flex-col justify-between transition hover:shadow-md"
+              >
+                <div>
+                  <div className="flex items-center justify-between">
+                    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold border ${v.color}`}>
+                      <ItemIcon className="size-3.5" /> {v.level}
+                    </span>
+                  </div>
+                  <p className="mt-3 text-[11px] font-bold uppercase tracking-wider text-forest-700">
+                    {v.tag}
+                  </p>
+                  <p className="mt-2 text-xs leading-relaxed text-muted">
+                    {v.desc}
+                  </p>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
-      {/* Trust Pillars */}
-      <div className="grid gap-8 md:grid-cols-3">
-        <div className="rounded-3xl border border-navy-100 bg-white p-6 shadow-sm">
-          <ShieldCheck className="size-7 text-primary" aria-hidden="true" />
-          <h3 className="mt-4 text-base font-extrabold text-navy-950">Property Auditing</h3>
-          <p className="mt-2 text-xs leading-relaxed text-navy-500 font-semibold">
-            Our local field agents verify property details on-site. We confirm caretakers, take coordinates, and photograph utilities.
+      {/* 3 Core Trust Pillars */}
+      <div className="grid gap-6 md:grid-cols-3">
+        <div className="rounded-3xl border border-line bg-white p-8 shadow-xs">
+          <div className="grid size-12 place-items-center rounded-2xl bg-forest-50 text-forest-700">
+            <ScanFace className="size-6" />
+          </div>
+          <h3 className="mt-5 text-lg font-black text-ink">NIN & BVN Biometric Verification</h3>
+          <p className="mt-2 text-xs leading-relaxed text-muted">
+            Landlords and property managers must validate national identity credentials matched with Nigerian federal databases prior to publishing listings.
           </p>
         </div>
-        <div className="rounded-3xl border border-navy-100 bg-white p-6 shadow-sm">
-          <CreditCard className="size-7 text-primary" aria-hidden="true" />
-          <h3 className="mt-4 text-base font-extrabold text-navy-950">Rent Escrow Holding</h3>
-          <p className="mt-2 text-xs leading-relaxed text-navy-500 font-semibold">
-            Funds remain safely locked in escrow and are released only 24 hours after checking in. No more disappearing landlords.
+        <div className="rounded-3xl border border-line bg-white p-8 shadow-xs">
+          <div className="grid size-12 place-items-center rounded-2xl bg-forest-50 text-forest-700">
+            <MapPin className="size-6" />
+          </div>
+          <h3 className="mt-5 text-lg font-black text-ink">Physical On-Site Inspection</h3>
+          <p className="mt-2 text-xs leading-relaxed text-muted">
+            Field agents verify the exact property address, test water/power fixtures, confirm caretaker authorization, and geotag listing coordinates.
           </p>
         </div>
-        <div className="rounded-3xl border border-navy-100 bg-white p-6 shadow-sm">
-          <ScanFace className="size-7 text-primary" aria-hidden="true" />
-          <h3 className="mt-4 text-base font-extrabold text-navy-950">Identity Verification</h3>
-          <p className="mt-2 text-xs leading-relaxed text-navy-500 font-semibold">
-            NIN, BVN, and CAC registrations of all landlords are audited against federal databases before listing approval.
+        <div className="rounded-3xl border border-line bg-white p-8 shadow-xs">
+          <div className="grid size-12 place-items-center rounded-2xl bg-forest-50 text-forest-700">
+            <Lock className="size-6" />
+          </div>
+          <h3 className="mt-5 text-lg font-black text-ink">Regulated Rent Escrow Vault</h3>
+          <p className="mt-2 text-xs leading-relaxed text-muted">
+            Rent and caution deposits remain in escrow until you safely move in and verify the property condition. 100% money-back safety guarantee.
           </p>
         </div>
       </div>
 
-      {/* Report Form and Safety FAQs */}
-      <div className="grid gap-8 md:grid-cols-2 items-start">
-        
+      {/* Scam Report Form and Safety FAQs */}
+      <div className="grid gap-8 lg:grid-cols-2 items-start">
         {/* Scam report form */}
-        <div className="rounded-3xl border border-navy-100 bg-white p-6 shadow-sm">
-          <h3 className="text-lg font-extrabold text-navy-950">Report Suspicious Activity</h3>
-          <p className="mt-1 text-xs text-navy-500 font-semibold">
-            Spotted a scam listing or a fraudulent landlord? Flag it instantly to our security team.
+        <div className="rounded-3xl border border-line bg-white p-7 sm:p-9 shadow-sm">
+          <div className="flex items-center gap-2 text-xs font-bold text-red-600 uppercase tracking-wider">
+            <ShieldAlert className="size-4" /> Incident Response Desk
+          </div>
+          <h3 className="mt-2 text-xl font-black text-ink">Report Suspicious Activity</h3>
+          <p className="mt-1 text-xs text-muted leading-relaxed">
+            Spotted a suspicious listing, unauthorized agent, or someone asking for offline payments? Submit an instant report for immediate investigation.
           </p>
 
           {reportSuccess ? (
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="mt-6 rounded-2xl bg-brandgreen-50 border border-brandgreen-200 p-6 text-center"
+              className="mt-6 rounded-2xl bg-forest-50 border border-forest-200 p-6 text-center"
             >
-              <CheckCircle2 className="mx-auto size-7 text-success" aria-hidden="true" />
-              <h4 className="mt-2 text-sm font-bold text-brandgreen-950">Report Received</h4>
-              <p className="mt-1 text-[11px] text-brandgreen-700 leading-normal">
-                Our moderator team will review the details in under 2 hours. Thank you for keeping LinkConn Rent safe!
+              <CheckCircle2 className="mx-auto size-8 text-forest-700" />
+              <h4 className="mt-2 text-base font-extrabold text-forest-950">Safety Report Received</h4>
+              <p className="mt-1 text-xs text-forest-800 leading-normal">
+                Our security and moderation desk will audit the record within 2 hours. Thank you for protecting the LinkConn Rent community!
               </p>
             </motion.div>
           ) : (
             <form onSubmit={handleReportSubmit} className="mt-6 space-y-4">
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-navy-400">Subject / Listing ID</label>
+                <label className="block text-xs font-bold uppercase tracking-wider text-forest-900">
+                  Subject or Property Listing ID
+                </label>
                 <Input
                   type="text"
                   required
-                  placeholder="e.g. Fake listing at Lekki Phase 1"
+                  placeholder="e.g. Suspicious request for offline fee in Lekki Phase 1"
                   value={reportTitle}
                   onChange={(e) => setReportTitle(e.target.value)}
-                  className="mt-2 text-xs font-bold"
+                  className="mt-2 text-xs"
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-navy-400">Describe the Issue</label>
+                <label className="block text-xs font-bold uppercase tracking-wider text-forest-900">
+                  Description of Issue / Evidence
+                </label>
                 <Textarea
                   rows={4}
                   required
-                  placeholder="Please describe why this listing is suspicious (e.g. asking for offline BVN, fake pictures)..."
+                  placeholder="Please describe why this listing or user is suspicious (e.g. asking for offline bank transfer, mismatched photos, refusal of in-app inspection)..."
                   value={reportDesc}
                   onChange={(e) => setReportDesc(e.target.value)}
-                  className="mt-2 min-h-28 resize-none text-xs font-semibold"
+                  className="mt-2 min-h-28 resize-none text-xs"
                 />
               </div>
               <button
                 type="submit"
-                className="w-full rounded-xl bg-red-600 py-3 text-xs font-extrabold text-white shadow-md transition-colors hover:bg-red-750 cursor-pointer"
+                className="w-full rounded-xl bg-red-600 py-3.5 text-xs font-extrabold text-white shadow-sm transition hover:bg-red-700 cursor-pointer"
               >
-                Submit Safety Report
+                Submit Incident Report to Security Desk
               </button>
             </form>
           )}
@@ -195,45 +245,44 @@ export default function TrustAndSafetyClient() {
 
         {/* Safety FAQs */}
         <div className="space-y-4">
-          <h3 className="text-lg font-extrabold text-navy-950">Frequently Asked Questions</h3>
+          <div>
+            <span className="text-xs font-bold uppercase tracking-widest text-forest-700">
+              Security Answers
+            </span>
+            <h3 className="mt-1 text-xl font-black text-ink">Frequently Asked Questions</h3>
+          </div>
           
-          <div className="space-y-3">
+          <div className="space-y-3 pt-2">
             {safetyFaqs.map((faq, i) => {
               const isOpen = openFaq === i;
               return (
                 <div
-                  key={i}
-                  className="rounded-2xl border border-navy-100 bg-white overflow-hidden transition-all shadow-sm"
+                  key={faq.q}
+                  className="rounded-2xl border border-line bg-white overflow-hidden transition shadow-xs"
                 >
                   <button
+                    type="button"
                     onClick={() => setOpenFaq(isOpen ? null : i)}
-                    className="flex w-full items-center justify-between p-4 text-left text-xs font-bold text-navy-900 hover:bg-navy-50 cursor-pointer select-none"
+                    className="flex w-full items-center justify-between p-4 text-left text-xs sm:text-sm font-bold text-ink hover:bg-sand-50 cursor-pointer"
                   >
                     <span>{faq.q}</span>
-                    <span>{isOpen ? "−" : "+"}</span>
+                    <ChevronDown
+                      className={`size-4 text-muted transition-transform ${
+                        isOpen ? "rotate-180 text-forest-700" : ""
+                      }`}
+                    />
                   </button>
-                  <AnimatePresence initial={false}>
-                    {isOpen && (
-                      <motion.div
-                        initial={{ height: 0 }}
-                        animate={{ height: "auto" }}
-                        exit={{ height: 0 }}
-                        className="overflow-hidden"
-                      >
-                        <p className="border-t border-navy-50 p-4 text-xs leading-relaxed text-navy-500 font-semibold bg-navy-50/20">
-                          {faq.a}
-                        </p>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                  {isOpen && (
+                    <div className="border-t border-line p-4 text-xs leading-relaxed text-muted bg-sand-50/40">
+                      {faq.a}
+                    </div>
+                  )}
                 </div>
               );
             })}
           </div>
         </div>
-
       </div>
-
     </div>
   );
 }

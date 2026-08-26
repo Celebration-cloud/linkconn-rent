@@ -72,6 +72,11 @@ enum PaymentStatus {
   Failed
 }
 
+enum SupportPriority {
+  Standard
+  Priority
+}
+
 enum PropertyStatus {
   Draft
   Available
@@ -252,7 +257,9 @@ model Profile {
   applications             Application[]               @relation("TenantApplications")
   maintenance              MaintenanceRequest[]
   payments                 Payment[]
+  accountPlanPayments      AccountPlanPayment[]
   savedProperties          SavedProperty[]
+  savedSearches            SavedSearch[]
   requestedViewings        Viewing[]                   @relation("TenantViewings")
   hostedViewings           Viewing[]                   @relation("LandlordViewings")
   tenantConversations      Conversation[]              @relation("TenantConversations")
@@ -283,6 +290,31 @@ model Profile {
   verificationFindings     VerificationReviewFinding[] @relation("VerificationFindingReviewer")
 
   @@map("profiles")
+}
+
+model AccountPlanPayment {
+  id               String        @id @default(uuid())
+  profileId        String
+  profile          Profile       @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  reference        String        @unique
+  planKey          String
+  billingPeriod    String
+  checkoutContext  String        @default("onboarding")
+  amountMinor      Int
+  currency         String        @default("NGN")
+  status           PaymentStatus @default(Processing)
+  paidAt           DateTime?
+  accessStartsAt   DateTime?
+  accessEndsAt     DateTime?
+  revokedAt        DateTime?
+  revocationReason String?
+  failureReason    String?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  @@index([profileId, status, accessEndsAt])
+  @@index([profileId, paidAt])
+  @@map("account_plan_payments")
 }
 
 model AdminInvitation {
@@ -396,6 +428,8 @@ model Property {
   serviceCharge      Float            @default(0)
   verified           Boolean          @default(false)
   featured           Boolean          @default(false)
+  paidVisibilityEndsAt DateTime?
+  featuredUntil      DateTime?
   rating             Float            @default(0.0)
   status             PropertyStatus   @default(Available)
   moderationStatus   ModerationStatus @default(PendingReview)
@@ -425,6 +459,8 @@ model Property {
   @@index([latitude, longitude])
   @@index([publicLatitude, publicLongitude])
   @@index([ownerId, status])
+  @@index([status, paidVisibilityEndsAt])
+  @@index([featured, featuredUntil])
   @@index([moderationStatus, updatedAt])
   @@map("properties")
 }
@@ -536,6 +572,21 @@ model SavedProperty {
   @@id([profileId, propertyId])
   @@index([propertyId])
   @@map("saved_properties")
+}
+
+model SavedSearch {
+  id             String   @id @default(uuid())
+  profileId      String
+  profile        Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  name           String
+  criteria       Json
+  active         Boolean  @default(true)
+  lastMatchedAt  DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([profileId, active, createdAt])
+  @@map("saved_searches")
 }
 
 model Viewing {
@@ -899,6 +950,7 @@ model SupportTicket {
   category     String
   subject      String
   message      String
+  priority     SupportPriority        @default(Standard)
   status       SupportTicketStatus     @default(Open)
   assignedToId String?
   assignedTo   Profile?                @relation("SupportTicketAssignee", fields: [assignedToId], references: [id], onDelete: SetNull)
@@ -908,7 +960,7 @@ model SupportTicket {
 
   @@index([profileId, createdAt])
   @@index([email, createdAt])
-  @@index([status, assignedToId, updatedAt])
+  @@index([status, priority, assignedToId, updatedAt])
   @@map("support_tickets")
 }
 

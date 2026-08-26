@@ -4,24 +4,43 @@ import { useState, useTransition, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
+  AlertCircle,
   AlertTriangle,
+  ArrowRight,
+  ArrowUpRight,
+  Award,
+  BadgeAlert,
   BadgeCheck,
+  Briefcase,
+  Building,
   Building2,
-  Calendar,
+  Camera,
   Check,
   CheckCircle2,
+  ChevronDown,
+  ChevronRight,
+  Clock,
   CreditCard,
   Download,
+  ExternalLink,
   Eye,
   EyeOff,
   FileCheck,
+  FileCheck2,
   FileQuestion,
+  FileSearch,
   FileText,
   FileX,
+  GraduationCap,
   History,
+  Home,
+  IdCard,
   Info,
+  Key,
+  Landmark,
   Layers,
-  LoaderCircle,
+  Lock,
+  MapPin,
   Maximize2,
   Minimize2,
   Phone,
@@ -40,6 +59,7 @@ import {
   X,
   ZoomIn,
   ZoomOut,
+  type LucideIcon,
 } from "lucide-react";
 import type {
   VerificationReviewDetailDto,
@@ -49,9 +69,208 @@ import {
   requiredVerificationFindingKeys,
   VERIFICATION_FINDINGS,
 } from "@/features/verifications/review-contracts";
-import { Input, Select, Textarea } from "@/components/ui/form-controls";
+import type { VerificationDocumentKind } from "@prisma/client";
 import { toastError, toastSuccess } from "@/stores/toast-store";
 import { formatNaira } from "@/utils/map-property";
+
+// ─────────────────────────────────────────────────────────────
+// Document Categorization & Intelligence System
+// ─────────────────────────────────────────────────────────────
+
+export type DocumentCategory =
+  | "Identity"
+  | "Property Title"
+  | "Income & Employment"
+  | "Address Proof"
+  | "Business & Corporate"
+  | "Guarantor & Surety"
+  | "Settlement & Banking"
+  | "General Evidence";
+
+export interface DocumentKindMeta {
+  category: DocumentCategory;
+  title: string;
+  shortLabel: string;
+  description: string;
+  icon: LucideIcon;
+  badgeTone: "indigo" | "emerald" | "amber" | "blue" | "purple" | "rose" | "teal";
+  checks: string[];
+}
+
+export const DOCUMENT_KIND_REGISTRY: Record<VerificationDocumentKind, DocumentKindMeta> = {
+  GovernmentId: {
+    category: "Identity",
+    title: "National Identity Card / Passport / Driver's License",
+    shortLabel: "Government Photo ID",
+    description: "NIN Slip, International Passport, Voter Card (INEC), or Driver's License.",
+    icon: IdCard,
+    badgeTone: "indigo",
+    checks: [
+      "Full legal name matches LinkConn account profile",
+      "Document is currently valid and unexpired",
+      "NIN or ID reference number is crisp and legible",
+      "Photo is clear without digital tampering or glare",
+    ],
+  },
+  Selfie: {
+    category: "Identity",
+    title: "Live Biometric / Liveness Photograph",
+    shortLabel: "Biometric Liveness",
+    description: "Real-time camera selfie to cross-reference against Government Photo ID.",
+    icon: Camera,
+    badgeTone: "indigo",
+    checks: [
+      "Facial features match the Government Photo ID",
+      "Natural lighting without reflections, sunglasses, or masks",
+      "No screenshot of a physical photograph",
+    ],
+  },
+  ProofOfAddress: {
+    category: "Address Proof",
+    title: "Proof of Address (Utility Bill / Bank Statement)",
+    shortLabel: "Utility / Address Proof",
+    description: "Recent Electricity (EKEDC, IKEDC, AEDC, etc.), Water, Waste bill or Bank Statement.",
+    icon: MapPin,
+    badgeTone: "amber",
+    checks: [
+      "Issued within the last 3 months",
+      "Physical address clearly displayed matching neighborhood",
+      "Applicant name or valid tenancy relation listed",
+    ],
+  },
+  EmploymentEvidence: {
+    category: "Income & Employment",
+    title: "Letter of Employment / Official Work ID Badge",
+    shortLabel: "Employment Offer / Work ID",
+    description: "Official employment contract, confirmation letter, or corporate ID badge.",
+    icon: Briefcase,
+    badgeTone: "emerald",
+    checks: [
+      "Official corporate letterhead and contact info",
+      "Matches declared job title and income range",
+      "Signature of HR / Managing Director present",
+    ],
+  },
+  SelfEmploymentEvidence: {
+    category: "Income & Employment",
+    title: "CAC Business Registration / Tax Clearance Certificate",
+    shortLabel: "Business Proof / CAC",
+    description: "Certificate of Business Name or Limited Liability registration, TIN clearance.",
+    icon: Building,
+    badgeTone: "emerald",
+    checks: [
+      "Valid CAC BN / RC number verifiable on corporate registry",
+      "Applicant listed as Proprietor, Director, or Shareholder",
+      "Tax Identification Number (TIN) is legible",
+    ],
+  },
+  StudentEvidence: {
+    category: "Income & Employment",
+    title: "Student Identity Card / Admission Letter",
+    shortLabel: "Student ID / Admission",
+    description: "Valid tertiary institution ID card or formal admission letter.",
+    icon: GraduationCap,
+    badgeTone: "blue",
+    checks: [
+      "Accredited Nigerian or foreign tertiary institution",
+      "Valid matriculation number and active academic session",
+    ],
+  },
+  RetirementEvidence: {
+    category: "Income & Employment",
+    title: "Pension Statement / Formal Retirement Letter",
+    shortLabel: "Pension / Retirement Letter",
+    description: "Pension Fund Administrator (PFA) statement or employer retirement notification.",
+    icon: Award,
+    badgeTone: "teal",
+    checks: [
+      "Verifiable Pension Fund Administrator header",
+      "Consistent payout schedule confirming solvency",
+    ],
+  },
+  GuarantorEvidence: {
+    category: "Guarantor & Surety",
+    title: "Guarantor Letter of Undertaking & ID",
+    shortLabel: "Guarantor Undertaking & ID",
+    description: "Signed letter of financial undertaking with attached guarantor government ID.",
+    icon: UserCheck,
+    badgeTone: "purple",
+    checks: [
+      "Guarantor signature clearly matches attached ID",
+      "Guarantor employment & residential details verified",
+    ],
+  },
+  PropertyOwnership: {
+    category: "Property Title",
+    title: "Certificate of Occupancy (C of O) / Deed of Assignment",
+    shortLabel: "C of O / Deed of Assignment",
+    description: "Governor's Consent, C of O, Registered Deed of Assignment, or Gazette.",
+    icon: Home,
+    badgeTone: "rose",
+    checks: [
+      "Property address matches the listed rental property",
+      "Grantor and Grantee names correctly identify the landlord",
+      "Land registry stamp, folio number, or survey plan verified",
+      "Owner is verified as legal titleholder or heir",
+    ],
+  },
+  ManagementAuthority: {
+    category: "Property Title",
+    title: "Letter of Authority to Manage / Power of Attorney",
+    shortLabel: "Power of Attorney / Mandate",
+    description: "Legal Power of Attorney or management contract from the titleholder.",
+    icon: Key,
+    badgeTone: "rose",
+    checks: [
+      "Signed by the verified titleholder",
+      "Explicitly empowers agent / manager to lease and collect rent",
+      "Mandate duration is currently active",
+    ],
+  },
+  PayoutAccountEvidence: {
+    category: "Settlement & Banking",
+    title: "Bank Statement Header / Account Confirmation Letter",
+    shortLabel: "Bank Settlement Proof",
+    description: "Official bank statement header showing NUBAN account name and number.",
+    icon: Landmark,
+    badgeTone: "blue",
+    checks: [
+      "Account name exactly matches registered landlord name",
+      "10-digit NUBAN and CBN-licensed commercial bank verified",
+    ],
+  },
+  BusinessRegistration: {
+    category: "Business & Corporate",
+    title: "CAC Certificate of Incorporation (RC / BN Status)",
+    shortLabel: "CAC Incorporation Certificate",
+    description: "Corporate Affairs Commission (CAC) Status Report or Incorporation Certificate.",
+    icon: Building2,
+    badgeTone: "emerald",
+    checks: [
+      "Verify RC / BN registration number on CAC portal",
+      "Check registered office address in Nigeria",
+      "Confirm authorized directors and signatories",
+    ],
+  },
+};
+
+export function getDocumentMeta(kind: VerificationDocumentKind): DocumentKindMeta {
+  return (
+    DOCUMENT_KIND_REGISTRY[kind] || {
+      category: "General Evidence",
+      title: "Supporting Document File",
+      shortLabel: kind,
+      description: "Supporting documentation uploaded by applicant.",
+      icon: FileText,
+      badgeTone: "blue",
+      checks: ["Verify authenticity and relevance to application"],
+    }
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Formatters & Presets
+// ─────────────────────────────────────────────────────────────
 
 interface PageData {
   items: VerificationReviewSummaryDto[];
@@ -66,6 +285,22 @@ function formatDate(value: Date | string | null | undefined) {
   });
 }
 
+function formatRelativeTime(value: Date | string | null | undefined) {
+  if (!value) return "Unknown";
+  const date = new Date(value);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMins / 60);
+  const diffDays = Math.floor(diffHours / 24);
+
+  if (diffMins < 1) return "Just now";
+  if (diffMins < 60) return `${diffMins}m ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  if (diffDays === 1) return "Yesterday";
+  return `${diffDays}d ago`;
+}
+
 function formatBytes(bytes: number | null | undefined) {
   if (!bytes) return "Unknown size";
   if (bytes < 1024) return `${bytes} B`;
@@ -73,51 +308,20 @@ function formatBytes(bytes: number | null | undefined) {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-function StatusBadge({ value }: { value: string }) {
-  const normalized = value.toLowerCase();
-  if (normalized === "approved") {
-    return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-forest-50 px-2.5 py-0.5 text-xs font-bold text-forest-800 ring-1 ring-inset ring-forest-600/20">
-        <CheckCircle2 className="size-3" /> Approved
-      </span>
-    );
-  }
-  if (normalized === "rejected") {
-    return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-red-50 px-2.5 py-0.5 text-xs font-bold text-red-700 ring-1 ring-inset ring-red-600/20">
-        <FileX className="size-3" /> Rejected
-      </span>
-    );
-  }
-  if (normalized === "needschanges") {
-    return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-bold text-amber-800 ring-1 ring-inset ring-amber-600/20">
-        <AlertTriangle className="size-3" /> Needs Changes
-      </span>
-    );
-  }
-  if (normalized === "pending") {
-    return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-sand-200 px-2.5 py-0.5 text-xs font-bold text-ink ring-1 ring-inset ring-line">
-        <RefreshCw className="size-3" /> Pending Review
-      </span>
-    );
-  }
-  return (
-    <span className="inline-flex items-center rounded-full bg-sand-200 px-2.5 py-0.5 text-xs font-semibold text-ink">
-      {value}
-    </span>
-  );
-}
-
 const PRESET_CORRECTIONS = [
-  { label: "Blurry / Unreadable", note: "The uploaded document is blurry or unreadable. Please provide a clear, high-resolution scan or photo." },
-  { label: "Expired Document", note: "The document provided has expired. Please submit a currently valid government-issued ID." },
-  { label: "Name Mismatch", note: "The name on the document does not match the name on your LinkConn account. Please upload matching identification or update your account details." },
-  { label: "Missing Back Page", note: "Both front and back sides of the identity card are required. Please upload both pages." },
-  { label: "Incomplete Address Proof", note: "The utility bill or bank statement is older than 3 months or does not clearly show your address." },
-  { label: "Ownership Proof Insufficient", note: "The submitted deed or title document does not show verifiable ownership for this property." },
+  { label: "Blurry / Unreadable", note: "The uploaded document is blurry or unreadable. Please provide a clear, high-resolution photo or scan." },
+  { label: "Expired ID", note: "The submitted document has expired. Please upload a currently valid government-issued ID." },
+  { label: "Name Mismatch", note: "The name on the document does not match your LinkConn account profile name. Please upload matching identification." },
+  { label: "Back Side Missing", note: "Both front and back sides of the card are required for verification. Please upload both pages." },
+  { label: "Utility Bill Too Old", note: "Proof of address must be dated within the last 3 months. Please upload a recent utility bill or bank statement." },
+  { label: "Deed Address Mismatch", note: "The address on the title deed does not match the listed property unit. Please attach the correct deed of assignment." },
 ];
+
+// ─────────────────────────────────────────────────────────────
+// Main Component: 2-Tier Layout
+// Tier 1: Submission Queue (Left) + Applicant Dossier & Decision Matrix (Right)
+// Tier 2: Dedicated Full-Width Document Evidence & Inspection Hub (Bottom)
+// ─────────────────────────────────────────────────────────────
 
 export function AdminVerificationWorkspace({
   data,
@@ -132,18 +336,20 @@ export function AdminVerificationWorkspace({
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
+  const [searchTerm, setSearchTerm] = useState(query.query ?? "");
   const [reason, setReason] = useState("");
   const [instructions, setInstructions] = useState("");
-  const [decision, setDecision] = useState<"approve" | "reject" | "request_changes">("request_changes");
+  const [decision, setDecision] = useState<"approve" | "reject" | "request_changes">("approve");
   const [revealed, setRevealed] = useState<{ nin: string | null; payoutAccount: string | null } | null>(null);
-  
-  // Active document viewing state
+
+  // Document inspection states
   const [selectedDocIndex, setSelectedDocIndex] = useState(0);
   const [zoomLevel, setZoomLevel] = useState(100);
   const [rotation, setRotation] = useState(0);
   const [highContrast, setHighContrast] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [activeDossierTab, setActiveDossierTab] = useState<"kyc" | "role" | "platform" | "history">("kyc");
+  const [activeDossierTab, setActiveDossierTab] = useState<"kyc" | "profile" | "activity" | "history">("kyc");
+  const [completedDocChecks, setCompletedDocChecks] = useState<Record<string, boolean>>({});
 
   const requiredKeys = detail ? requiredVerificationFindingKeys(detail.type) : [];
   const [findings, setFindings] = useState<Record<string, "Approved" | "NeedsChanges">>(() =>
@@ -155,12 +361,34 @@ export function AdminVerificationWorkspace({
     return detail.documents[selectedDocIndex] || detail.documents[0];
   }, [detail, selectedDocIndex]);
 
+  const activeDocMeta = useMemo(() => {
+    if (!activeDoc) return null;
+    return getDocumentMeta(activeDoc.kind);
+  }, [activeDoc]);
+
+  // Status counts
+  const counts = useMemo(() => {
+    return {
+      pending: data.items.filter((i) => i.status === "Pending").length,
+      needsChanges: data.items.filter((i) => i.status === "NeedsChanges").length,
+      approved: data.items.filter((i) => i.status === "Approved").length,
+      rejected: data.items.filter((i) => i.status === "Rejected").length,
+    };
+  }, [data.items]);
+
   function itemHref(id: string) {
     const params = new URLSearchParams();
     if (query.status) params.set("status", query.status);
     if (query.query) params.set("query", query.query);
     params.set("item", id);
-    return `/admin/verifications?${params}`;
+    return `/admin/verifications?${params.toString()}`;
+  }
+
+  function filterStatusHref(status?: string) {
+    const params = new URLSearchParams();
+    if (status) params.set("status", status);
+    if (query.query) params.set("query", query.query);
+    return `/admin/verifications?${params.toString()}`;
   }
 
   async function revealSensitive() {
@@ -175,16 +403,16 @@ export function AdminVerificationWorkspace({
       return toastError("Reveal unavailable", result.message);
     }
     setRevealed(result.data);
-    toastSuccess("Sensitive values revealed", "This access was recorded in the audit log.");
+    toastSuccess("Sensitive values revealed", "This access was recorded in the compliance audit ledger.");
   }
 
   async function submitDecision() {
     if (!detail) return;
     if (decision === "request_changes" && !instructions.trim() && !reason.trim()) {
-      return toastError("Missing instructions", "Please provide specific correction instructions for the applicant.");
+      return toastError("Missing instructions", "Please provide specific correction instructions for the user.");
     }
     if (decision === "reject" && !reason.trim()) {
-      return toastError("Missing reason", "Please provide a reason for rejecting this verification.");
+      return toastError("Missing reason", "Please provide a rejection reason for the audit ledger.");
     }
 
     const response = await fetch(`/api/admin/verifications/${detail.id}`, {
@@ -192,7 +420,7 @@ export function AdminVerificationWorkspace({
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         action: decision,
-        reason: reason || "Reviewed by compliance team",
+        reason: reason || "Reviewed and verified by compliance specialist",
         ...(decision === "request_changes" ? { correctionInstructions: instructions || reason } : {}),
         findings: requiredKeys.map((key) => ({
           key,
@@ -215,586 +443,572 @@ export function AdminVerificationWorkspace({
     setReason((prev) => (prev ? `${prev}, ${preset.label}` : preset.label));
   }
 
+  const toggleCheck = (checkText: string) => {
+    setCompletedDocChecks((prev) => ({
+      ...prev,
+      [checkText]: !prev[checkText],
+    }));
+  };
+
   return (
-    <div className="min-w-0 space-y-5">
-      {/* Header Banner */}
-      <header className="admin-page-heading px-10 py-5">
-        <div className="space-y-1">
-          <div className="inline-flex items-center gap-2 rounded-md bg-forest-100 px-2.5 py-1 text-xs font-bold text-forest-900">
-            <ShieldCheck className="size-3.5 text-forest-700" />
-            <span>Compliance & KYC Studio</span>
+    <div className="admin-canvas min-w-0 space-y-6">
+      {/* ─────────────────────────────────────────────────────────────
+          1. Header & Operational Metrics Telemetry
+      ───────────────────────────────────────────────────────────── */}
+      <header className="admin-page-heading">
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-forest-100 px-3 py-0.5 text-xs font-black text-forest-900">
+              <ShieldCheck className="size-3.5 text-forest-700" />
+              Trust & Compliance Studio
+            </span>
+            <span className="text-xs font-semibold text-muted">Document Categorization & Title Audit</span>
           </div>
-          <h1>Verification queue</h1>
+          <h1 className="mt-1">Verification Queue</h1>
           <p>
-            Review evidence, account facts, findings and history in one addressable workspace.
+            Review applicant identities and title credentials. The top tier handles queue routing and decision ledger actions, while the dedicated hub below provides document categorization and high-resolution evidence inspection.
           </p>
         </div>
-        <div className="admin-record-count">
-          <span>Total cases</span>
-          <strong>{data.pagination.totalItems}</strong>
+
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4 bg-white border border-[#d6ddd5] px-4 py-2.5 shadow-xs">
+            <div>
+              <p className="text-[10px] font-extrabold uppercase tracking-wider text-muted">Total Submissions</p>
+              <p className="text-xl font-black text-forest-950 tabular-nums">{data.pagination.totalItems}</p>
+            </div>
+            <div className="h-8 w-px bg-line" />
+            <div>
+              <p className="text-[10px] font-extrabold uppercase tracking-wider text-amber-700">Urgent Pending</p>
+              <p className="text-xl font-black text-amber-800 tabular-nums">{counts.pending}</p>
+            </div>
+            <div className="h-8 w-px bg-line" />
+            <div>
+              <p className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-700">Approved</p>
+              <p className="text-xl font-black text-emerald-800 tabular-nums">{counts.approved}</p>
+            </div>
+          </div>
         </div>
       </header>
 
-      {/* Filter Bar */}
-      <form
-        method="get"
-        className="admin-filter-bar grid gap-3 sm:grid-cols-[minmax(0,1fr)_12rem_auto]"
-      >
-        <div className="relative">
-          <Input
-            name="query"
-            defaultValue={query.query ?? ""}
-            placeholder="Search name or email"
-          />
-        </div>
-        <Select name="status" defaultValue={query.status ?? ""}>
-          <option value="">All statuses</option>
-          {["Pending", "NeedsChanges", "Approved", "Rejected", "Draft"].map((status) => (
-            <option key={status} value={status}>
-              {status === "NeedsChanges" ? "Needs Changes" : status}
-            </option>
-          ))}
-        </Select>
-        {query.item ? <Input type="hidden" name="item" value={query.item} /> : null}
-        <button type="submit" className="stitch-button">
-          Apply filters
-        </button>
-      </form>
-
-      {/* 3-Column Main Workspace */}
-      <div className="mt-5 grid min-w-0 gap-px bg-line xl:grid-cols-[19rem_minmax(24rem,1fr)_25rem]">
-        {/* Column 1: Verification Queue List */}
-        <section
-          className="min-w-0 bg-white"
-          aria-label="Verification queue"
-        >
-          <div className="border-b border-line px-4 py-3 bg-sand-50/70">
-            <h2 className="text-sm font-extrabold text-ink">Verification queue</h2>
-            <p className="mt-1 text-xs text-muted">Selection stays in the item query.</p>
+      {/* ─────────────────────────────────────────────────────────────
+          2. Filter Bar with Segmented Pills & Search
+      ───────────────────────────────────────────────────────────── */}
+      <div className="border border-[#d6ddd5] bg-white p-3 shadow-xs">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex flex-wrap items-center gap-1.5">
+            {[
+              { label: "All Items", value: undefined, count: data.pagination.totalItems },
+              { label: "Pending Review", value: "Pending", count: counts.pending, tone: "amber" },
+              { label: "Needs Changes", value: "NeedsChanges", count: counts.needsChanges, tone: "amber" },
+              { label: "Approved", value: "Approved", count: counts.approved, tone: "green" },
+              { label: "Rejected", value: "Rejected", count: counts.rejected, tone: "red" },
+            ].map(({ label, value, count, tone }) => {
+              const active = query.status === value || (!query.status && value === undefined);
+              return (
+                <Link
+                  key={label}
+                  href={filterStatusHref(value)}
+                  className={`inline-flex items-center gap-2 px-3 py-1.5 text-xs font-bold transition ${
+                    active
+                      ? "bg-forest-950 text-white shadow-xs"
+                      : "bg-[#f4f6f3] text-muted hover:bg-[#e9eee7] hover:text-ink"
+                  }`}
+                >
+                  <span>{label}</span>
+                  {count !== undefined && count > 0 && (
+                    <span
+                      className={`min-w-5 rounded px-1.5 py-0.2 text-center text-[10px] font-black tabular-nums ${
+                        active
+                          ? "bg-lime text-forest-950"
+                          : tone === "amber"
+                          ? "bg-amber-100 text-amber-900"
+                          : tone === "green"
+                          ? "bg-emerald-100 text-emerald-900"
+                          : "bg-sand-200 text-ink"
+                      }`}
+                    >
+                      {count}
+                    </span>
+                  )}
+                </Link>
+              );
+            })}
           </div>
 
-          <div className="divide-y divide-line overflow-y-auto max-h-[46rem]">
+          {/* Search Box */}
+          <form method="get" className="flex items-center gap-2">
+            {query.status && <input type="hidden" name="status" value={query.status} />}
+            <div className="relative w-full sm:w-72">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted pointer-events-none" />
+              <input
+                type="text"
+                name="query"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search applicant name, email..."
+                className="w-full bg-[#f8faf7] border border-[#d6ddd5] pl-9 pr-8 py-1.5 text-xs font-medium text-ink placeholder:text-muted focus:bg-white focus:border-forest-700 focus:outline-none"
+              />
+              {searchTerm && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchTerm("");
+                    router.push(filterStatusHref(query.status));
+                  }}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted hover:text-ink"
+                >
+                  <X className="size-3.5" />
+                </button>
+              )}
+            </div>
+            <button type="submit" className="stitch-button py-1.5 text-xs">
+              Filter
+            </button>
+          </form>
+        </div>
+      </div>
+
+      {/* ─────────────────────────────────────────────────────────────
+          TIER 1: 2-Column Row: Submission Queue (Left) & Applicant Dossier + Decision Console (Right)
+      ───────────────────────────────────────────────────────────── */}
+      <div className="grid min-w-0 border border-[#d6ddd5] bg-[#eaeee9] gap-px lg:grid-cols-[22rem_minmax(0,1fr)] shadow-sm">
+        
+        {/* ========================================================= */}
+        {/* Tier 1 - Column 1: Submission Queue */}
+        {/* ========================================================= */}
+        <section className="flex flex-col bg-white min-w-0" aria-label="Verification submission queue">
+          <div className="border-b border-[#eaeee9] bg-[#f8faf7] px-4 py-3 flex items-center justify-between">
+            <div>
+              <h2 className="text-xs font-extrabold uppercase tracking-wider text-muted">Submission Queue</h2>
+              <p className="text-[11px] text-muted">Showing {data.items.length} records</p>
+            </div>
+            <span className="text-[11px] font-bold text-forest-800 tabular-nums">
+              Page {data.pagination.page} of {data.pagination.totalPages}
+            </span>
+          </div>
+
+          <div className="divide-y divide-[#eaeee9] overflow-y-auto max-h-[38rem]">
             {data.items.length ? (
               data.items.map((item) => {
                 const isSelected = detail?.id === item.id;
+                const isLandlord = item.owner.role === "Landlord" || item.owner.role === "PropertyManager";
                 return (
                   <Link
                     key={item.id}
                     href={itemHref(item.id)}
                     aria-current={isSelected ? "true" : undefined}
-                    className={`block min-h-24 p-4 transition-colors focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-forest-600 ${
+                    className={`group block p-4 transition-all ${
                       isSelected
-                        ? "bg-forest-50 border-l-4 border-forest-600"
-                        : "hover:bg-sand-50 border-l-4 border-transparent"
+                        ? "bg-forest-950 text-white shadow-md ring-1 ring-forest-900"
+                        : "hover:bg-[#f6f9f5] bg-white text-ink"
                     }`}
                   >
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <strong className="block truncate text-sm font-bold text-ink">
-                          {item.owner.firstName} {item.owner.lastName}
-                        </strong>
-                        <span className="mt-1 block truncate text-xs text-muted">{item.owner.email}</span>
+                    <div className="flex items-start justify-between gap-2.5">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div
+                          className={`size-9 shrink-0 grid place-items-center text-xs font-black uppercase ${
+                            isSelected
+                              ? "bg-lime text-forest-950"
+                              : isLandlord
+                              ? "bg-forest-100 text-forest-900"
+                              : "bg-sand-200 text-ink"
+                          }`}
+                        >
+                          {item.owner.firstName[0]}
+                          {item.owner.lastName[0]}
+                        </div>
+                        <div className="min-w-0">
+                          <strong className={`block truncate text-sm font-extrabold ${isSelected ? "text-white" : "text-forest-950"}`}>
+                            {item.owner.firstName} {item.owner.lastName}
+                          </strong>
+                          <span className={`block truncate text-xs ${isSelected ? "text-forest-300" : "text-muted"}`}>
+                            {item.owner.email}
+                          </span>
+                        </div>
                       </div>
-                      <StatusBadge value={item.status} />
+
+                      <div className="shrink-0">
+                        {isSelected ? (
+                          <span className="inline-flex items-center gap-1 rounded bg-lime/20 border border-lime/30 px-2 py-0.5 text-[10px] font-black text-lime">
+                            Active
+                          </span>
+                        ) : item.status === "Approved" ? (
+                          <span className="inline-flex items-center gap-1 rounded bg-emerald-50 border border-emerald-200 px-2 py-0.5 text-[10px] font-bold text-emerald-800">
+                            <CheckCircle2 className="size-3 text-emerald-600" /> Approved
+                          </span>
+                        ) : item.status === "NeedsChanges" ? (
+                          <span className="inline-flex items-center gap-1 rounded bg-amber-50 border border-amber-200 px-2 py-0.5 text-[10px] font-bold text-amber-800">
+                            <AlertTriangle className="size-3 text-amber-600" /> Changes
+                          </span>
+                        ) : item.status === "Rejected" ? (
+                          <span className="inline-flex items-center gap-1 rounded bg-red-50 border border-red-200 px-2 py-0.5 text-[10px] font-bold text-red-800">
+                            <FileX className="size-3 text-red-600" /> Rejected
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 rounded bg-forest-50 border border-forest-200 px-2 py-0.5 text-[10px] font-bold text-forest-900">
+                            <Clock className="size-3 text-forest-600" /> Pending
+                          </span>
+                        )}
+                      </div>
                     </div>
 
-                    <div className="mt-3 flex items-center justify-between text-[11px] font-bold text-muted">
-                      <span className="flex items-center gap-1 rounded bg-sand-200 px-1.5 py-0.5 text-ink font-semibold">
-                        <User className="size-3 text-forest-700" /> {item.owner.role}
+                    {/* Metadata & Tag Badges */}
+                    <div className="mt-3 flex items-center justify-between text-[11px]">
+                      <div className="flex items-center gap-1.5">
+                        <span className={`px-2 py-0.5 text-[10px] font-bold ${
+                          isSelected
+                            ? "bg-white/15 text-sand-100"
+                            : item.type === "PropertyOwnership"
+                            ? "bg-rose-50 text-rose-900 border border-rose-200"
+                            : "bg-indigo-50 text-indigo-900 border border-indigo-200"
+                        }`}>
+                          {item.type === "PropertyOwnership" ? "Title Deed" : "National ID"}
+                        </span>
+                        <span className={`text-[10px] font-semibold ${isSelected ? "text-forest-300" : "text-muted"}`}>
+                          Round {item.reviewRound}
+                        </span>
+                      </div>
+
+                      <span className={`flex items-center gap-1 text-[10px] tabular-nums ${isSelected ? "text-forest-300" : "text-muted"}`}>
+                        <Clock className="size-3" />
+                        {formatRelativeTime(item.submittedAt)}
                       </span>
-                      <span>Round {item.reviewRound}</span>
-                      <span>{item.evidence.active} active evidence</span>
                     </div>
 
-                    {item.property ? (
-                      <div className="mt-2 flex items-center gap-1 text-xs text-forest-800 font-medium truncate">
-                        <Building2 className="size-3 shrink-0" />
+                    {item.property && (
+                      <div className={`mt-2 flex items-center gap-1.5 text-xs truncate ${
+                        isSelected ? "text-forest-200" : "text-forest-800 font-semibold"
+                      }`}>
+                        <Building2 className="size-3.5 shrink-0" />
                         <span className="truncate">{item.property.title}</span>
                       </div>
-                    ) : null}
+                    )}
                   </Link>
                 );
               })
             ) : (
-              <div className="p-8 text-center">
-                <FileQuestion className="mx-auto size-7 text-forest-700" />
-                <p className="mt-3 text-sm font-bold text-ink">No cases match these filters</p>
-                <p className="mt-1 text-xs text-muted">Clear a filter to return to the full queue.</p>
+              <div className="p-10 text-center">
+                <FileSearch className="mx-auto size-8 text-muted" />
+                <p className="mt-3 text-sm font-extrabold text-ink">No submissions in queue</p>
+                <p className="mt-1 text-xs text-muted">Clear the search or status filter to see all submissions.</p>
               </div>
             )}
           </div>
         </section>
 
-        {/* Column 2: Interactive Document Evidence Viewer */}
-        <section
-          className={`min-w-0 bg-sand-50 ${
-            isFullscreen ? "fixed inset-4 z-50 bg-white shadow-2xl rounded-2xl overflow-hidden border border-line" : ""
-          }`}
-          aria-label="Evidence viewer"
-        >
-          <div className="border-b border-line bg-white px-4 py-3 flex flex-wrap items-center justify-between gap-2">
+        {/* ========================================================= */}
+        {/* Tier 1 - Column 2: Applicant Dossier & Decision Matrix */}
+        {/* ========================================================= */}
+        <aside className="flex flex-col bg-white min-w-0" aria-label="Applicant dossier and decision matrix">
+          <div className="border-b border-[#eaeee9] bg-[#f8faf7] px-4 py-3 flex items-center justify-between">
             <div>
-              <h2 className="text-sm font-extrabold text-ink">Evidence viewer</h2>
-              <p className="mt-1 text-xs text-muted">Private files open inline and are audited on access.</p>
+              <h2 className="text-xs font-extrabold uppercase tracking-wider text-muted">Applicant Dossier & Decision Matrix</h2>
+              <p className="text-[11px] text-muted">KYC credentials & compliance decision</p>
             </div>
-
-            {/* Document Controls Bar */}
-            {detail && activeDoc && !activeDoc.deletedAt && (
-              <div className="flex items-center gap-1 bg-sand-100 p-1 rounded-lg border border-line text-ink">
-                <button
-                  type="button"
-                  title="Zoom Out"
-                  onClick={() => setZoomLevel((z) => Math.max(50, z - 25))}
-                  className="rounded p-1 hover:bg-white text-muted hover:text-ink transition-colors"
-                >
-                  <ZoomOut className="size-4" />
-                </button>
-                <span className="text-xs font-bold px-1.5">{zoomLevel}%</span>
-                <button
-                  type="button"
-                  title="Zoom In"
-                  onClick={() => setZoomLevel((z) => Math.min(250, z + 25))}
-                  className="rounded p-1 hover:bg-white text-muted hover:text-ink transition-colors"
-                >
-                  <ZoomIn className="size-4" />
-                </button>
-                <button
-                  type="button"
-                  title="Rotate Clockwise"
-                  onClick={() => setRotation((r) => (r + 90) % 360)}
-                  className="rounded p-1 hover:bg-white text-muted hover:text-ink transition-colors"
-                >
-                  <RotateCw className="size-4" />
-                </button>
-                <button
-                  type="button"
-                  title="Toggle Contrast"
-                  onClick={() => setHighContrast((c) => !c)}
-                  className={`rounded p-1 transition-colors ${
-                    highContrast ? "bg-forest-700 text-white" : "text-muted hover:text-ink hover:bg-white"
-                  }`}
-                >
-                  <Sparkles className="size-4" />
-                </button>
-                <button
-                  type="button"
-                  title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
-                  onClick={() => setIsFullscreen((f) => !f)}
-                  className="rounded p-1 hover:bg-white text-muted hover:text-ink transition-colors"
-                >
-                  {isFullscreen ? <Minimize2 className="size-4" /> : <Maximize2 className="size-4" />}
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* Document Tabs (If multiple documents or revisions) */}
-          {detail && detail.documents.length > 0 && (
-            <div className="flex border-b border-line bg-white/60 px-3 py-2 gap-2 overflow-x-auto">
-              {detail.documents.map((doc, idx) => {
-                const isActive = (selectedDocIndex || 0) === idx;
-                return (
-                  <button
-                    key={doc.id}
-                    type="button"
-                    onClick={() => {
-                      setSelectedDocIndex(idx);
-                      setZoomLevel(100);
-                      setRotation(0);
-                    }}
-                    className={`flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-bold transition-colors shrink-0 ${
-                      isActive
-                        ? "bg-white text-forest-900 border border-forest-300 shadow-xs ring-1 ring-forest-600/10"
-                        : "bg-sand-200/70 text-muted hover:bg-white hover:text-ink"
-                    }`}
-                  >
-                    <FileText className={`size-3.5 ${isActive ? "text-forest-700" : "text-muted"}`} />
-                    <span className="truncate max-w-[12rem]">{doc.fileName ?? `${doc.kind} (Rev ${doc.revision})`}</span>
-                    {doc.supersededAt ? (
-                      <span className="rounded bg-amber-100 px-1 py-0.2 text-[10px] text-amber-800">Old</span>
-                    ) : (
-                      <span className="rounded bg-forest-100 px-1 py-0.2 text-[10px] text-forest-800">Active</span>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          )}
-
-          {/* Viewer Content Area */}
-          <div className="p-4">
-            {!detail ? (
-              <div className="grid min-h-[34rem] place-items-center p-8 text-center">
-                <div>
-                  <FileText className="mx-auto size-8 text-forest-700" />
-                  <p className="mt-3 font-extrabold text-ink">Select a case from the queue</p>
-                  <p className="mt-1 text-sm text-muted">Evidence and findings will appear here.</p>
-                </div>
-              </div>
-            ) : detail.documents.length === 0 ? (
-              <div className="grid min-h-[34rem] place-items-center p-8 text-center">
-                <div>
-                  <ShieldCheck className="mx-auto size-8 text-forest-700" />
-                  <p className="mt-3 font-extrabold text-ink">Private evidence unavailable</p>
-                  <p className="mt-1 max-w-sm text-sm text-muted">
-                    Your role cannot access private document metadata, or this case has no retained evidence.
-                  </p>
-                </div>
-              </div>
-            ) : !activeDoc ? (
-              <div className="p-8 text-center text-sm font-bold text-ink">No document selected</div>
-            ) : (
-              <div>
-                <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-                  <div>
-                    <strong className="text-sm text-ink">{activeDoc.fileName ?? "Retained evidence"}</strong>
-                    <p className="text-xs text-muted">
-                      Revision {activeDoc.revision} · {activeDoc.mimeType} · {formatBytes(activeDoc.size)}
-                    </p>
-                  </div>
-                  <a
-                    href={activeDoc.accessHref}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="stitch-button-secondary"
-                  >
-                    <Eye className="size-4" /> Open fallback
-                  </a>
-                </div>
-
-                {activeDoc.deletedAt ? (
-                  <div className="grid min-h-[28rem] place-items-center border border-dashed border-line bg-white p-6 text-center">
-                    <p className="text-sm font-bold">This evidence is no longer retained.</p>
-                  </div>
-                ) : activeDoc.mimeType?.startsWith("image/") ? (
-                  <div className="overflow-auto border border-line bg-white rounded-lg p-2 flex items-center justify-center min-h-[34rem]">
-                    <div
-                      style={{
-                        transform: `scale(${zoomLevel / 100}) rotate(${rotation}deg)`,
-                        transition: "transform 0.15s ease",
-                        filter: highContrast ? "contrast(180%) brightness(90%)" : "none",
-                      }}
-                      className="origin-center"
-                    >
-                      <img
-                        src={activeDoc.accessHref}
-                        alt={`Private ${activeDoc.kind} evidence`}
-                        className="max-h-[38rem] w-full object-contain"
-                      />
-                    </div>
-                  </div>
+            {detail && (
+              <span className="text-xs font-extrabold">
+                {detail.status === "Approved" ? (
+                  <span className="text-emerald-800 bg-emerald-50 px-2 py-0.5 border border-emerald-200">Approved</span>
+                ) : detail.status === "NeedsChanges" ? (
+                  <span className="text-amber-800 bg-amber-50 px-2 py-0.5 border border-amber-200">Needs Changes</span>
+                ) : detail.status === "Rejected" ? (
+                  <span className="text-red-800 bg-red-50 px-2 py-0.5 border border-red-200">Rejected</span>
                 ) : (
-                  <iframe
-                    title={`Private ${activeDoc.kind} evidence`}
-                    src={`${activeDoc.accessHref}#toolbar=1&navpanes=0`}
-                    className="h-[40rem] w-full border border-line bg-white rounded-lg"
-                  />
+                  <span className="text-forest-900 bg-forest-50 px-2 py-0.5 border border-forest-200">In Review</span>
                 )}
-              </div>
+              </span>
             )}
-          </div>
-        </section>
-
-        {/* Column 3: Case Dossier & Review Actions */}
-        <aside
-          className="min-w-0 bg-white"
-          aria-label="Case dossier"
-        >
-          <div className="border-b border-line px-4 py-3 flex items-center justify-between">
-            <div>
-              <h2 className="text-sm font-extrabold text-ink">Case dossier</h2>
-              <p className="mt-1 text-xs text-muted">Account, linked records and accountable decision.</p>
-            </div>
-            {detail && <StatusBadge value={detail.status} />}
           </div>
 
           {!detail ? (
-            <div className="p-8 text-center">
-              <p className="font-extrabold text-ink">No case selected</p>
-              <p className="mt-1 text-sm text-muted">Choose a queue record to inspect its dossier.</p>
+            <div className="p-12 text-center my-auto">
+              <User className="mx-auto size-10 text-muted" />
+              <p className="mt-3 text-sm font-bold text-ink">No applicant selected</p>
+              <p className="text-xs text-muted mt-1">Select an applicant from the queue on the left to inspect their dossier.</p>
             </div>
           ) : (
-            <div className="p-4 space-y-4">
-              {/* Active Correction Note */}
-              {detail.correctionInstructions ? (
-                <div className="border border-amber-300 bg-amber-50 p-3 text-sm text-amber-950 rounded-lg">
-                  <span className="flex items-center gap-2 font-extrabold">
-                    <AlertTriangle className="size-4 text-amber-700" /> Current correction instructions
-                  </span>
-                  <p className="mt-2 leading-6">{detail.correctionInstructions}</p>
+            <div className="p-5 space-y-5 overflow-y-auto max-h-[38rem]">
+              
+              {/* Applicant Header Banner & Sensitive Vault */}
+              <div className="grid sm:grid-cols-2 gap-4">
+                {/* Applicant Summary */}
+                <div className="border border-[#d6ddd5] bg-[#f8faf7] p-4 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="inline-flex items-center gap-1 bg-forest-100 px-2 py-0.5 text-[11px] font-black text-forest-900">
+                      <UserCheck className="size-3 text-forest-700" />
+                      {detail.owner.role}
+                    </span>
+                    <span className="text-[11px] font-bold text-muted">
+                      Tier: <strong className="text-forest-950">{detail.owner.verificationLevel}</strong>
+                    </span>
+                  </div>
+                  <div>
+                    <h3 className="text-base font-extrabold text-forest-950">
+                      {detail.owner.firstName} {detail.owner.lastName}
+                    </h3>
+                    <p className="text-xs text-muted">{detail.owner.email}</p>
+                    {detail.owner.phone && <p className="text-xs font-mono text-muted">{detail.owner.phone}</p>}
+                  </div>
                 </div>
-              ) : null}
 
-              {/* Dossier Tabs */}
-              <div className="flex border-b border-line bg-sand-50 p-1 rounded-lg">
-                <button
-                  type="button"
-                  onClick={() => setActiveDossierTab("kyc")}
-                  className={`flex-1 py-1.5 text-xs font-bold rounded-md transition-colors ${
-                    activeDossierTab === "kyc" ? "bg-white text-forest-900 shadow-xs" : "text-muted hover:text-ink"
-                  }`}
-                >
-                  Identity
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setActiveDossierTab("role")}
-                  className={`flex-1 py-1.5 text-xs font-bold rounded-md transition-colors ${
-                    activeDossierTab === "role" ? "bg-white text-forest-900 shadow-xs" : "text-muted hover:text-ink"
-                  }`}
-                >
-                  Profile
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setActiveDossierTab("platform")}
-                  className={`flex-1 py-1.5 text-xs font-bold rounded-md transition-colors ${
-                    activeDossierTab === "platform" ? "bg-white text-forest-900 shadow-xs" : "text-muted hover:text-ink"
-                  }`}
-                >
-                  Linked
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setActiveDossierTab("history")}
-                  className={`flex-1 py-1.5 text-xs font-bold rounded-md transition-colors ${
-                    activeDossierTab === "history" ? "bg-white text-forest-900 shadow-xs" : "text-muted hover:text-ink"
-                  }`}
-                >
-                  History
-                </button>
-              </div>
+                {/* Sensitive Credentials Vault */}
+                <div className="border border-[#d6ddd5] bg-white p-4 space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-xs font-extrabold uppercase tracking-wider text-forest-950 flex items-center gap-1.5">
+                      <Lock className="size-3 text-forest-700" />
+                      Sensitive Credentials
+                    </h4>
+                    <span className="text-[10px] text-muted">NDPR Vault</span>
+                  </div>
 
-              {/* Tab 1: KYC / Identity facts */}
-              {activeDossierTab === "kyc" && (
-                <div>
-                  <dl className="divide-y divide-line">
-                  <div className="py-2.5 flex justify-between">
-                    <dt className="text-[11px] font-bold uppercase tracking-[0.08em] text-muted">Applicant</dt>
-                    <dd className="text-sm font-semibold text-ink">{detail.owner.firstName} {detail.owner.lastName}</dd>
-                  </div>
-                  <div className="py-2.5 flex justify-between">
-                    <dt className="text-[11px] font-bold uppercase tracking-[0.08em] text-muted">Contact</dt>
-                    <dd className="text-sm font-semibold text-ink text-right">
-                      {detail.owner.email}
-                      {detail.owner.phone ? <><br />{detail.owner.phone}</> : null}
-                    </dd>
-                  </div>
-                  <div className="py-2.5 flex justify-between">
-                    <dt className="text-[11px] font-bold uppercase tracking-[0.08em] text-muted">Account</dt>
-                    <dd className="text-sm font-semibold text-ink">{detail.owner.role} · {detail.owner.accountStatus}</dd>
-                  </div>
-                  <div className="py-2.5 flex justify-between">
-                    <dt className="text-[11px] font-bold uppercase tracking-[0.08em] text-muted">Verification</dt>
-                    <dd className="text-sm font-semibold text-ink">{detail.status} · Round {detail.reviewRound}</dd>
-                  </div>
-                  <div className="py-2.5 flex justify-between">
-                    <dt className="text-[11px] font-bold uppercase tracking-[0.08em] text-muted">Submitted</dt>
-                    <dd className="text-sm font-semibold text-ink">{formatDate(detail.submittedAt)}</dd>
-                  </div>
-                  <div className="py-2.5 flex justify-between">
-                    <dt className="text-[11px] font-bold uppercase tracking-[0.08em] text-muted">Assignment</dt>
-                    <dd className="text-sm font-semibold text-ink">
-                      {detail.assignedTo ? `${detail.assignedTo.firstName} ${detail.assignedTo.lastName}` : "Unassigned"}
-                    </dd>
-                  </div>
-                </dl>
-                <div>
-                  <h3 className="mt-3 text-xs font-extrabold uppercase tracking-wider text-muted mb-2">Linked activity</h3>
-                  <dl className="grid grid-cols-2 gap-2 text-xs">
-                    <div className="border border-line rounded-lg p-2 bg-sand-50">
-                      <dt className="font-bold text-muted uppercase text-[10px]">Properties</dt>
-                      <dd className="mt-0.5 text-sm font-extrabold text-ink">{detail.linked.properties}</dd>
+                  <div className="space-y-1.5 text-xs">
+                    <div className="flex justify-between items-center py-1 border-b border-[#eaeee9]">
+                      <span className="text-muted">NIN Number:</span>
+                      <strong className="font-mono text-xs text-ink">
+                        {revealed?.nin ??
+                          detail.owner.sensitive.nin.masked ??
+                          (detail.owner.sensitive.nin.available ? "Restricted" : "Not supplied")}
+                      </strong>
                     </div>
-                    <div className="border border-line rounded-lg p-2 bg-sand-50">
-                      <dt className="font-bold text-muted uppercase text-[10px]">Applications</dt>
-                      <dd className="mt-0.5 text-sm font-extrabold text-ink">{detail.linked.applications}</dd>
+                    <div className="flex justify-between items-center py-1 border-b border-[#eaeee9]">
+                      <span className="text-muted">Settlement Account:</span>
+                      <strong className="font-mono text-xs text-ink">
+                        {revealed?.payoutAccount ??
+                          detail.owner.sensitive.payoutAccount.masked ??
+                          (detail.owner.sensitive.payoutAccount.available ? "Restricted" : "Not supplied")}
+                      </strong>
                     </div>
-                    <div className="border border-line rounded-lg p-2 bg-sand-50">
-                      <dt className="font-bold text-muted uppercase text-[10px]">Payments</dt>
-                      <dd className="mt-0.5 text-sm font-extrabold text-ink">{detail.linked.payments}</dd>
-                    </div>
-                    <div className="border border-line rounded-lg p-2 bg-sand-50">
-                      <dt className="font-bold text-muted uppercase text-[10px]">Maintenance</dt>
-                      <dd className="mt-0.5 text-sm font-extrabold text-ink">{detail.linked.maintenance}</dd>
-                    </div>
-                  </dl>
-                </div>
-              </div>
-              )}
+                  </div>
 
-              {/* Tab 2: Role Details (Tenant or Landlord) */}
-              {activeDossierTab === "role" && (
-                <div className="space-y-3">
-                  {detail.owner.tenantProfile ? (
-                    <div>
-                      <h3 className="text-xs font-extrabold uppercase tracking-wider text-muted mb-2">Tenant onboarding</h3>
-                      <dl className="divide-y divide-line">
-                        <div className="py-2 flex justify-between">
-                          <dt className="text-xs text-muted">Employment</dt>
-                          <dd className="text-xs font-semibold text-ink">
-                            {detail.owner.tenantProfile.employmentType} · {detail.owner.tenantProfile.employerName ?? "Not supplied"}
-                          </dd>
-                        </div>
-                        <div className="py-2 flex justify-between">
-                          <dt className="text-xs text-muted">Role / income</dt>
-                          <dd className="text-xs font-semibold text-ink">
-                            {detail.owner.tenantProfile.jobTitle ?? "Not supplied"} · {detail.owner.tenantProfile.incomeRange}
-                          </dd>
-                        </div>
-                        <div className="py-2 flex justify-between">
-                          <dt className="text-xs text-muted">Preferences</dt>
-                          <dd className="text-xs font-semibold text-ink text-right">
-                            {[...detail.owner.tenantProfile.preferredLocations, ...detail.owner.tenantProfile.preferredTypes].join(", ") || "Any"}
-                          </dd>
-                        </div>
-                      </dl>
-                    </div>
-                  ) : null}
-
-                  {detail.owner.landlordProfile ? (
-                    <div>
-                      <h3 className="text-xs font-extrabold uppercase tracking-wider text-muted mb-2">Landlord profile</h3>
-                      <dl className="divide-y divide-line">
-                        <div className="py-2 flex justify-between">
-                          <dt className="text-xs text-muted">Business name</dt>
-                          <dd className="text-xs font-semibold text-ink">
-                            {detail.owner.landlordProfile.businessName ?? "Individual Landlord"}
-                          </dd>
-                        </div>
-                        <div className="py-2 flex justify-between">
-                          <dt className="text-xs text-muted">Properties</dt>
-                          <dd className="text-xs font-semibold text-ink">
-                            {detail.owner.landlordProfile.propertyCount} units
-                          </dd>
-                        </div>
-                        <div className="py-2 flex justify-between">
-                          <dt className="text-xs text-muted">Bank Name</dt>
-                          <dd className="text-xs font-semibold text-ink">
-                            {detail.owner.landlordProfile.bankName ?? "Not linked"}
-                          </dd>
-                        </div>
-                      </dl>
-                    </div>
-                  ) : null}
-                </div>
-              )}
-
-              {/* Tab 3: Linked Activity */}
-              {activeDossierTab === "platform" && (
-                <div>
-                  <h3 className="text-sm font-extrabold text-ink mb-2">Linked activity</h3>
-                  <dl className="grid grid-cols-2 gap-2 text-sm">
-                    <div className="border border-line rounded-lg p-2.5 bg-sand-50">
-                      <dt className="text-[11px] font-bold text-muted uppercase">Properties</dt>
-                      <dd className="mt-1 text-base font-extrabold text-ink">{detail.linked.properties}</dd>
-                    </div>
-                    <div className="border border-line rounded-lg p-2.5 bg-sand-50">
-                      <dt className="text-[11px] font-bold text-muted uppercase">Applications</dt>
-                      <dd className="mt-1 text-base font-extrabold text-ink">{detail.linked.applications}</dd>
-                    </div>
-                    <div className="border border-line rounded-lg p-2.5 bg-sand-50">
-                      <dt className="text-[11px] font-bold text-muted uppercase">Payments</dt>
-                      <dd className="mt-1 text-base font-extrabold text-ink">{detail.linked.payments}</dd>
-                    </div>
-                    <div className="border border-line rounded-lg p-2.5 bg-sand-50">
-                      <dt className="text-[11px] font-bold text-muted uppercase">Maintenance</dt>
-                      <dd className="mt-1 text-base font-extrabold text-ink">{detail.linked.maintenance}</dd>
-                    </div>
-                  </dl>
-                </div>
-              )}
-
-              {/* Tab 4: History / Findings Log */}
-              {activeDossierTab === "history" && (
-                <div className="space-y-2 text-xs">
-                  <h3 className="text-xs font-extrabold uppercase text-muted">Review findings history</h3>
-                  {detail.findings.length > 0 ? (
-                    detail.findings.map((f) => (
-                      <div key={f.id} className="border border-line rounded-lg p-2 bg-sand-50">
-                        <div className="flex justify-between font-bold">
-                          <span>{f.label}</span>
-                          <span className={f.status === "Approved" ? "text-forest-800" : "text-amber-700"}>
-                            {f.status}
-                          </span>
-                        </div>
-                        {f.note ? <p className="mt-1 text-muted">{f.note}</p> : null}
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-muted py-2">No prior findings recorded.</p>
-                  )}
-                </div>
-              )}
-
-              {/* Sensitive Values Box */}
-              <div className="border-t border-line pt-3">
-                <h3 className="text-sm font-extrabold text-ink">Sensitive values</h3>
-                <div className="mt-2 border border-line rounded-lg p-3 text-sm bg-sand-50/60 space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-xs text-muted">NIN:</span>
-                    <strong className="font-mono text-xs">
-                      {revealed?.nin ??
-                        detail.owner.sensitive.nin.masked ??
-                        (detail.owner.sensitive.nin.available ? "Restricted" : "Not supplied")}
-                    </strong>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-xs text-muted">Payout:</span>
-                    <strong className="font-mono text-xs">
-                      {revealed?.payoutAccount ??
-                        detail.owner.sensitive.payoutAccount.masked ??
-                        (detail.owner.sensitive.payoutAccount.available ? "Restricted" : "Not supplied")}
-                    </strong>
-                  </div>
                   {canRevealSensitive &&
-                  (detail.owner.sensitive.nin.available || detail.owner.sensitive.payoutAccount.available) ? (
+                  (detail.owner.sensitive.nin.available || detail.owner.sensitive.payoutAccount.available) &&
+                  !revealed ? (
                     <button
                       type="button"
                       onClick={() => void revealSensitive()}
-                      className="stitch-button-secondary mt-2 w-full justify-center text-xs"
+                      className="w-full bg-[#edf1eb] hover:bg-forest-900 hover:text-white text-forest-900 border border-[#d6ddd5] py-1.5 text-xs font-bold transition flex items-center justify-center gap-1.5"
                     >
-                      <Eye className="size-4" /> Reveal with audit
+                      <Eye className="size-3.5" /> Reveal Full Values (Audited)
                     </button>
                   ) : null}
                 </div>
               </div>
 
-              {/* Decision and Review Findings Controls */}
+              {/* Outstanding Correction Note */}
+              {detail.correctionInstructions && (
+                <div className="border border-amber-300 bg-amber-50 p-3.5 text-xs text-amber-950">
+                  <strong className="flex items-center gap-1.5 font-extrabold text-amber-900">
+                    <AlertTriangle className="size-3.5 text-amber-700" />
+                    Active Correction Instructions:
+                  </strong>
+                  <p className="mt-1 leading-relaxed">{detail.correctionInstructions}</p>
+                </div>
+              )}
+
+              {/* Dossier Tabs & Platform History */}
+              <div className="border border-[#d6ddd5] bg-white">
+                <div className="flex border-b border-[#d6ddd5] bg-[#f8faf7] text-xs font-bold">
+                  {[
+                    { id: "kyc" as const, label: "Identity & Account" },
+                    { id: "profile" as const, label: "Role Details" },
+                    { id: "activity" as const, label: "Platform Activity" },
+                    { id: "history" as const, label: "Audit Findings" },
+                  ].map((tab) => (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      onClick={() => setActiveDossierTab(tab.id)}
+                      className={`flex-1 py-2 text-center transition ${
+                        activeDossierTab === tab.id
+                          ? "bg-white text-forest-950 border-b-2 border-forest-900 font-extrabold"
+                          : "text-muted hover:text-ink"
+                      }`}
+                    >
+                      {tab.label}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="p-3.5 text-xs">
+                  {/* Tab 1: KYC Facts */}
+                  {activeDossierTab === "kyc" && (
+                    <dl className="divide-y divide-[#eaeee9]">
+                      <div className="py-2 flex justify-between">
+                        <dt className="text-muted font-semibold">Account Status</dt>
+                        <dd className="font-bold text-ink">{detail.owner.accountStatus}</dd>
+                      </div>
+                      <div className="py-2 flex justify-between">
+                        <dt className="text-muted font-semibold">Email Verified</dt>
+                        <dd className="font-bold text-emerald-800">
+                          {detail.owner.emailVerified ? "Yes (Confirmed)" : "Pending"}
+                        </dd>
+                      </div>
+                      <div className="py-2 flex justify-between">
+                        <dt className="text-muted font-semibold">Submission Date</dt>
+                        <dd className="font-medium text-ink">{formatDate(detail.submittedAt)}</dd>
+                      </div>
+                      <div className="py-2 flex justify-between">
+                        <dt className="text-muted font-semibold">Assigned Operator</dt>
+                        <dd className="font-bold text-forest-950">
+                          {detail.assignedTo ? `${detail.assignedTo.firstName} ${detail.assignedTo.lastName}` : "Operations Pool"}
+                        </dd>
+                      </div>
+                    </dl>
+                  )}
+
+                  {/* Tab 2: Role Profile */}
+                  {activeDossierTab === "profile" && (
+                    <div>
+                      {detail.owner.tenantProfile ? (
+                        <dl className="divide-y divide-[#eaeee9]">
+                          <div className="py-2 flex justify-between">
+                            <dt className="text-muted">Employment</dt>
+                            <dd className="font-bold text-ink">{detail.owner.tenantProfile.employmentType}</dd>
+                          </div>
+                          <div className="py-2 flex justify-between">
+                            <dt className="text-muted">Employer</dt>
+                            <dd className="font-bold text-ink">{detail.owner.tenantProfile.employerName ?? "Self / Unstated"}</dd>
+                          </div>
+                          <div className="py-2 flex justify-between">
+                            <dt className="text-muted">Income Range</dt>
+                            <dd className="font-bold text-forest-900">{detail.owner.tenantProfile.incomeRange}</dd>
+                          </div>
+                        </dl>
+                      ) : detail.owner.landlordProfile ? (
+                        <dl className="divide-y divide-[#eaeee9]">
+                          <div className="py-2 flex justify-between">
+                            <dt className="text-muted">Business Name</dt>
+                            <dd className="font-bold text-ink">{detail.owner.landlordProfile.businessName ?? "Individual Landlord"}</dd>
+                          </div>
+                          <div className="py-2 flex justify-between">
+                            <dt className="text-muted">Portfolio Count</dt>
+                            <dd className="font-bold text-forest-900">{detail.owner.landlordProfile.propertyCount} properties</dd>
+                          </div>
+                          <div className="py-2 flex justify-between">
+                            <dt className="text-muted">Bank Name</dt>
+                            <dd className="font-bold text-ink">{detail.owner.landlordProfile.bankName ?? "Not configured"}</dd>
+                          </div>
+                        </dl>
+                      ) : (
+                        <p className="text-muted text-center py-3">No specific role profile attached.</p>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Tab 3: Platform Linked Records */}
+                  {activeDossierTab === "activity" && (
+                    <div className="grid grid-cols-4 gap-2">
+                      <div className="border border-[#eaeee9] bg-[#f8faf7] p-2 text-center">
+                        <p className="text-[10px] uppercase font-bold text-muted">Properties</p>
+                        <p className="text-lg font-black text-forest-950 tabular-nums">{detail.linked.properties}</p>
+                      </div>
+                      <div className="border border-[#eaeee9] bg-[#f8faf7] p-2 text-center">
+                        <p className="text-[10px] uppercase font-bold text-muted">Applications</p>
+                        <p className="text-lg font-black text-forest-950 tabular-nums">{detail.linked.applications}</p>
+                      </div>
+                      <div className="border border-[#eaeee9] bg-[#f8faf7] p-2 text-center">
+                        <p className="text-[10px] uppercase font-bold text-muted">Payments</p>
+                        <p className="text-lg font-black text-forest-950 tabular-nums">{detail.linked.payments}</p>
+                      </div>
+                      <div className="border border-[#eaeee9] bg-[#f8faf7] p-2 text-center">
+                        <p className="text-[10px] uppercase font-bold text-muted">Maintenance</p>
+                        <p className="text-lg font-black text-forest-950 tabular-nums">{detail.linked.maintenance}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Tab 4: Prior Findings Log */}
+                  {activeDossierTab === "history" && (
+                    <div className="space-y-2">
+                      {detail.findings.length > 0 ? (
+                        detail.findings.map((f) => (
+                          <div key={f.id} className="border border-[#eaeee9] bg-[#f8faf7] p-2.5">
+                            <div className="flex justify-between font-bold">
+                              <span className="text-forest-950">{f.label}</span>
+                              <span className={f.status === "Approved" ? "text-emerald-800" : "text-amber-800"}>
+                                {f.status}
+                              </span>
+                            </div>
+                            {f.note && <p className="mt-1 text-muted text-[11px]">{f.note}</p>}
+                          </div>
+                        ))
+                      ) : (
+                        <p className="text-muted text-center py-3">No prior round findings recorded.</p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* ─────────────────────────────────────────────────────
+                  Decision Action Console
+              ───────────────────────────────────────────────────── */}
               {detail.status === "Pending" ? (
-                <div className="mt-6 border-t border-line pt-5 space-y-4">
-                  <h3 className="text-sm font-extrabold text-ink">Review findings</h3>
-                  <div className="space-y-3">
-                    {requiredKeys.map((key) => (
-                      <label key={key} className="block text-sm font-bold text-ink">
-                        {VERIFICATION_FINDINGS[key]}
-                        <Select
-                          value={findings[key] ?? "Approved"}
-                          onChange={(event) =>
-                            setFindings((current) => ({
-                              ...current,
-                              [key]: event.target.value as "Approved" | "NeedsChanges",
-                            }))
-                          }
-                          className="mt-1"
-                        >
-                          <option value="Approved">Satisfied</option>
-                          <option value="NeedsChanges">Needs changes</option>
-                        </Select>
-                      </label>
-                    ))}
+                <div className="border border-[#d6ddd5] bg-white p-4 space-y-4 shadow-sm">
+                  <div className="border-b border-[#eaeee9] pb-2">
+                    <h3 className="text-xs font-extrabold uppercase tracking-wider text-forest-950">
+                      Overall Compliance Findings & Decision
+                    </h3>
+                    <p className="text-[11px] text-muted">Review criteria against evidence inspected below</p>
                   </div>
 
-                  {/* Preset Buttons for Quick Reason Filling */}
+                  {/* Findings Checklist */}
+                  <div className="grid sm:grid-cols-2 gap-2">
+                    {requiredKeys.map((key) => {
+                      const isSatisfied = (findings[key] ?? "Approved") === "Approved";
+                      return (
+                        <div
+                          key={key}
+                          className="flex items-center justify-between gap-2 border border-[#eaeee9] p-2 bg-[#f8faf7]"
+                        >
+                          <span className="text-xs font-bold text-ink truncate">
+                            {VERIFICATION_FINDINGS[key]}
+                          </span>
+                          <div className="flex items-center gap-1 shrink-0">
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setFindings((prev) => ({ ...prev, [key]: "Approved" }))
+                              }
+                              className={`px-2 py-1 text-[10px] font-black transition ${
+                                isSatisfied
+                                  ? "bg-emerald-700 text-white shadow-xs"
+                                  : "bg-[#e5eae3] text-muted hover:text-ink"
+                              }`}
+                            >
+                              Satisfied
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setFindings((prev) => ({ ...prev, [key]: "NeedsChanges" }))
+                              }
+                              className={`px-2 py-1 text-[10px] font-black transition ${
+                                !isSatisfied
+                                  ? "bg-amber-700 text-white shadow-xs"
+                                  : "bg-[#e5eae3] text-muted hover:text-ink"
+                              }`}
+                            >
+                              Flag
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Macro Presets */}
                   <div>
-                    <label className="block text-xs font-bold text-muted mb-1">Quick reason presets:</label>
-                    <div className="flex flex-wrap gap-1">
+                    <label className="block text-[11px] font-bold text-muted mb-1.5 uppercase tracking-wider">
+                      Quick Feedback Macros:
+                    </label>
+                    <div className="flex flex-wrap gap-1.5">
                       {PRESET_CORRECTIONS.map((preset) => (
                         <button
                           key={preset.label}
                           type="button"
                           onClick={() => applyPreset(preset)}
-                          className="rounded border border-line bg-sand-50 px-2 py-0.5 text-[11px] font-semibold text-ink hover:bg-white transition-colors"
+                          className="border border-[#d6ddd5] bg-[#f8faf7] hover:bg-forest-900 hover:text-white px-2 py-1 text-[10px] font-semibold text-ink transition"
                         >
                           + {preset.label}
                         </button>
@@ -802,68 +1016,423 @@ export function AdminVerificationWorkspace({
                     </div>
                   </div>
 
-                  <label className="block text-sm font-bold text-ink">
-                    Decision
-                    <Select
-                      value={decision}
-                      onChange={(event) => setDecision(event.target.value as typeof decision)}
-                      className="mt-1"
-                    >
-                      <option value="approve">Approve</option>
-                      <option value="request_changes">Request changes</option>
-                      <option value="reject">Reject</option>
-                    </Select>
-                  </label>
-
-                  <label className="block text-sm font-bold text-ink">
-                    Reason
-                    <Textarea
-                      value={reason}
-                      onChange={(event) => setReason(event.target.value)}
-                      className="mt-1"
-                      placeholder="Record the evidence-based reason"
-                    />
-                  </label>
-
-                  {decision === "request_changes" ? (
-                    <label className="block text-sm font-bold text-ink">
-                      Correction instructions
-                      <Textarea
-                        value={instructions}
-                        onChange={(event) => setInstructions(event.target.value)}
-                        className="mt-1 border-amber-300 bg-amber-50/50"
-                        placeholder="Tell the owner exactly what to correct"
-                      />
+                  {/* Action Selector */}
+                  <div className="space-y-2">
+                    <label className="block text-xs font-bold text-ink uppercase tracking-wider">
+                      Action Decision:
                     </label>
-                  ) : null}
+                    <div className="grid grid-cols-3 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setDecision("approve")}
+                        className={`py-2 text-xs font-extrabold transition border ${
+                          decision === "approve"
+                            ? "bg-emerald-700 text-white border-emerald-800 shadow-xs"
+                            : "bg-[#f8faf7] text-muted border-[#d6ddd5] hover:text-ink"
+                        }`}
+                      >
+                        Approve
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setDecision("request_changes")}
+                        className={`py-2 text-xs font-extrabold transition border ${
+                          decision === "request_changes"
+                            ? "bg-amber-600 text-white border-amber-700 shadow-xs"
+                            : "bg-[#f8faf7] text-muted border-[#d6ddd5] hover:text-ink"
+                        }`}
+                      >
+                        Needs Changes
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setDecision("reject")}
+                        className={`py-2 text-xs font-extrabold transition border ${
+                          decision === "reject"
+                            ? "bg-red-700 text-white border-red-800 shadow-xs"
+                            : "bg-[#f8faf7] text-muted border-[#d6ddd5] hover:text-ink"
+                        }`}
+                      >
+                        Reject
+                      </button>
+                    </div>
+                  </div>
 
+                  {/* Audit Ledger Reason */}
+                  <div>
+                    <label className="block text-xs font-bold text-ink mb-1">
+                      Audit Ledger Reason:
+                    </label>
+                    <textarea
+                      value={reason}
+                      onChange={(e) => setReason(e.target.value)}
+                      rows={2}
+                      className="w-full border border-[#d6ddd5] bg-[#f8faf7] p-2 text-xs text-ink placeholder:text-muted focus:bg-white focus:border-forest-700 focus:outline-none"
+                      placeholder="e.g. Verified against land registry records and biometric match"
+                    />
+                  </div>
+
+                  {/* Correction Instructions */}
+                  {decision === "request_changes" && (
+                    <div>
+                      <label className="block text-xs font-bold text-amber-900 mb-1">
+                        Instructions to Applicant (Shown in User Dashboard):
+                      </label>
+                      <textarea
+                        value={instructions}
+                        onChange={(e) => setInstructions(e.target.value)}
+                        rows={3}
+                        className="w-full border border-amber-300 bg-amber-50/60 p-2 text-xs text-amber-950 placeholder:text-amber-700/60 focus:bg-white focus:border-amber-600 focus:outline-none"
+                        placeholder="Explain specifically which document needs re-uploading and why..."
+                      />
+                    </div>
+                  )}
+
+                  {/* Commit Action Button */}
                   <button
                     type="button"
                     disabled={pending}
                     onClick={() => void submitDecision()}
-                    className="stitch-button mt-4 w-full justify-center"
+                    className={`w-full py-3 text-xs font-black uppercase tracking-wider text-white transition flex items-center justify-center gap-2 shadow-sm ${
+                      decision === "approve"
+                        ? "bg-forest-900 hover:bg-forest-800"
+                        : decision === "request_changes"
+                        ? "bg-amber-700 hover:bg-amber-800"
+                        : "bg-red-700 hover:bg-red-800"
+                    }`}
                   >
                     {pending ? (
-                      <LoaderCircle className="size-4 animate-spin" />
+                      <RefreshCw className="size-4 animate-spin" />
                     ) : decision === "approve" ? (
                       <Check className="size-4" />
                     ) : decision === "reject" ? (
-                      <X className="size-4" />
+                      <FileX className="size-4" />
                     ) : (
-                      <RefreshCw className="size-4" />
+                      <AlertTriangle className="size-4" />
                     )}
-                    {decision === "request_changes"
-                      ? "Request changes"
-                      : decision === "approve"
-                      ? "Approve verification"
-                      : "Reject verification"}
+                    {decision === "approve"
+                      ? "Commit Approval to Audit Ledger"
+                      : decision === "request_changes"
+                      ? "Send Correction Instructions"
+                      : "Record Verification Rejection"}
                   </button>
                 </div>
-              ) : null}
+              ) : (
+                <div className="border border-[#d6ddd5] bg-[#f8faf7] p-4 text-center">
+                  <p className="text-xs font-extrabold text-forest-950">Review Complete</p>
+                  <p className="mt-1 text-[11px] text-muted">
+                    This submission status is <strong className="text-ink">{detail.status}</strong>. Subsequent updates will occur if the owner submits a new revision.
+                  </p>
+                </div>
+              )}
             </div>
           )}
         </aside>
       </div>
+
+      {/* ─────────────────────────────────────────────────────────────
+          TIER 2: DEDICATED FULL-WIDTH DOCUMENT EVIDENCE & INSPECTION HUB
+          (Positioned clearly below the Queue & Dossier row!)
+      ───────────────────────────────────────────────────────────── */}
+      <section
+        className="border border-[#d6ddd5] bg-white shadow-sm"
+        aria-label="Dedicated document evidence inspection hub"
+      >
+        {/* Section Header */}
+        <div className="border-b border-[#d6ddd5] bg-[#f8faf7] px-5 py-4 flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="size-7 grid place-items-center bg-forest-900 text-lime font-black text-xs">
+                <FileText className="size-4" />
+              </span>
+              <h2 className="text-base font-extrabold text-forest-950">
+                Submitted Documents & High-Definition Inspection Hub
+              </h2>
+            </div>
+            <p className="mt-0.5 text-xs text-muted">
+              Full-width document examination studio with categorized files, inspection checklists, and forensic image filters.
+            </p>
+          </div>
+
+          {detail && (
+            <div className="flex items-center gap-3">
+              <span className="text-xs font-bold text-muted">
+                Total Files: <strong className="text-forest-950">{detail.documents.length}</strong>
+              </span>
+              <span className="text-xs font-bold text-muted">
+                Active Evidence: <strong className="text-emerald-800">{detail.evidence.active}</strong>
+              </span>
+            </div>
+          )}
+        </div>
+
+        {!detail ? (
+          <div className="p-16 text-center">
+            <FileSearch className="mx-auto size-12 text-muted" />
+            <h3 className="mt-4 text-base font-extrabold text-ink">No Verification Case Active</h3>
+            <p className="mt-1 text-xs text-muted max-w-md mx-auto">
+              Select any applicant from the Submission Queue in the section above to view all their submitted documents, categorizations, and high-resolution inspection tools here.
+            </p>
+          </div>
+        ) : detail.documents.length === 0 ? (
+          <div className="p-16 text-center">
+            <ShieldAlert className="mx-auto size-12 text-amber-600" />
+            <h3 className="mt-4 text-base font-extrabold text-ink">No Retained Document Evidence</h3>
+            <p className="mt-1 text-xs text-muted max-w-md mx-auto">
+              Files for this verification submission have exceeded the NDPR retention period or were verified via direct database lookup.
+            </p>
+          </div>
+        ) : (
+          <div className="p-5 space-y-5">
+            {/* 1. Categorized Document Card Grid */}
+            <div>
+              <h3 className="text-xs font-extrabold uppercase tracking-wider text-muted mb-3 flex items-center gap-1.5">
+                <Layers className="size-3.5 text-forest-700" />
+                Submitted Document Gallery ({detail.documents.length} Files) — Click to Inspect:
+              </h3>
+
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                {detail.documents.map((doc, idx) => {
+                  const docMeta = getDocumentMeta(doc.kind);
+                  const isSelected = selectedDocIndex === idx;
+                  const DocIcon = docMeta.icon;
+                  return (
+                    <button
+                      key={doc.id}
+                      type="button"
+                      onClick={() => {
+                        setSelectedDocIndex(idx);
+                        setZoomLevel(100);
+                        setRotation(0);
+                      }}
+                      className={`p-3.5 text-left border transition relative flex flex-col justify-between gap-3 ${
+                        isSelected
+                          ? "bg-forest-950 text-white border-forest-950 shadow-md ring-2 ring-forest-700"
+                          : "bg-[#f8faf7] hover:bg-white border-[#d6ddd5] text-ink"
+                      }`}
+                    >
+                      <div>
+                        {/* Category & Revision Tag */}
+                        <div className="flex items-center justify-between gap-2 mb-2">
+                          <span
+                            className={`inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-black ${
+                              isSelected
+                                ? "bg-lime text-forest-950"
+                                : docMeta.category === "Property Title"
+                                ? "bg-rose-100 text-rose-900 border border-rose-200"
+                                : docMeta.category === "Identity"
+                                ? "bg-indigo-100 text-indigo-900 border border-indigo-200"
+                                : docMeta.category === "Income & Employment"
+                                ? "bg-emerald-100 text-emerald-900 border border-emerald-200"
+                                : "bg-blue-100 text-blue-900 border border-blue-200"
+                            }`}
+                          >
+                            <DocIcon className="size-3" />
+                            {docMeta.category}
+                          </span>
+
+                          <span className={`text-[10px] font-bold ${isSelected ? "text-forest-300" : "text-muted"}`}>
+                            Rev {doc.revision}
+                          </span>
+                        </div>
+
+                        {/* Document Name */}
+                        <strong className={`block text-xs font-extrabold leading-snug line-clamp-2 ${isSelected ? "text-white" : "text-forest-950"}`}>
+                          {docMeta.title}
+                        </strong>
+                        <p className={`mt-1 text-[11px] truncate ${isSelected ? "text-forest-300" : "text-muted"}`}>
+                          {doc.fileName ?? doc.kind}
+                        </p>
+                      </div>
+
+                      {/* Bottom File Metadata */}
+                      <div className={`flex items-center justify-between border-t pt-2 text-[10px] font-medium ${
+                        isSelected ? "border-white/15 text-forest-300" : "border-[#eaeee9] text-muted"
+                      }`}>
+                        <span>{formatBytes(doc.size)}</span>
+                        {doc.supersededAt ? (
+                          <span className="text-amber-600 font-bold">Superceded</span>
+                        ) : (
+                          <span className="text-emerald-700 font-bold">Active</span>
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* 2. Active Document Inspection Workbench */}
+            {activeDoc && activeDocMeta && (
+              <div
+                className={`border border-[#d6ddd5] bg-[#f3f5f1] overflow-hidden ${
+                  isFullscreen
+                    ? "fixed inset-3 z-[100] bg-[#111c16] text-white shadow-2xl border border-white/20"
+                    : ""
+                }`}
+              >
+                {/* Document Information & Inspection Tools Toolbar */}
+                <div className="border-b border-[#d6ddd5] bg-white p-4 flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={`inline-flex items-center gap-1 px-2.5 py-1 text-xs font-black ${
+                          activeDocMeta.category === "Property Title"
+                            ? "bg-rose-100 text-rose-900 border border-rose-300"
+                            : activeDocMeta.category === "Identity"
+                            ? "bg-indigo-100 text-indigo-900 border border-indigo-300"
+                            : activeDocMeta.category === "Income & Employment"
+                            ? "bg-emerald-100 text-emerald-900 border border-emerald-300"
+                            : "bg-blue-100 text-blue-900 border border-blue-300"
+                        }`}
+                      >
+                        <activeDocMeta.icon className="size-3.5" />
+                        {activeDocMeta.category}
+                      </span>
+                      <h4 className="text-base font-extrabold text-forest-950">
+                        {activeDocMeta.title}
+                      </h4>
+                    </div>
+                    <p className="mt-1 text-xs text-muted">
+                      {activeDocMeta.description} · File: <strong className="text-ink">{activeDoc.fileName ?? activeDoc.kind}</strong> ({activeDoc.mimeType}, {formatBytes(activeDoc.size)}, Rev {activeDoc.revision})
+                    </p>
+                  </div>
+
+                  {/* Viewer Controls */}
+                  <div className="flex items-center gap-2">
+                    <a
+                      href={activeDoc.accessHref}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="stitch-button-secondary text-xs py-1.5 inline-flex items-center gap-1"
+                    >
+                      <ExternalLink className="size-3.5" /> Raw File
+                    </a>
+
+                    <div className="flex items-center gap-1 bg-[#edf1eb] p-1 border border-[#d6ddd5]">
+                      <button
+                        type="button"
+                        title="Zoom Out"
+                        onClick={() => setZoomLevel((z) => Math.max(50, z - 25))}
+                        className="p-1 hover:bg-white text-muted hover:text-ink transition"
+                      >
+                        <ZoomOut className="size-4" />
+                      </button>
+                      <span className="text-xs font-bold px-1.5 tabular-nums text-forest-950">{zoomLevel}%</span>
+                      <button
+                        type="button"
+                        title="Zoom In"
+                        onClick={() => setZoomLevel((z) => Math.min(250, z + 25))}
+                        className="p-1 hover:bg-white text-muted hover:text-ink transition"
+                      >
+                        <ZoomIn className="size-4" />
+                      </button>
+                      <div className="h-4 w-px bg-line mx-0.5" />
+                      <button
+                        type="button"
+                        title="Rotate 90°"
+                        onClick={() => setRotation((r) => (r + 90) % 360)}
+                        className="p-1 hover:bg-white text-muted hover:text-ink transition"
+                      >
+                        <RotateCw className="size-4" />
+                      </button>
+                      <button
+                        type="button"
+                        title="Enhance Contrast"
+                        onClick={() => setHighContrast((c) => !c)}
+                        className={`p-1 transition ${
+                          highContrast ? "bg-forest-900 text-lime font-bold" : "text-muted hover:text-ink hover:bg-white"
+                        }`}
+                      >
+                        <Sparkles className="size-4" />
+                      </button>
+                      <div className="h-4 w-px bg-line mx-0.5" />
+                      <button
+                        type="button"
+                        title={isFullscreen ? "Exit Fullscreen" : "Fullscreen Inspection"}
+                        onClick={() => setIsFullscreen((f) => !f)}
+                        className="p-1 hover:bg-white text-muted hover:text-ink transition"
+                      >
+                        {isFullscreen ? <Minimize2 className="size-4" /> : <Maximize2 className="size-4" />}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Specific Mandatory Criteria Checklist for Active Document */}
+                <div className="bg-[#f8faf7] border-b border-[#d6ddd5] px-5 py-3 text-xs">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-extrabold text-forest-950 uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+                      <CheckCircle2 className="size-3.5 text-forest-700" />
+                      Specific Verification Inspection Checklist for {activeDocMeta.shortLabel}:
+                    </span>
+                    <span className="text-[11px] text-muted">Click each criterion once verified</span>
+                  </div>
+
+                  <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-2">
+                    {activeDocMeta.checks.map((checkText) => {
+                      const isChecked = Boolean(completedDocChecks[checkText]);
+                      return (
+                        <button
+                          key={checkText}
+                          type="button"
+                          onClick={() => toggleCheck(checkText)}
+                          className={`flex items-start gap-2 p-2 text-left text-xs border transition ${
+                            isChecked
+                              ? "bg-emerald-50 border-emerald-300 text-emerald-950 font-bold"
+                              : "bg-white border-[#d6ddd5] text-muted hover:text-ink hover:border-forest-400"
+                          }`}
+                        >
+                          <span
+                            className={`size-4 mt-0.5 shrink-0 grid place-items-center rounded-xs text-[10px] font-black ${
+                              isChecked ? "bg-emerald-700 text-white" : "border border-muted"
+                            }`}
+                          >
+                            {isChecked ? "✓" : ""}
+                          </span>
+                          <span className="leading-tight">{checkText}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Canvas Render Area */}
+                <div className="p-4">
+                  {activeDoc.deletedAt ? (
+                    <div className="grid min-h-[30rem] place-items-center border border-dashed border-line bg-white p-6 text-center">
+                      <p className="text-sm font-bold text-muted">Evidence file was purged per NDPR 30-day retention policies.</p>
+                    </div>
+                  ) : activeDoc.mimeType?.startsWith("image/") ? (
+                    <div className="relative overflow-auto border border-[#d6ddd5] bg-[#1a251e] p-6 flex items-center justify-center min-h-[38rem]">
+                      <div
+                        style={{
+                          transform: `scale(${zoomLevel / 100}) rotate(${rotation}deg)`,
+                          transition: "transform 0.15s ease",
+                          filter: highContrast ? "contrast(200%) brightness(95%) saturate(120%)" : "none",
+                        }}
+                        className="origin-center shadow-2xl"
+                      >
+                        <img
+                          src={activeDoc.accessHref}
+                          alt={`Private ${activeDoc.kind} evidence`}
+                          className="max-h-[46rem] w-auto max-w-full object-contain"
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    <iframe
+                      title={`Private ${activeDoc.kind} evidence`}
+                      src={`${activeDoc.accessHref}#toolbar=1&navpanes=0`}
+                      className="h-[46rem] w-full border border-[#d6ddd5] bg-white"
+                    />
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </section>
     </div>
   );
 }
