@@ -113,7 +113,7 @@ export function PropertyDetails({
                       <ShieldCheck className="h-4 w-4" /> Verified property
                     </span>
                   )}
-                  <span className="text-xs font-semibold text-muted">Replies in under 2 hours</span>
+                  <span className="text-xs font-semibold text-muted">Response history stays with this listing</span>
                 </div>
                 <h1 className="mt-4 text-3xl font-extrabold tracking-[-0.045em] text-ink sm:text-4xl">{property.title}</h1>
                 <p className="mt-3 flex items-center gap-1.5 text-sm text-muted">
@@ -217,7 +217,7 @@ export function PropertyDetails({
 
             <div className="mt-5 overflow-hidden rounded-xl border border-line bg-white">
               <div className="bg-forest-900 px-5 py-4 text-white">
-                <p className="text-xs font-bold uppercase tracking-[0.15em] text-forest-200">Move-in breakdown</p>
+                <p className="text-xs font-bold text-forest-200">Move-in breakdown</p>
                 <p className="mt-2 text-2xl font-extrabold">
                   {moveInEstimate === null
                     ? "Fee estimate unavailable"

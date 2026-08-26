@@ -1,239 +1,72 @@
-"use client";
+import Image from "next/image";
+import Link from "next/link";
+import {
+  ArrowRight,
+  BadgeCheck,
+  CircleAlert,
+  EyeOff,
+  FileCheck2,
+  MapPin,
+  MessageSquareWarning,
+  ReceiptText,
+  ShieldCheck,
+} from "lucide-react";
+import { LINKCONN_ASSETS } from "@/domain/constants/linkconn-assets";
+import { VERIFICATION_LEVELS } from "@/domain/constants/permissions";
+import type { VerificationLevel } from "@/domain/types/auth";
 
-import type React from "react";
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { BadgeCheck, CheckCircle2, CircleAlert, CreditCard, Gem, ScanFace, ShieldCheck } from "lucide-react";
-import { Input, Textarea } from "@/components/ui/form-controls";
-
-const verifications = [
-  {
-    level: "Unverified",
-    color: "text-red-600 bg-red-50 border-red-100",
-    icon: CircleAlert,
-    desc: "Initial listing status. Property details are uploaded but have not undergone physical inspection or document checks. Exercise caution.",
-  },
-  {
-    level: "Partially Verified",
-    color: "text-amber-brand-700 bg-amber-brand-50 border-amber-brand-100",
-    icon: CircleAlert,
-    desc: "Landlord identity verified via national NIN/BVN data. Ownership papers uploaded and undergoing audit.",
-  },
-  {
-    level: "Fully Verified",
-    color: "text-brandgreen-700 bg-brandgreen-50 border-brandgreen-100",
-    icon: BadgeCheck,
-    desc: "Land title documents certified by our legal team. High trust listing.",
-  },
-  {
-    level: "Trusted",
-    color: "text-info bg-info-soft border-info/20",
-    icon: Gem,
-    desc: "Premium verified landlord status with a 4.8+ rating and 10+ successful, dispute-free tenancies completed via LinkConn Rent.",
-  },
+const levels: Array<{ level: VerificationLevel; icon: typeof ShieldCheck; meaning: string }> = [
+  { level: "Unverified", icon: CircleAlert, meaning: "The account exists, but the identity workflow is not complete. Treat claims as unconfirmed." },
+  { level: "Partially Verified", icon: FileCheck2, meaning: "The account has completed an early verification step. Review the exact status before acting." },
+  { level: "Fully Verified", icon: BadgeCheck, meaning: "The required identity checks for this level have been approved and recorded." },
+  { level: "Trusted", icon: ShieldCheck, meaning: "Verified identity is joined with the relevant property authority and positive platform history." },
 ];
 
-const safetyFaqs = [
-  {
-    q: "How does the Rent Escrow process work?",
-    a: "When you pay rent via LinkConn Rent, the payment is held securely in escrow. It is released to the landlord only 24 hours after your move-in date, once you confirm the property condition matches the listing details. This prevents keyholder runaways and upfront fraud.",
-  },
-  {
-    q: "Are there any physical inspections?",
-    a: "Yes! Fully Verified properties undergo a physical check by our field inspectors. We verify the location coordinates, check basic utilities (water, power), and confirm the landlord is the actual caretaker.",
-  },
-  {
-    q: "Why should I keep all messages in the chat?",
-    a: "LinkConn Rent monitors chats for suspicious links and patterns to prevent fraud. Landlords requesting you to continue on WhatsApp, or offering offline discounts, might be attempting to bypass our escrow safety rules.",
-  },
-  {
-    q: "How do I report a listing that seems fake?",
-    a: "You can click 'Report Listing' on any property details page, or use the Report Scam form below. Our moderator team audits and removes flagged accounts in under 2 hours.",
-  },
-];
+const safeguards = [
+  [MapPin, "Approximate public locations", "Search and map results do not publish a landlord's exact coordinates. Address release follows the approved viewing workflow."],
+  [ReceiptText, "Protected Payment records", "Use the platform payment flow and wait for the provider-confirmed status. Keep receipts with the tenancy record."],
+  [EyeOff, "Private evidence stays private", "Identity and ownership documents are available only to authorized reviewers and are never placed in shared public caches."],
+  [MessageSquareWarning, "Suspicious requests belong in support", "Keep conversations in the platform and create a support record when payment, identity, or viewing instructions do not match the listing."],
+] as const;
 
 export default function TrustAndSafetyClient() {
-  const [reportTitle, setReportTitle] = useState("");
-  const [reportDesc, setReportDesc] = useState("");
-  const [reportSuccess, setReportSuccess] = useState(false);
-  const [openFaq, setOpenFaq] = useState<number | null>(null);
-
-  const handleReportSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!reportTitle || !reportDesc) return;
-    
-    setReportSuccess(true);
-    setReportTitle("");
-    setReportDesc("");
-    setTimeout(() => setReportSuccess(false), 5000);
-  };
-
   return (
-    <div className="mx-auto max-w-5xl px-5 py-12 lg:px-8 space-y-16">
-      
-      {/* Header section */}
-      <div className="text-center">
-        <span className="text-xs font-bold uppercase tracking-widest text-brandgreen-600 bg-brandgreen-50 px-3.5 py-1.5 rounded-full">
-          Platform Safety
-        </span>
-        <h1 className="mt-4 text-3xl font-extrabold tracking-tight text-navy-950 sm:text-4xl">
-          Trust & Safety Guidelines
-        </h1>
-        <p className="mt-3 mx-auto max-w-xl text-sm leading-relaxed text-navy-500 font-semibold">
-          Your protection is our highest priority. Learn how we eliminate rental scams and secure transactions in Nigeria.
-        </p>
-      </div>
-
-      {/* Verification Level cards */}
-      <div>
-        <h2 className="text-xl font-extrabold text-navy-950 text-center sm:text-2xl">
-          Verification Tiers Explained
-        </h2>
-        <p className="text-center text-xs text-navy-500 font-semibold mt-1.5 max-w-md mx-auto">
-          We rate every property listing and landlord profile to show you the security level of each listing.
-        </p>
-
-        <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {verifications.map((v) => (
-            <div
-              key={v.level}
-              className={`rounded-2xl border p-5 bg-white shadow-sm flex flex-col justify-between`}
-            >
-              <div>
-                <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold border ${v.color}`}>
-                  <v.icon className="size-3.5" aria-hidden="true" /> {v.level}
-                </span>
-                <p className="mt-4 text-xs leading-relaxed text-navy-600 font-semibold">
-                  {v.desc}
-                </p>
-              </div>
-            </div>
-          ))}
+    <main id="main-content" className="bg-sand-50 pb-24 pt-16">
+      <section className="relative overflow-hidden bg-forest-950 text-white">
+        <div className="absolute inset-y-0 right-0 hidden w-1/2 lg:block">
+          <Image src={LINKCONN_ASSETS.verification.src} alt={LINKCONN_ASSETS.verification.alt} fill priority className="object-cover" sizes="50vw" />
+          <div className="absolute inset-0 bg-gradient-to-r from-forest-950 via-forest-950/35 to-transparent" />
         </div>
-      </div>
-
-      {/* Trust Pillars */}
-      <div className="grid gap-8 md:grid-cols-3">
-        <div className="rounded-3xl border border-navy-100 bg-white p-6 shadow-sm">
-          <ShieldCheck className="size-7 text-primary" aria-hidden="true" />
-          <h3 className="mt-4 text-base font-extrabold text-navy-950">Property Auditing</h3>
-          <p className="mt-2 text-xs leading-relaxed text-navy-500 font-semibold">
-            Our local field agents verify property details on-site. We confirm caretakers, take coordinates, and photograph utilities.
-          </p>
-        </div>
-        <div className="rounded-3xl border border-navy-100 bg-white p-6 shadow-sm">
-          <CreditCard className="size-7 text-primary" aria-hidden="true" />
-          <h3 className="mt-4 text-base font-extrabold text-navy-950">Rent Escrow Holding</h3>
-          <p className="mt-2 text-xs leading-relaxed text-navy-500 font-semibold">
-            Funds remain safely locked in escrow and are released only 24 hours after checking in. No more disappearing landlords.
-          </p>
-        </div>
-        <div className="rounded-3xl border border-navy-100 bg-white p-6 shadow-sm">
-          <ScanFace className="size-7 text-primary" aria-hidden="true" />
-          <h3 className="mt-4 text-base font-extrabold text-navy-950">Identity Verification</h3>
-          <p className="mt-2 text-xs leading-relaxed text-navy-500 font-semibold">
-            NIN, BVN, and CAC registrations of all landlords are audited against federal databases before listing approval.
-          </p>
-        </div>
-      </div>
-
-      {/* Report Form and Safety FAQs */}
-      <div className="grid gap-8 md:grid-cols-2 items-start">
-        
-        {/* Scam report form */}
-        <div className="rounded-3xl border border-navy-100 bg-white p-6 shadow-sm">
-          <h3 className="text-lg font-extrabold text-navy-950">Report Suspicious Activity</h3>
-          <p className="mt-1 text-xs text-navy-500 font-semibold">
-            Spotted a scam listing or a fraudulent landlord? Flag it instantly to our security team.
-          </p>
-
-          {reportSuccess ? (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="mt-6 rounded-2xl bg-brandgreen-50 border border-brandgreen-200 p-6 text-center"
-            >
-              <CheckCircle2 className="mx-auto size-7 text-success" aria-hidden="true" />
-              <h4 className="mt-2 text-sm font-bold text-brandgreen-950">Report Received</h4>
-              <p className="mt-1 text-[11px] text-brandgreen-700 leading-normal">
-                Our moderator team will review the details in under 2 hours. Thank you for keeping LinkConn Rent safe!
-              </p>
-            </motion.div>
-          ) : (
-            <form onSubmit={handleReportSubmit} className="mt-6 space-y-4">
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-navy-400">Subject / Listing ID</label>
-                <Input
-                  type="text"
-                  required
-                  placeholder="e.g. Fake listing at Lekki Phase 1"
-                  value={reportTitle}
-                  onChange={(e) => setReportTitle(e.target.value)}
-                  className="mt-2 text-xs font-bold"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-navy-400">Describe the Issue</label>
-                <Textarea
-                  rows={4}
-                  required
-                  placeholder="Please describe why this listing is suspicious (e.g. asking for offline BVN, fake pictures)..."
-                  value={reportDesc}
-                  onChange={(e) => setReportDesc(e.target.value)}
-                  className="mt-2 min-h-28 resize-none text-xs font-semibold"
-                />
-              </div>
-              <button
-                type="submit"
-                className="w-full rounded-xl bg-red-600 py-3 text-xs font-extrabold text-white shadow-md transition-colors hover:bg-red-750 cursor-pointer"
-              >
-                Submit Safety Report
-              </button>
-            </form>
-          )}
-        </div>
-
-        {/* Safety FAQs */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-extrabold text-navy-950">Frequently Asked Questions</h3>
-          
-          <div className="space-y-3">
-            {safetyFaqs.map((faq, i) => {
-              const isOpen = openFaq === i;
-              return (
-                <div
-                  key={i}
-                  className="rounded-2xl border border-navy-100 bg-white overflow-hidden transition-all shadow-sm"
-                >
-                  <button
-                    onClick={() => setOpenFaq(isOpen ? null : i)}
-                    className="flex w-full items-center justify-between p-4 text-left text-xs font-bold text-navy-900 hover:bg-navy-50 cursor-pointer select-none"
-                  >
-                    <span>{faq.q}</span>
-                    <span>{isOpen ? "−" : "+"}</span>
-                  </button>
-                  <AnimatePresence initial={false}>
-                    {isOpen && (
-                      <motion.div
-                        initial={{ height: 0 }}
-                        animate={{ height: "auto" }}
-                        exit={{ height: 0 }}
-                        className="overflow-hidden"
-                      >
-                        <p className="border-t border-navy-50 p-4 text-xs leading-relaxed text-navy-500 font-semibold bg-navy-50/20">
-                          {faq.a}
-                        </p>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              );
-            })}
+        <div className="stitch-container relative grid min-h-[34rem] items-end py-16 sm:py-24 lg:grid-cols-2">
+          <div className="max-w-2xl">
+            <h1 className="text-balance text-5xl font-extrabold leading-[.98] tracking-[-.04em] sm:text-6xl">Know what has been checked—and what has not.</h1>
+            <p className="mt-6 max-w-xl text-pretty text-base leading-7 text-sand-300">Verification is a recorded state, not a promise that removes every rental risk. Read the level, inspect the home, keep communication on-platform, and confirm payment status.</p>
           </div>
         </div>
+      </section>
 
-      </div>
+      <section className="stitch-container py-16 sm:py-20">
+        <div className="grid gap-8 lg:grid-cols-[.68fr_1.32fr]">
+          <div><h2 className="text-3xl font-extrabold tracking-[-.03em] text-ink sm:text-4xl">Verification levels in plain language</h2><p className="mt-4 max-w-xl text-sm leading-6 text-muted">The badge tells you the review stage. Open the related profile or listing details for the facts behind it.</p></div>
+          <div className="border-t border-line">
+            {levels.map(({ level, icon: Icon, meaning }) => <article key={level} className="grid gap-4 border-b border-line py-6 sm:grid-cols-[3rem_12rem_1fr] sm:items-start"><span className="grid size-11 place-items-center bg-forest-100 text-forest-900"><Icon className="size-5" /></span><div><h3 className="font-extrabold text-ink">{level}</h3><p className="mt-1 text-xs text-forest-700">{VERIFICATION_LEVELS[level].description}</p></div><p className="text-sm leading-6 text-muted">{meaning}</p></article>)}
+          </div>
+        </div>
+      </section>
 
-    </div>
+      <section className="bg-sand-200 py-16 sm:py-20">
+        <div className="stitch-container">
+          <div className="max-w-3xl"><h2 className="text-3xl font-extrabold tracking-[-.03em] text-ink sm:text-4xl">Four safeguards you can see</h2><p className="mt-4 text-sm leading-6 text-muted">Each one leaves a clearer boundary or record around the rental decision.</p></div>
+          <div className="mt-9 grid gap-px bg-line md:grid-cols-2">{safeguards.map(([Icon, title, copy]) => <article key={title} className="min-h-56 bg-white p-6 sm:p-8"><Icon className="size-6 text-forest-700" /><h3 className="mt-8 text-xl font-extrabold tracking-[-.02em] text-ink">{title}</h3><p className="mt-3 max-w-xl text-sm leading-6 text-muted">{copy}</p></article>)}</div>
+        </div>
+      </section>
+
+      <section className="stitch-container py-16 sm:py-20">
+        <div className="grid border border-error/25 bg-white lg:grid-cols-[.72fr_1.28fr]">
+          <div className="bg-error-soft/45 p-6 text-error sm:p-9"><CircleAlert className="size-7" /><h2 className="mt-8 text-3xl font-extrabold tracking-[-.03em]">Pause before you pay.</h2><p className="mt-4 text-sm leading-6">Do not send money because a message creates urgency. Confirm the listing, viewing, fee breakdown, recipient, and provider result first.</p></div>
+          <div className="p-6 sm:p-9"><h3 className="text-xl font-extrabold text-ink">Create a record when something is wrong</h3><p className="mt-3 max-w-2xl text-sm leading-6 text-muted">The help centre creates a support reference for suspicious listings, account access, payment questions, viewing safety, and disputes.</p><div className="mt-6 flex flex-wrap gap-3"><Link href="/help" className="stitch-button">Open help centre <ArrowRight className="size-4" /></Link><Link href="/properties" className="stitch-button stitch-button-secondary">Return to verified homes</Link></div></div>
+        </div>
+      </section>
+    </main>
   );
 }

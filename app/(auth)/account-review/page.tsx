@@ -85,7 +85,7 @@ export default function AccountReviewPage() {
   return (
     <main
       id="main-content"
-      className="min-h-[100dvh] bg-[radial-gradient(circle_at_top_right,rgba(184,227,110,0.22),transparent_30%),linear-gradient(180deg,#fdf9f0_0%,#f1eee5_100%)] px-4 py-6 sm:px-6"
+      className="min-h-[100dvh] bg-sand-100 px-4 py-6 sm:px-6"
     >
       <header className="mx-auto flex max-w-5xl items-center justify-between">
         <Link href="/" className="flex min-h-11 items-center" aria-label="LinkConn Rent home">
@@ -108,7 +108,7 @@ export default function AccountReviewPage() {
             reducedMotion ? { opacity: 0 } : { opacity: 0, y: 24, scale: 0.98 }
           }
           animate={{ opacity: 1, y: 0, scale: 1 }}
-          className="w-full overflow-hidden rounded-2xl border border-white/80 bg-white shadow-[0_30px_90px_rgba(18,55,42,0.16)]"
+          className="w-full overflow-hidden border border-line bg-white"
         >
           <div
             className={`h-2 w-full ${
@@ -130,7 +130,7 @@ export default function AccountReviewPage() {
                   <FileSearch className="size-7" />
                 )}
               </span>
-              <p className="mt-6 text-xs font-bold uppercase tracking-[0.16em] text-forest-700">
+              <p className="mt-6 text-xs font-bold text-forest-700">
                 Account verification
               </p>
               <h1 className="mt-2 max-w-xl text-3xl font-extrabold tracking-tight text-ink sm:text-4xl">
@@ -175,8 +175,8 @@ export default function AccountReviewPage() {
               </div>
             </div>
 
-            <aside className="rounded-2xl bg-sand-100 p-5">
-              <p className="text-xs font-bold uppercase tracking-[0.14em] text-forest-700">
+            <aside className="bg-sand-100 p-5">
+              <p className="text-xs font-bold text-forest-700">
                 What happens next
               </p>
               <ol className="mt-5 space-y-5">

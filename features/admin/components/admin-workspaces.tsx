@@ -9,6 +9,7 @@ import { formatNaira } from "@/utils/map-property";
 import { toastError, toastSuccess } from "@/stores/toast-store";
 import { AdminLinkedDetail } from "@/features/admin/components/admin-linked-detail";
 import { AdminItemLink } from "@/features/admin/admin-item-link";
+import { EmptyState, StatusBadge } from "@/components/ui/surface-primitives";
 
 type Pagination = { page: number; pageSize: number; totalItems: number; totalPages: number };
 type PageData<T> = { items: T[]; pagination: Pagination };
@@ -149,15 +150,7 @@ function Pager({ value }: { value: Pagination }) {
 }
 
 function Empty({ message }: { message: string }) {
-  return (
-    <div className="grid min-h-64 place-items-center p-8 text-center">
-      <div>
-        <ShieldCheck className="mx-auto size-8 text-forest-600" />
-        <p className="mt-3 font-bold">{message}</p>
-        <p className="mt-1 text-sm text-muted">Change the filters or check back later.</p>
-      </div>
-    </div>
-  );
+  return <EmptyState compact icon={ShieldCheck} title={message} description="Change the filters or return when new records enter this workspace." />;
 }
 
 async function patchRecord(path: string, body: object) {
@@ -244,9 +237,9 @@ export function UsersWorkspace({
                     </span>
                   </td>
                   <td className="px-4 py-4">{item.role}</td>
-                  <td className="px-4 py-4 font-bold">{item.accountStatus}</td>
+                  <td className="px-4 py-4"><StatusBadge value={item.accountStatus} /></td>
                   <td className="px-4 py-4">
-                    <span className="block">{item.verificationLevel}</span>
+                    <StatusBadge value={item.verificationLevel} />
                     <span className="text-xs text-muted">
                       {item.emailVerified ? "Email verified" : "Email unverified"} ·{" "}
                       {item.onboardingComplete ? "Onboarded" : "Incomplete"}
@@ -357,9 +350,9 @@ export function PropertiesWorkspace({ data, detail }: { data: PageData<PropertyI
                     </span>
                   </td>
                   <td className="px-4 py-4 font-bold">{formatNaira(item.price)}</td>
-                  <td className="px-4 py-4">{item.status}</td>
+                  <td className="px-4 py-4"><StatusBadge value={item.status} /></td>
                   <td className="px-4 py-4">
-                    <strong>{item.moderationStatus}</strong>
+                    <StatusBadge value={item.moderationStatus} />
                     {item.moderationReason && (
                       <span className="block max-w-64 text-xs text-muted">{item.moderationReason}</span>
                     )}
@@ -447,7 +440,7 @@ export function PaymentsWorkspace({ data, detail }: { data: PageData<PaymentItem
                     <span className="block text-xs text-muted">{item.property.location}</span>
                   </td>
                   <td className="px-4 py-4 font-bold">{formatNaira(item.amount)}</td>
-                  <td className="px-4 py-4 font-bold">{item.status}</td>
+                  <td className="px-4 py-4"><StatusBadge value={item.status} /></td>
                   <td className="px-4 py-4 text-xs">
                     Due {new Date(item.dueDate).toLocaleDateString()}
                     {item.paidAt && (
@@ -589,16 +582,6 @@ export function AdminPasswordForm() {
 
 function Canvas({ children }: { children: React.ReactNode }) {
   return <div className="admin-canvas">{children}</div>;
-}
-function State({ label, value }: { label: string; value: unknown }) {
-  return (
-    <div className="min-w-0">
-      <p className="text-xs font-bold text-muted">{label}</p>
-      <pre className="mt-2 max-h-52 overflow-auto whitespace-pre-wrap break-all rounded-lg bg-forest-950 p-3 text-[11px] text-sand-100">
-        {value == null ? "None" : JSON.stringify(value, null, 2)}
-      </pre>
-    </div>
-  );
 }
 function DecisionDialog({
   title,

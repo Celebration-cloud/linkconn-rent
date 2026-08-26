@@ -1,20 +1,3 @@
-import Link from 'next/link';
-
-export default function PropertyNotFound() {
-  return (
-    <div className="flex min-h-[60vh] flex-col items-center justify-center gap-6 px-4 text-center">
-      <div className="space-y-2">
-        <h2 className="text-3xl font-bold text-foreground">Property Not Found</h2>
-        <p className="text-muted-foreground max-w-md">
-          The property you are looking for does not exist or has been removed from our listings.
-        </p>
-      </div>
-      <Link
-        href="/properties"
-        className="rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground hover:opacity-90 transition-opacity"
-      >
-        Browse Properties
-      </Link>
-    </div>
-  );
-}
+import { EmptyState } from "@/components/ui/surface-primitives";
+import { SearchX } from "lucide-react";
+export default function PropertyNotFound() { return <main className="bg-sand-50 px-4 pb-24 pt-28"><div className="mx-auto max-w-3xl"><EmptyState icon={SearchX} title="No homes match this route" description="The listing may have moved or the current filters may be too narrow. Return to the catalogue to continue with available homes." actionHref="/properties" actionLabel="Browse available homes" /></div></main>; }

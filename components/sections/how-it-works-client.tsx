@@ -1,173 +1,123 @@
 "use client";
 
+import Image from "next/image";
+import Link from "next/link";
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { useAuth } from "@/providers/auth-provider";
-import { BadgeCheck, BriefcaseBusiness, Building2, CalendarDays, CircleDollarSign, House, KeyRound, MessageSquare, Search, UserRound, Wrench } from "lucide-react";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import {
+  ArrowRight,
+  BadgeCheck,
+  Building2,
+  CalendarDays,
+  FileCheck2,
+  House,
+  MessageSquare,
+  ReceiptText,
+  Search,
+  UserRound,
+  Wrench,
+} from "lucide-react";
+import { LINKCONN_ASSETS } from "@/domain/constants/linkconn-assets";
 
-const tenantSteps = [
-  {
-    num: "01",
-    title: "Browse Verified Homes",
-    desc: "Use our custom directory filters to find verified apartments, duplexes, or studios. Every listing goes through a strict identity and location audit.",
-    icon: Search,
+const journeys = {
+  tenant: {
+    title: "From shortlist to a recorded tenancy.",
+    description:
+      "Every stage keeps the home, the landlord, the viewing, the costs, and your messages connected.",
+    image: LINKCONN_ASSETS.tenantStory,
+    steps: [
+      [Search, "Search with the real cost in view", "Filter homes by location and fit, then compare the listed rent with the available move-in fee breakdown."],
+      [BadgeCheck, "Read the verification state", "Check the property and landlord status. Public locations stay approximate until the approved workflow releases an address."],
+      [MessageSquare, "Keep questions with the record", "Message the landlord in LinkConn Rent so the conversation stays connected to the home you are considering."],
+      [CalendarDays, "Book and track a viewing", "Request a viewing, follow its status, and keep any schedule change in one place."],
+      [ReceiptText, "Apply and use Protected Payment", "Review the tenancy details before paying. Payment status and receipts remain attached to the property and account."],
+    ],
   },
-  {
-    num: "02",
-    title: "Direct Landlord Chat",
-    desc: "Connect directly with property managers without middleman interference. Clear all queries, negotiate pricing, and finalize terms directly in the app.",
-    icon: MessageSquare,
+  landlord: {
+    title: "From listing evidence to an active tenancy.",
+    description:
+      "Publish with clear authority, respond to qualified interest, and keep every operational hand-off traceable.",
+    image: LINKCONN_ASSETS.landlordStory,
+    steps: [
+      [House, "Build a complete listing", "Add the home, amenities, images, rental period, and every required fee so tenants can judge the full cost."],
+      [FileCheck2, "Submit identity and property evidence", "Provide the documents required for your role and follow the review state from the dashboard."],
+      [MessageSquare, "Answer enquiries directly", "Keep tenant questions, applications, and viewing discussions attached to the right property."],
+      [CalendarDays, "Manage viewings and applicants", "Confirm appointments, review applicants, and preserve the decision trail."],
+      [Wrench, "Run the tenancy after move-in", "Track leases, payment records, and maintenance requests without moving the work into scattered chats."],
+    ],
   },
-  {
-    num: "03",
-    title: "Schedule Inspections",
-    desc: "Book physical inspect slots directly using our dashboard calendar widget. No agent registration fee or viewing fees required.",
-    icon: CalendarDays,
-  },
-  {
-    num: "04",
-    title: "Pay Rent via Escrow",
-    desc: "Rent payment is securely processed through Paystack/Flutterwave and held in escrow. Funds are released to the landlord only after you move in safely.",
-    icon: KeyRound,
-  },
-  {
-    num: "05",
-    title: "Digital Tenancy Management",
-    desc: "Submit maintenance requests, upload receipts, and manage automated rent renewal schedules inside your student/professional dashboard.",
-    icon: BriefcaseBusiness,
-  },
-];
-
-const landlordSteps = [
-  {
-    num: "01",
-    title: "List Your Properties",
-    desc: "Upload photos, location coordinates, rental price, and standard amenities. Setting up listings takes less than 5 minutes.",
-    icon: House,
-  },
-  {
-    num: "02",
-    title: "Submit Ownership Verification",
-    desc: "Provide basic identity and utility bills to earn the 'Verified Landlord' badge. Properties with verification badges secure tenants 3x faster.",
-    icon: BadgeCheck,
-  },
-  {
-    num: "03",
-    title: "Chat with Screened Tenants",
-    desc: "Receive text inquiries directly from verified tenants. Review their profiles, income range statements, and verification levels prior to responding.",
-    icon: UserRound,
-  },
-  {
-    num: "04",
-    title: "Automated Rent Payouts",
-    desc: "Receive payments safely into your bank account. Get automatic rent invoices sent to tenants 30 days before renewal due dates.",
-    icon: CircleDollarSign,
-  },
-  {
-    num: "05",
-    title: "Track Maintenance Requests",
-    desc: "Track tenant repair requests with structured statuses: Pending, In Progress, and Completed. Assign tasks to managers or mechanics easily.",
-    icon: Wrench,
-  },
-];
+} as const;
 
 export default function HowItWorksClient() {
-  const { openAuth } = useAuth();
-  const [activeTab, setActiveTab] = useState<"tenant" | "landlord">("tenant");
-
-  const steps = activeTab === "tenant" ? tenantSteps : landlordSteps;
+  const [audience, setAudience] = useState<keyof typeof journeys>("tenant");
+  const reducedMotion = useReducedMotion();
+  const journey = journeys[audience];
 
   return (
-    <div className="mx-auto max-w-5xl px-5 py-12 lg:px-8">
-      {/* Hero Header */}
-      <div className="text-center">
-        <span className="text-xs font-bold uppercase tracking-widest text-brandgreen-600 bg-brandgreen-50 px-3.5 py-1.5 rounded-full">
-          Process Guide
-        </span>
-        <h1 className="mt-4 text-3xl font-extrabold tracking-tight text-navy-950 sm:text-4xl">
-          How LinkConn Rent Works
-        </h1>
-        <p className="mt-3 mx-auto max-w-xl text-sm leading-relaxed text-navy-500 font-semibold">
-          We strip out agents and middlemen commissions to give you direct connection. Enjoy scam-free rentals across Nigeria.
-        </p>
-      </div>
-
-      {/* Tab Selectors */}
-      <div className="mt-10 flex justify-center">
-        <div className="inline-flex rounded-2xl bg-white border border-navy-100 p-1.5 shadow-sm">
-          <button
-            onClick={() => setActiveTab("tenant")}
-            className={`rounded-xl px-6 py-2.5 text-xs font-bold transition-all cursor-pointer ${
-              activeTab === "tenant"
-                ? "bg-navy-950 text-white shadow-sm"
-                : "text-navy-600 hover:text-navy-800"
-            }`}
-          >
-            <span className="inline-flex items-center gap-1.5"><UserRound className="size-4" aria-hidden="true" /> For Tenants</span>
-          </button>
-          <button
-            onClick={() => setActiveTab("landlord")}
-            className={`rounded-xl px-6 py-2.5 text-xs font-bold transition-all cursor-pointer ${
-              activeTab === "landlord"
-                ? "bg-navy-950 text-white shadow-sm"
-                : "text-navy-600 hover:text-navy-800"
-            }`}
-          >
-            <span className="inline-flex items-center gap-1.5"><Building2 className="size-4" aria-hidden="true" /> For Landlords</span>
-          </button>
+    <main id="main-content" className="bg-sand-50 pb-24 pt-16">
+      <section className="bg-forest-950 text-white">
+        <div className="stitch-container grid gap-10 py-16 sm:py-24 lg:grid-cols-[1.05fr_.95fr] lg:items-end">
+          <div>
+            <h1 className="max-w-4xl text-balance text-5xl font-extrabold leading-[.98] tracking-[-.04em] sm:text-6xl">
+              A rental journey with a record at every step.
+            </h1>
+            <p className="mt-6 max-w-2xl text-pretty text-base leading-7 text-sand-300 sm:text-lg">
+              LinkConn Rent connects discovery, verification, conversations, viewings, applications, payments, and ongoing tenancy work.
+            </p>
+          </div>
+          <div className="grid grid-cols-2 border border-white/15 text-sm">
+            <div className="border-r border-white/15 p-5"><strong className="block text-white">Approximate locations</strong><span className="mt-1 block text-sand-300">Public until release is approved</span></div>
+            <div className="p-5"><strong className="block text-white">Recorded decisions</strong><span className="mt-1 block text-sand-300">Statuses stay connected</span></div>
+          </div>
         </div>
-      </div>
+      </section>
 
-      {/* Timeline steps */}
-      <div className="mt-16 relative border-l-2 border-dashed border-navy-200 pl-6 md:pl-8 ml-3 sm:ml-6 space-y-12">
-        <AnimatePresence mode="wait">
-          {steps.map((s, idx) => (
-            <motion.div
-              key={s.num + activeTab}
-              initial={{ opacity: 0, x: -30 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 30 }}
-              transition={{ duration: 0.35, delay: idx * 0.08 }}
-              className="relative"
-            >
-              {/* Bullet Node */}
-              <div className="absolute -left-[45px] md:-left-[53px] flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-full bg-navy-950 text-white shadow-md font-bold text-sm border-4 border-sand-100">
-                {s.num}
-              </div>
+      <section className="stitch-container py-16 sm:py-20">
+        <div className="flex flex-col gap-6 border-b border-line pb-8 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h2 className="text-3xl font-extrabold tracking-[-.03em] text-ink sm:text-4xl">Choose your side of the journey</h2>
+            <p className="mt-3 max-w-2xl text-sm leading-6 text-muted">The workflow changes by role, but the record stays connected.</p>
+          </div>
+          <div className="segmented-control" aria-label="Choose a journey">
+            <button type="button" aria-pressed={audience === "tenant"} onClick={() => setAudience("tenant")}><UserRound className="mr-2 inline size-4" />Tenant</button>
+            <button type="button" aria-pressed={audience === "landlord"} onClick={() => setAudience("landlord")}><Building2 className="mr-2 inline size-4" />Landlord</button>
+          </div>
+        </div>
 
-              {/* Step Card */}
-              <div className="rounded-3xl border border-navy-100 bg-white p-6 shadow-sm hover:shadow-md transition-shadow">
-                <div className="flex items-center gap-3">
-                  <s.icon className="size-7 text-primary" aria-hidden="true" />
-                  <h3 className="text-base font-extrabold text-navy-950">{s.title}</h3>
-                </div>
-                <p className="mt-3 text-xs leading-relaxed text-navy-600 font-semibold md:text-sm">
-                  {s.desc}
-                </p>
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div
+            key={audience}
+            initial={reducedMotion ? false : { opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={reducedMotion ? undefined : { opacity: 0, y: -10 }}
+            transition={{ duration: reducedMotion ? 0 : .32, ease: [0.22, 1, 0.36, 1] }}
+            className="grid gap-10 pt-10 lg:grid-cols-[.82fr_1.18fr]"
+          >
+            <div className="lg:sticky lg:top-24 lg:h-fit">
+              <div className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-forest-900">
+                <Image src={journey.image.src} alt={journey.image.alt} fill className="object-cover" sizes="(max-width:1024px) 100vw, 38vw" />
+                <div className="absolute inset-0 bg-gradient-to-t from-forest-950/80 via-transparent to-transparent" />
+                <div className="absolute inset-x-0 bottom-0 p-6 text-white sm:p-8"><h2 className="text-3xl font-extrabold tracking-[-.03em]">{journey.title}</h2><p className="mt-3 text-sm leading-6 text-sand-200">{journey.description}</p></div>
               </div>
-            </motion.div>
-          ))}
+            </div>
+            <ol className="border-t border-line">
+              {journey.steps.map(([Icon, title, copy], index) => (
+                <li key={title} className="grid gap-4 border-b border-line py-6 sm:grid-cols-[3rem_1fr] sm:py-8">
+                  <span className="grid size-11 place-items-center bg-forest-100 text-forest-900"><Icon className="size-5" aria-hidden="true" /></span>
+                  <div><p className="text-xs font-extrabold tabular-nums text-forest-700">Step {index + 1} of {journey.steps.length}</p><h3 className="mt-2 text-xl font-extrabold tracking-[-.02em] text-ink">{title}</h3><p className="mt-2 max-w-2xl text-sm leading-6 text-muted">{copy}</p></div>
+                </li>
+              ))}
+            </ol>
+          </motion.div>
         </AnimatePresence>
-      </div>
+      </section>
 
-      {/* Bottom CTA Block */}
-      <div className="mt-16 rounded-3xl bg-gradient-to-br from-navy-900 to-navy-950 p-8 text-center text-white shadow-xl relative overflow-hidden">
-        <div className="absolute right-0 top-0 h-40 w-40 rounded-full bg-brandgreen-500/10 blur-2xl" />
-        <h3 className="text-xl font-extrabold sm:text-2xl">
-          {activeTab === "tenant" ? "Ready to find your dream apartment?" : "Start listing your properties today"}
-        </h3>
-        <p className="mt-2 text-xs text-navy-300 max-w-sm mx-auto font-medium">
-          {activeTab === "tenant"
-            ? "Sign up now and view properties free of agent commissions."
-            : "Connect with verified tenants, manage invoicing, and track maintenance repairs."}
-        </p>
-        <button
-          onClick={() => openAuth("pick")}
-          className="mt-6 rounded-xl bg-brandgreen-500 px-6 py-3 text-xs font-bold text-white shadow-lg shadow-brandgreen-500/20 transition-colors hover:bg-brandgreen-600 cursor-pointer"
-        >
-          {activeTab === "tenant" ? "Get Started" : "List Your Home"}
-        </button>
-      </div>
-    </div>
+      <section className="stitch-container">
+        <div className="grid gap-8 bg-forest-800 px-6 py-10 text-white sm:px-10 lg:grid-cols-[1fr_auto] lg:items-center">
+          <div><h2 className="text-3xl font-extrabold tracking-[-.03em]">Start with the next accountable action.</h2><p className="mt-3 max-w-2xl text-sm leading-6 text-forest-100">Browse available homes or create the account that matches your role.</p></div>
+          <div className="flex flex-wrap gap-3"><Link href="/properties" className="stitch-button bg-lime text-forest-950 hover:bg-white">Browse homes <ArrowRight className="size-4" /></Link><Link href="/signup" className="stitch-button border border-white/20 bg-transparent hover:bg-white/10">Create account</Link></div>
+        </div>
+      </section>
+    </main>
   );
 }

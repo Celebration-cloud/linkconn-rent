@@ -7,9 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function PricingPage() {
-  return (
-    <div className="min-h-screen bg-sand-100 pt-24">
-      <PricingClient />
-    </div>
-  );
+  return <PricingClient />;
 }

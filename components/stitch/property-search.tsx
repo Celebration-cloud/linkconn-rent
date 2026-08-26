@@ -26,7 +26,7 @@ import {
   X,
 } from "lucide-react";
 import { Checkbox, Input, Select } from "@/components/ui/form-controls";
-import type { Property } from "@/domain/types/property";
+import type { Property, PropertyCostView } from "@/domain/types/property";
 import type {
   PropertySearchEnvelope,
   PropertySearchResult,
@@ -110,6 +110,39 @@ function PropertySkeleton() {
   );
 }
 
+function CostLens({
+  value,
+  onChange,
+}: {
+  value: PropertyCostView;
+  // eslint-disable-next-line no-unused-vars -- parameter label documents the callback contract
+  onChange: (value: PropertyCostView) => void;
+}) {
+  return (
+    <div
+      role="group"
+      className="inline-grid min-h-11 grid-cols-2 rounded-lg border border-line bg-white p-1"
+      aria-label="Property cost view"
+    >
+      {(["rent", "move-in"] as const).map((option) => (
+        <button
+          key={option}
+          type="button"
+          onClick={() => onChange(option)}
+          aria-pressed={value === option}
+          className={`rounded-md px-3 text-xs font-bold transition-colors ${
+            value === option
+              ? "bg-forest-900 text-white"
+              : "text-muted hover:bg-sand-100 hover:text-forest-900"
+          }`}
+        >
+          {option === "rent" ? "Rent" : "Move-in cost"}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 export function PropertySearch({
   initialResult,
   initialFilters,
@@ -156,6 +189,7 @@ export function PropertySearch({
   const [blockEndPage, setBlockEndPage] = useState(initialBatch.page + 2);
   const [lastVisiblePage, setLastVisiblePage] = useState(initialBatch.page);
   const [advancedOpen, setAdvancedOpen] = useState(false);
+  const [tabletFiltersOpen, setTabletFiltersOpen] = useState(false);
   const [sortOpen, setSortOpen] = useState(false);
   const [previewCount, setPreviewCount] = useState<number | null>(
     initialResult.pagination.totalItems,
@@ -164,6 +198,8 @@ export function PropertySearch({
   const [countError, setCountError] = useState<string | null>(null);
   const [countRetry, setCountRetry] = useState(0);
   const [compareIds, setCompareIds] = useState<string[]>([]);
+  const [costView, setCostView] = useState<PropertyCostView>("rent");
+  const [filterEditing, setFilterEditing] = useState(false);
   const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
   const [savingIds, setSavingIds] = useState<Set<string>>(new Set());
   const [restored, setRestored] = useState(false);
@@ -180,6 +216,7 @@ export function PropertySearch({
   }, [batches]);
   const lastPage = Math.max(...batches.map((batch) => batch.page));
   const isPaused = lastPage >= blockEndPage;
+  const showLoadMoreControl = !loadError && pagination.hasNextPage && isPaused;
   const canShowSave = !isLoadingProfile && (!user || user.role === "Tenant");
   const appliedAdvancedFilters = useMemo(
     () => createAdvancedDraft(initialFilters),
@@ -232,6 +269,7 @@ export function PropertySearch({
     setBatches(cached.batches);
     setPagination(cached.pagination);
     setCompareIds(cached.compareIds);
+    setCostView(cached.costView);
     setLastVisiblePage(cached.lastVisiblePage);
     setBlockEndPage(
       getBlockEndPage(cached.batches[0].page, cached.batches.length),
@@ -250,6 +288,7 @@ export function PropertySearch({
         batches,
         pagination,
         compareIds,
+        costView,
         lastVisiblePage,
         scrollY,
       };
@@ -259,7 +298,7 @@ export function PropertySearch({
         // Search remains usable when browser storage is unavailable.
       }
     },
-    [batches, compareIds, lastVisiblePage, pagination, storageKey],
+    [batches, compareIds, costView, lastVisiblePage, pagination, storageKey],
   );
 
   useEffect(() => {
@@ -492,13 +531,13 @@ export function PropertySearch({
   }, [baseQuery, draftFilters]);
 
   useEffect(() => {
-    if (!advancedOpen) return;
+    if (!advancedOpen && !tabletFiltersOpen && !filterEditing) return;
     if (countTimer.current) clearTimeout(countTimer.current);
     countTimer.current = setTimeout(() => void getAdvancedCount(), 300);
     return () => {
       if (countTimer.current) clearTimeout(countTimer.current);
     };
-  }, [advancedOpen, countRetry, getAdvancedCount]);
+  }, [advancedOpen, countRetry, filterEditing, getAdvancedCount, tabletFiltersOpen]);
 
   useEffect(
     () => () => {
@@ -513,6 +552,7 @@ export function PropertySearch({
     setDraftFilters(appliedAdvancedFilters);
     setPreviewCount(pagination.totalItems);
     setCountError(null);
+    setFilterEditing(true);
     setAdvancedOpen(true);
   };
 
@@ -527,6 +567,18 @@ export function PropertySearch({
         : null,
     });
     setAdvancedOpen(false);
+    setTabletFiltersOpen(false);
+    setFilterEditing(false);
+  };
+
+  const updateDraftFilters = (next: AdvancedFilterDraft) => {
+    setDraftFilters(next);
+    setFilterEditing(true);
+  };
+
+  const resetDraftFilters = () => {
+    setDraftFilters(EMPTY_ADVANCED_FILTERS);
+    setFilterEditing(true);
   };
 
   const toggleSaved = async (property: Property) => {
@@ -639,43 +691,106 @@ export function PropertySearch({
   return (
     <main id="main-content" className="min-h-screen bg-sand-50 pb-28 pt-16">
       <section className="border-b border-line bg-sand-100">
-        <div className="stitch-container py-9 sm:py-11">
-          <p className="text-xs font-bold uppercase tracking-[0.16em] text-forest-700">Verified rentals across Nigeria</p>
-          <h1 className="mt-2 max-w-3xl text-3xl font-extrabold tracking-[-0.045em] text-ink sm:text-4xl">
-            Find a home with the full cost in view.
-          </h1>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-muted">
-            Search approved rentals and compare the costs that matter before you move.
-          </p>
+        <div className="stitch-container grid gap-7 py-9 sm:py-11 md:grid-cols-[minmax(0,1fr)_13rem] md:items-end xl:grid-cols-[minmax(0,1fr)_17rem] xl:py-14">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[0.16em] text-forest-700">Verified rentals across Nigeria</p>
+            <h1 className="mt-2 max-w-3xl text-3xl font-extrabold tracking-[-0.045em] text-ink sm:text-4xl xl:text-5xl">
+              Find a home with the full cost in view.
+            </h1>
+            <p className="mt-3 max-w-2xl text-sm leading-6 text-muted md:text-base">
+              Search approved rentals, inspect declared move-in fees, save promising homes, and compare the shortlist that fits.
+            </p>
+          </div>
+          <div className="hidden border-l border-line pl-6 md:block">
+            <p className="text-3xl font-extrabold tabular-nums tracking-[-0.04em] text-forest-900">
+              {pagination.totalItems}
+            </p>
+            <p className="mt-1 text-sm font-semibold text-muted">
+              {pagination.totalItems === 1 ? "approved home" : "approved homes"} in this search
+            </p>
+          </div>
         </div>
       </section>
 
-      <div className="sticky top-16 z-30 border-b border-line bg-sand-50/95 backdrop-blur-xl lg:static lg:bg-sand-100">
-        <div className="stitch-container py-3 lg:pb-8 lg:pt-0">
-          <Input
-            value={searchValue}
-            onChange={(event) => setSearchValue(event.target.value)}
-            onKeyDown={onSearchKeyDown}
-            leadingIcon={Search}
-            placeholder="Search by area, city, property name or keyword"
-            aria-label="Search properties"
-            className="h-14 bg-white text-base shadow-[0_8px_24px_rgba(18,55,42,0.07)]"
-            trailingAction={searchValue ? (
-              <button
-                type="button"
-                onClick={() => {
-                  setSearchValue("");
-                  replaceQuery({ q: null });
-                }}
-                aria-label="Clear property search"
-                className="grid size-9 place-items-center rounded-md text-muted hover:bg-sand-100 hover:text-forest-900"
-              >
-                <X className="size-4" aria-hidden="true" />
-              </button>
-            ) : undefined}
-          />
+      <div className="sticky top-16 z-30 border-b border-line bg-sand-50/95 backdrop-blur-xl lg:bg-sand-100">
+        <div className="stitch-container py-3 xl:py-4">
+          <div className="xl:grid xl:grid-cols-[minmax(22rem,1fr)_auto] xl:items-center xl:gap-3">
+            <Input
+              value={searchValue}
+              onChange={(event) => setSearchValue(event.target.value)}
+              onKeyDown={onSearchKeyDown}
+              leadingIcon={Search}
+              placeholder="Search by area, city, property name or keyword"
+              aria-label="Search properties"
+              className="h-14 bg-white text-base shadow-[0_8px_24px_rgba(18,55,42,0.07)]"
+              trailingAction={searchValue ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchValue("");
+                    replaceQuery({ q: null });
+                  }}
+                  aria-label="Clear property search"
+                  className="grid size-9 place-items-center rounded-md text-muted hover:bg-sand-100 hover:text-forest-900"
+                >
+                  <X className="size-4" aria-hidden="true" />
+                </button>
+              ) : undefined}
+            />
 
-          <div className="mt-2 grid grid-cols-4 gap-2 lg:hidden" aria-label="Property view controls">
+            <div role="group" className="hidden items-center gap-2 xl:flex" aria-label="Desktop property controls">
+              <CostLens value={costView} onChange={setCostView} />
+              <Select
+                value={activeSort}
+                onChange={(event) => replaceQuery({ sort: event.target.value === "recommended" ? null : event.target.value })}
+                aria-label="Sort properties"
+                className="min-w-44 font-semibold"
+              >
+                {SORT_OPTIONS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+              </Select>
+              <span aria-current="page" className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-forest-900 px-3 text-xs font-bold text-white">
+                <List className="size-4" aria-hidden="true" /> List
+              </span>
+              <Link href={mapHref} onClick={() => persistState()} className="stitch-button stitch-button-secondary shrink-0">
+                <Map className="size-4" aria-hidden="true" /> Map
+              </Link>
+            </div>
+          </div>
+
+          <div role="group" className="mt-2 hidden items-center gap-2 md:flex xl:hidden" aria-label="Tablet property controls">
+            <button
+              type="button"
+              onClick={() => {
+                setDraftFilters(appliedAdvancedFilters);
+                setPreviewCount(pagination.totalItems);
+                setCountError(null);
+                setFilterEditing(true);
+                setTabletFiltersOpen((current) => !current);
+              }}
+              aria-expanded={tabletFiltersOpen}
+              aria-controls="tablet-property-filters"
+              className="stitch-button stitch-button-secondary shrink-0"
+            >
+              <SlidersHorizontal className="size-4" aria-hidden="true" /> Filters
+            </button>
+            <CostLens value={costView} onChange={setCostView} />
+            <Select
+              value={activeSort}
+              onChange={(event) => replaceQuery({ sort: event.target.value === "recommended" ? null : event.target.value })}
+              aria-label="Sort properties"
+              className="min-w-0 flex-1 font-semibold"
+            >
+              {SORT_OPTIONS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+            </Select>
+            <span aria-current="page" className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-lg bg-forest-900 px-3 text-xs font-bold text-white">
+              <List className="size-4" aria-hidden="true" /> List
+            </span>
+            <Link href={mapHref} onClick={() => persistState()} className="stitch-button stitch-button-secondary shrink-0">
+              <Map className="size-4" aria-hidden="true" /> Map
+            </Link>
+          </div>
+
+          <div className="mt-2 grid grid-cols-4 gap-2 md:hidden" aria-label="Property view controls">
             <button
               type="button"
               onClick={openAdvanced}
@@ -704,18 +819,50 @@ export function PropertySearch({
           </div>
 
           {filterChips.length ? (
-            <div className="-mx-1 mt-2 flex gap-2 overflow-x-auto px-1 pb-1 lg:hidden" aria-label="Applied filters">
+            <div className="-mx-1 mt-2 flex gap-2 overflow-x-auto px-1 pb-1 md:hidden" aria-label="Applied filters">
               {chips}
             </div>
           ) : null}
         </div>
       </div>
 
-      <div className="stitch-container grid gap-7 py-7 lg:grid-cols-[13rem_minmax(0,1fr)]">
-        <aside className="hidden h-fit border-r border-line pr-5 lg:sticky lg:top-24 lg:block">
+      {tabletFiltersOpen ? (
+        <div id="tablet-property-filters" className="stitch-container hidden pt-6 md:block xl:hidden">
+          <section aria-label="Tablet property filters" className="rounded-xl border border-line bg-white p-5 shadow-[0_12px_35px_rgba(18,55,42,0.06)]">
+            <div className="flex items-center justify-between gap-4 border-b border-line pb-4">
+              <div>
+                <h2 className="text-base font-extrabold text-ink">Refine this search</h2>
+                <p className="mt-1 text-xs text-muted">Review the available homes before applying your changes.</p>
+              </div>
+              <button type="button" onClick={() => setTabletFiltersOpen(false)} className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-line px-3 text-xs font-bold text-forest-900">
+                <X className="size-4" aria-hidden="true" /> Close
+              </button>
+            </div>
+            <PropertyFilterPanel
+              draft={draftFilters}
+              onChange={updateDraftFilters}
+              onApply={applyAdvanced}
+              onCancel={() => setTabletFiltersOpen(false)}
+              onReset={resetDraftFilters}
+              onRetryCount={() => setCountRetry((value) => value + 1)}
+              resultCount={previewCount}
+              counting={counting}
+              countError={countError}
+              idPrefix="tablet"
+              presentation="deck"
+            />
+          </section>
+        </div>
+      ) : null}
+
+      <div className="stitch-container grid gap-7 py-7 xl:grid-cols-[18rem_minmax(0,1fr)]">
+        <aside className="hidden max-h-[calc(100dvh-11rem)] self-start overflow-y-auto border-r border-line pr-6 xl:sticky xl:top-40 xl:block">
           <div className="flex items-center justify-between">
-            <h2 className="text-sm font-extrabold text-ink">Quick filters</h2>
-            <button type="button" onClick={() => router.replace("/properties", { scroll: false })} className="min-h-10 text-xs font-bold text-forest-700">Reset</button>
+            <div>
+              <h2 className="text-base font-extrabold text-ink">All filters</h2>
+              <p className="mt-1 text-xs text-muted">Everything stays in view.</p>
+            </div>
+            <button type="button" onClick={() => router.replace("/properties", { scroll: false })} className="min-h-10 text-xs font-bold text-forest-700">Reset all</button>
           </div>
           <div className="mt-4 space-y-5">
             <label className="flex min-h-11 items-center gap-3 text-sm font-semibold text-forest-900">
@@ -750,6 +897,22 @@ export function PropertySearch({
               </div>
             </fieldset>
           </div>
+
+          <div className="mt-6 border-t border-line pt-5">
+            <PropertyFilterPanel
+              draft={draftFilters}
+              onChange={updateDraftFilters}
+              onApply={applyAdvanced}
+              onCancel={() => undefined}
+              onReset={resetDraftFilters}
+              onRetryCount={() => setCountRetry((value) => value + 1)}
+              resultCount={previewCount}
+              counting={counting}
+              countError={countError}
+              idPrefix="desktop"
+              presentation="rail"
+            />
+          </div>
         </aside>
 
         <section aria-busy={loadingNext} aria-describedby="property-result-status">
@@ -759,20 +922,12 @@ export function PropertySearch({
                 <span className="font-extrabold tabular-nums text-forest-900">{pagination.totalItems}</span>{" "}
                 {pagination.totalItems === 1 ? "property" : "properties"}
               </p>
-              <div className="hidden items-center gap-2 lg:flex">
-                <button type="button" onClick={openAdvanced} aria-expanded={advancedOpen} className="stitch-button stitch-button-secondary">
-                  <SlidersHorizontal className="size-4" aria-hidden="true" /> More filters
-                </button>
-                <Select value={activeSort} onChange={(event) => replaceQuery({ sort: event.target.value === "recommended" ? null : event.target.value })} aria-label="Sort properties" className="min-w-44 font-semibold">
-                  {SORT_OPTIONS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
-                </Select>
-                <Link href={mapHref} onClick={() => persistState()} className="stitch-button stitch-button-secondary shrink-0">
-                  <Map className="size-4" aria-hidden="true" /> Show map
-                </Link>
-              </div>
+              <p className="hidden text-xs font-semibold text-muted md:block">
+                Save favourites or select up to four homes to compare.
+              </p>
             </div>
             {filterChips.length ? (
-              <div className="mt-3 hidden flex-wrap items-center gap-2 lg:flex" aria-label="Applied filters">
+              <div className="mt-3 hidden flex-wrap items-center gap-2 md:flex" aria-label="Applied filters">
                 {chips}
                 <button type="button" onClick={() => router.replace("/properties", { scroll: false })} className="inline-flex min-h-10 items-center gap-1.5 px-2 text-xs font-bold text-forest-700">
                   <RotateCcw className="size-3.5" aria-hidden="true" /> Clear all
@@ -786,7 +941,7 @@ export function PropertySearch({
               {batches.map((batch) => (
                 <div key={batch.page} data-property-page={batch.page} className="scroll-mt-44 lg:scroll-mt-28">
                   <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
-                    {batch.items.map((property) => (
+                    {batch.items.map((property, propertyIndex) => (
                       <StitchPropertyCard
                         key={property.id}
                         property={property}
@@ -794,6 +949,8 @@ export function PropertySearch({
                         saved={savedIds.has(property.id)}
                         saving={savingIds.has(property.id)}
                         compareSelected={compareIds.includes(property.id)}
+                        costView={costView}
+                        eager={batch.page === initialResult.pagination.page && propertyIndex < 3}
                         onToggleSaved={canShowSave ? () => void toggleSaved(property) : undefined}
                         onToggleCompare={() => toggleCompare(property.id)}
                         onOpenDetails={() => persistState()}
@@ -827,7 +984,7 @@ export function PropertySearch({
               <button type="button" onClick={() => void loadNextPage()} className="stitch-button mt-3">Retry</button>
             </div>
           ) : null}
-          {!loadError && pagination.hasNextPage && isPaused ? (
+          {showLoadMoreControl ? (
             <div className="mt-8 text-center">
               <button type="button" onClick={() => {
                 waitingForSentinelExit.current = true;
@@ -838,23 +995,23 @@ export function PropertySearch({
               </button>
               <p className="mt-2 text-xs text-muted">Loading pauses after every three displayed pages.</p>
             </div>
-          ) : null}
-
-          <nav aria-label="Property result pages" className="mt-10 flex items-center justify-center gap-3 border-t border-line pt-6">
-            {pagination.page > 1 ? (
-              <Link href={pageHref(baseQuery, pagination.page - 1)} className="inline-flex min-h-11 items-center gap-1 rounded-lg border border-line bg-white px-3 text-sm font-bold text-muted hover:border-forest-300 hover:text-forest-800">
-                <ChevronLeft className="size-4" aria-hidden="true" /> Previous
-              </Link>
-            ) : <span />}
-            <span aria-current="page" className="min-h-11 rounded-lg bg-forest-700 px-4 py-3 text-sm font-bold text-white">
-              Page {pagination.page} of {pagination.totalPages}
-            </span>
-            {pagination.hasNextPage ? (
-              <Link href={pageHref(baseQuery, pagination.page + 1)} className="inline-flex min-h-11 items-center gap-1 rounded-lg border border-line bg-white px-3 text-sm font-bold text-muted hover:border-forest-300 hover:text-forest-800">
-                Next <ChevronRight className="size-4" aria-hidden="true" />
-              </Link>
-            ) : <span />}
-          </nav>
+          ) : (
+            <nav aria-label="Property result pages" className="mt-10 flex items-center justify-center gap-3 border-t border-line pt-6">
+              {pagination.page > 1 ? (
+                <Link href={pageHref(baseQuery, pagination.page - 1)} className="inline-flex min-h-11 items-center gap-1 rounded-lg border border-line bg-white px-3 text-sm font-bold text-muted hover:border-forest-300 hover:text-forest-800">
+                  <ChevronLeft className="size-4" aria-hidden="true" /> Previous
+                </Link>
+              ) : <span />}
+              <span aria-current="page" className="min-h-11 rounded-lg bg-forest-700 px-4 py-3 text-sm font-bold text-white">
+                Page {pagination.page} of {pagination.totalPages}
+              </span>
+              {pagination.hasNextPage ? (
+                <Link href={pageHref(baseQuery, pagination.page + 1)} className="inline-flex min-h-11 items-center gap-1 rounded-lg border border-line bg-white px-3 text-sm font-bold text-muted hover:border-forest-300 hover:text-forest-800">
+                  Next <ChevronRight className="size-4" aria-hidden="true" />
+                </Link>
+              ) : <span />}
+            </nav>
+          )}
           {batches.length > 1 ? (
             <div className="mt-6 text-center">
               <button type="button" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} className="inline-flex min-h-11 items-center gap-2 text-sm font-bold text-forest-700">
@@ -866,7 +1023,7 @@ export function PropertySearch({
       </div>
 
       {advancedOpen ? (
-        <div className="fixed inset-0 z-[110] bg-forest-950/45 backdrop-blur-sm" role="presentation" onMouseDown={(event) => {
+        <div className="fixed inset-0 z-[110] bg-forest-950/45 backdrop-blur-sm md:hidden" role="presentation" onMouseDown={(event) => {
           if (event.target === event.currentTarget) closeAdvanced();
         }}>
           <div ref={drawerRef} role="dialog" aria-modal="true" aria-label="More property filters" className="ml-auto h-full w-full overflow-y-auto bg-sand-50 p-5 shadow-[0_24px_80px_rgba(18,55,42,0.28)] sm:max-w-md sm:border-l sm:border-line">
@@ -882,10 +1039,10 @@ export function PropertySearch({
             <div className="mt-5">
               <PropertyFilterPanel
                 draft={draftFilters}
-                onChange={setDraftFilters}
+                onChange={updateDraftFilters}
                 onApply={applyAdvanced}
                 onCancel={closeAdvanced}
-                onReset={() => setDraftFilters(EMPTY_ADVANCED_FILTERS)}
+                onReset={resetDraftFilters}
                 onRetryCount={() => setCountRetry((value) => value + 1)}
                 resultCount={previewCount}
                 counting={counting}
@@ -898,7 +1055,7 @@ export function PropertySearch({
       ) : null}
 
       {sortOpen ? (
-        <div className="fixed inset-0 z-[110] bg-forest-950/45 backdrop-blur-sm lg:hidden" role="presentation" onMouseDown={(event) => {
+        <div className="fixed inset-0 z-[110] bg-forest-950/45 backdrop-blur-sm md:hidden" role="presentation" onMouseDown={(event) => {
           if (event.target === event.currentTarget) {
             setSortOpen(false);
             activeTriggerRef.current?.focus();

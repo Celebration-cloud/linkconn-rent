@@ -42,6 +42,7 @@ type PropertyFilterPanelProps = {
   counting: boolean;
   countError: string | null;
   idPrefix: string;
+  presentation?: "drawer" | "rail" | "deck";
 };
 /* eslint-enable no-unused-vars */
 
@@ -62,7 +63,11 @@ export function PropertyFilterPanel({
   counting,
   countError,
   idPrefix,
+  presentation = "drawer",
 }: PropertyFilterPanelProps) {
+  const isDrawer = presentation === "drawer";
+  const isDeck = presentation === "deck";
+
   return (
     <div>
       <div className="flex items-center justify-end gap-3">
@@ -75,7 +80,13 @@ export function PropertyFilterPanel({
         </button>
       </div>
 
-      <div className="mt-5 space-y-6">
+      <div
+        className={
+          isDeck
+            ? "mt-5 grid gap-6 md:grid-cols-2 lg:grid-cols-3"
+            : "mt-5 space-y-6"
+        }
+      >
         <fieldset>
           <legend className="mb-2 text-xs font-bold text-forest-900">Rent range</legend>
           <div className="grid grid-cols-2 gap-2">
@@ -118,7 +129,7 @@ export function PropertyFilterPanel({
 
         <fieldset>
           <legend className="mb-2 text-xs font-bold text-forest-900">Property types</legend>
-          <div className="space-y-1">
+          <div className={isDeck ? "grid grid-cols-2 gap-x-4" : "space-y-1"}>
             {PROPERTY_TYPES.map((type) => (
               <label key={type} className="flex min-h-11 items-center gap-3 text-sm font-semibold text-forest-900">
                 <Checkbox
@@ -133,7 +144,7 @@ export function PropertyFilterPanel({
 
         <fieldset>
           <legend className="mb-2 text-xs font-bold text-forest-900">Amenities</legend>
-          <div className="grid grid-cols-1 gap-1 sm:grid-cols-2 lg:grid-cols-1">
+          <div className={isDeck ? "grid grid-cols-2 gap-x-4" : "grid grid-cols-1 gap-1"}>
             {PROPERTY_AMENITIES.map((amenity) => (
               <label key={amenity} className="flex min-h-11 items-center gap-3 text-sm font-semibold text-forest-900">
                 <Checkbox
@@ -155,11 +166,13 @@ export function PropertyFilterPanel({
           </div>
         ) : null}
 
-        <div className="grid grid-cols-2 gap-2">
-          <button type="button" onClick={onCancel} className="stitch-button stitch-button-secondary w-full">
-            Cancel
-          </button>
-          <button type="button" onClick={onApply} className="stitch-button w-full" disabled={counting}>
+        <div className={isDrawer ? "grid grid-cols-2 gap-2" : isDeck ? "flex items-end md:col-span-2 lg:col-span-3" : "block"}>
+          {isDrawer ? (
+            <button type="button" onClick={onCancel} className="stitch-button stitch-button-secondary w-full">
+              Cancel
+            </button>
+          ) : null}
+          <button type="button" onClick={onApply} className={isDeck ? "stitch-button ml-auto min-w-52" : "stitch-button w-full"} disabled={counting}>
             {counting ? (
               <><LoaderCircle className="size-4 animate-spin" aria-hidden="true" /> Checking…</>
             ) : resultCount === null ? (

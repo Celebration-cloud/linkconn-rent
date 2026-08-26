@@ -1,8 +1,8 @@
 import { z } from "zod";
-import type { Property } from "@/domain/types/property";
+import type { Property, PropertyCostView } from "@/domain/types/property";
 import type { PropertyPagination } from "@/domain/types/property-search";
 
-export const PROPERTY_SEARCH_RESTORE_VERSION = 3 as const;
+export const PROPERTY_SEARCH_RESTORE_VERSION = 4 as const;
 export const PROPERTY_SEARCH_RESTORE_TTL = 30 * 60 * 1_000;
 const STORAGE_PREFIX = "linkconn.property-search:";
 
@@ -14,6 +14,7 @@ export type PropertySearchRestorationState = {
   batches: PropertyResultBatch[];
   pagination: PropertyPagination;
   compareIds: string[];
+  costView: PropertyCostView;
   lastVisiblePage: number;
   scrollY: number;
 };
@@ -44,6 +45,7 @@ const restorationSchema = z.object({
     hasPreviousPage: z.boolean(),
   }),
   compareIds: z.array(z.string()).max(4),
+  costView: z.enum(["rent", "move-in"]),
   lastVisiblePage: z.number().int().positive(),
   scrollY: z.number().finite().nonnegative(),
 });

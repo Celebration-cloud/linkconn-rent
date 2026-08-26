@@ -111,7 +111,7 @@ export default function LoginForm({
       </label>
 
       {error && (
-        <div role="alert" className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div role="alert" className="border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           {error}
         </div>
       )}
@@ -139,7 +139,7 @@ export default function LoginForm({
         </span>
       </div>
 
-      <div className="rounded-lg border border-forest-100 bg-forest-50 px-4 py-3 text-sm text-forest-900">
+      <div className="border border-forest-100 bg-forest-50 px-4 py-3 text-sm text-forest-900">
         <div className="flex items-start gap-2">
           <Check className="mt-0.5 h-4 w-4 shrink-0" />
           <p>We check your account status before opening the correct workspace.</p>

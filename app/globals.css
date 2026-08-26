@@ -9,6 +9,68 @@
 }
 
 @layer components {
+  .surface-intro {
+    @apply flex flex-col gap-6 border-b border-line pb-8 lg:flex-row lg:items-end lg:justify-between;
+  }
+
+  .surface-intro h1 {
+    @apply max-w-4xl text-balance text-4xl font-extrabold leading-[1.02] tracking-[-0.04em] text-ink sm:text-5xl lg:text-6xl;
+  }
+
+  .surface-intro p {
+    @apply mt-4 max-w-3xl text-pretty text-base leading-7 text-muted;
+  }
+
+  .surface-intro-aside {
+    @apply shrink-0 lg:max-w-sm;
+  }
+
+  .surface-intro-inverse {
+    @apply border-white/15;
+  }
+
+  .surface-intro-inverse h1 {
+    @apply text-white;
+  }
+
+  .surface-intro-inverse p {
+    @apply text-sand-300;
+  }
+
+  .status-badge {
+    @apply inline-flex min-h-7 shrink-0 items-center gap-2 px-2.5 text-[11px] font-extrabold;
+  }
+
+  .status-badge > span {
+    @apply size-1.5 shrink-0 rounded-full bg-current;
+  }
+
+  .status-badge-success { @apply bg-forest-100 text-forest-900; }
+  .status-badge-warning { @apply bg-warning-soft text-warning; }
+  .status-badge-error { @apply bg-error-soft text-error; }
+  .status-badge-neutral { @apply bg-sand-200 text-forest-900; }
+
+  .empty-state {
+    @apply grid min-h-80 place-items-center content-center border border-dashed border-line bg-white px-6 py-12 text-center;
+  }
+
+  .empty-state > svg { @apply size-8 text-forest-600; }
+  .empty-state h2 { @apply mt-4 text-2xl font-extrabold tracking-[-0.025em] text-ink; }
+  .empty-state p { @apply mt-2 max-w-md text-sm leading-6 text-muted; }
+  .empty-state-compact { @apply min-h-56; }
+
+  .segmented-control {
+    @apply inline-grid min-h-12 grid-flow-col items-center border border-line bg-white p-1;
+  }
+
+  .segmented-control button {
+    @apply min-h-10 px-4 text-sm font-bold text-muted transition-colors hover:bg-sand-100 hover:text-forest-900;
+  }
+
+  .segmented-control button[aria-pressed="true"] {
+    @apply bg-forest-950 text-white;
+  }
+
   .admin-canvas {
     @apply mx-auto w-full max-w-[100rem] p-4 pb-24 sm:p-6 md:pb-8 lg:p-8;
   }
@@ -43,6 +105,10 @@
 
   .admin-ledger {
     @apply mt-4 overflow-hidden border border-[#d6ddd5] bg-white;
+  }
+
+  .admin-ledger tbody tr {
+    @apply transition-colors hover:bg-[#f7f9f6];
   }
 
   .admin-scrollbar {
