@@ -2,11 +2,11 @@
 
 import { useState, type FormEvent } from "react";
 import { z } from "zod";
-import { Check, Shield } from "@/components/shared/icons";
+import { CheckCircle2, Mail, ShieldCheck } from "lucide-react";
 import { Input } from "@/components/ui/form-controls";
 
 const schema = z.object({
-  email: z.string().email("Enter a valid email"),
+  email: z.string().email("Enter a valid email address"),
 });
 
 type ForgotPasswordFormProps = {
@@ -30,7 +30,7 @@ export default function ForgotPasswordForm({
 
     const parsed = schema.safeParse({ email });
     if (!parsed.success) {
-      setError(parsed.error.issues[0]?.message || "Enter your email");
+      setError(parsed.error.issues[0]?.message || "Enter your registered email");
       return;
     }
 
@@ -57,45 +57,51 @@ export default function ForgotPasswordForm({
       return;
     }
 
-    setSuccess(result.data?.message || "Check your inbox for the reset link.");
+    setSuccess(result.data?.message || "We sent a secure password reset link to your email.");
   };
 
   return (
     <form onSubmit={submit} className="space-y-4">
       <label className="block">
-        <span className="mb-1.5 block text-sm font-semibold text-navy-700">Email</span>
+        <span className="mb-1.5 block text-xs font-bold text-forest-950">Registered email address</span>
         <Input
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           type="email"
           autoComplete="email"
-          placeholder="you@example.com"
+          placeholder="e.g. name@example.com"
+          leadingIcon={Mail}
+          required
         />
       </label>
 
-      {error && <div role="alert" className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}
+      {error && (
+        <div role="alert" className="rounded-lg border border-red-200 bg-red-50 p-3 text-xs font-medium text-red-700">
+          {error}
+        </div>
+      )}
 
       {success && (
-        <div role="status" className="rounded-2xl border border-brandgreen-200 bg-brandgreen-50 px-4 py-3 text-sm text-brandgreen-900">
-          <div className="flex items-start gap-2">
-            <Check className="mt-0.5 h-4 w-4 shrink-0" />
-            <p>{success}</p>
-          </div>
+        <div role="status" className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-xs font-bold text-emerald-900 flex items-start gap-2">
+          <CheckCircle2 className="size-4 text-emerald-600 shrink-0 mt-0.5" />
+          <p className="leading-relaxed">{success}</p>
         </div>
       )}
 
       <button
         type="submit"
         disabled={loading}
-        className="w-full rounded-2xl bg-navy-950 px-4 py-3.5 text-sm font-bold text-white shadow-lg shadow-navy-950/15 transition-colors hover:bg-navy-900 disabled:cursor-not-allowed disabled:opacity-70"
+        className="stitch-button w-full justify-center py-3 text-sm font-black disabled:cursor-not-allowed disabled:opacity-70 shadow-sm"
       >
-        {loading ? "Sending..." : "Send reset link"}
+        {loading ? "Sending reset instructions..." : "Send Password Reset Link"}
       </button>
 
-      <div className="rounded-2xl border border-navy-100 bg-navy-50/70 px-4 py-3 text-sm text-navy-600">
+      <div className="rounded-lg border border-forest-100 bg-forest-50/70 p-3 text-xs text-forest-950">
         <div className="flex items-start gap-2">
-          <Shield className="mt-0.5 h-4 w-4 shrink-0 text-brandgreen-600" />
-          <p>We’ll send a secure link that returns you to the password reset page.</p>
+          <ShieldCheck className="mt-0.5 size-4 shrink-0 text-forest-700" />
+          <p className="leading-relaxed">
+            We will send a one-time cryptographic token to your registered email to safely reset your credentials.
+          </p>
         </div>
       </div>
     </form>

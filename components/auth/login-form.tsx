@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { z } from "zod";
 import { motion } from "framer-motion";
 import { Check, Sparkle } from "@/components/shared/icons";
-import { LockKeyhole, Mail } from "lucide-react";
+import { Eye, EyeOff, LockKeyhole, Mail, ShieldCheck } from "lucide-react";
 import { Input } from "@/components/ui/form-controls";
 import { getInternalRedirectPath } from "@/lib/security/internal-redirect";
 
@@ -29,6 +29,7 @@ export default function LoginForm({
   const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -87,31 +88,52 @@ export default function LoginForm({
   return (
     <form onSubmit={submit} className="space-y-4">
       <label className="block">
-        <span className="mb-1.5 block text-xs font-bold text-forest-900">Email address</span>
+        <span className="mb-1.5 block text-xs font-bold text-forest-950">Email address</span>
         <Input
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            type="email"
-            autoComplete="email"
-            placeholder="you@example.com"
-            leadingIcon={Mail}
-          />
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          type="email"
+          autoComplete="email"
+          placeholder="e.g. name@example.com"
+          leadingIcon={Mail}
+          required
+        />
       </label>
 
-      <label className="block">
-        <span className="mb-1.5 block text-xs font-bold text-forest-900">Password</span>
-        <Input
+      <label className="block relative">
+        <div className="flex items-center justify-between mb-1.5">
+          <span className="text-xs font-bold text-forest-950">Password</span>
+          <button
+            type="button"
+            onClick={() => router.push(`${forgotPasswordHref}?next=${encodeURIComponent(next)}`)}
+            className="text-xs font-bold text-forest-700 hover:text-forest-950 hover:underline"
+          >
+            Forgot password?
+          </button>
+        </div>
+        <div className="relative">
+          <Input
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            type="password"
+            type={showPassword ? "text" : "password"}
             autoComplete="current-password"
             placeholder="Enter your password"
             leadingIcon={LockKeyhole}
+            required
           />
+          <button
+            type="button"
+            onClick={() => setShowPassword((prev) => !prev)}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-ink transition"
+            aria-label={showPassword ? "Hide password" : "Show password"}
+          >
+            {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+          </button>
+        </div>
       </label>
 
       {error && (
-        <div role="alert" className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div role="alert" className="rounded-lg border border-red-200 bg-red-50 p-3 text-xs font-medium text-red-700">
           {error}
         </div>
       )}
@@ -120,29 +142,17 @@ export default function LoginForm({
         whileTap={{ scale: 0.99 }}
         type="submit"
         disabled={loading}
-        className="stitch-button w-full disabled:cursor-not-allowed disabled:opacity-70"
+        className="stitch-button w-full justify-center py-3 text-sm font-black disabled:cursor-not-allowed disabled:opacity-70 shadow-sm"
       >
-        {loading ? "Signing in and checking account…" : "Sign in"}
+        {loading ? "Authenticating & verifying workspace…" : "Sign In to Account"}
       </motion.button>
 
-      <div className="flex items-center justify-between text-sm">
-        <button
-          type="button"
-          onClick={() => router.push(`${forgotPasswordHref}?next=${encodeURIComponent(next)}`)}
-          className="min-h-11 font-bold text-forest-700 hover:underline"
-        >
-          Reset password
-        </button>
-        <span className="inline-flex items-center gap-1 text-muted">
-          <Sparkle className="h-4 w-4 text-forest-600" />
-          Email only
-        </span>
-      </div>
-
-      <div className="rounded-lg border border-forest-100 bg-forest-50 px-4 py-3 text-sm text-forest-900">
+      <div className="rounded-lg border border-forest-100 bg-forest-50/70 p-3 text-xs text-forest-950">
         <div className="flex items-start gap-2">
-          <Check className="mt-0.5 h-4 w-4 shrink-0" />
-          <p>We check your account status before opening the correct workspace.</p>
+          <ShieldCheck className="mt-0.5 size-4 shrink-0 text-forest-700" />
+          <p className="leading-relaxed">
+            Your role (Tenant, Landlord, or Property Manager) is automatically detected to load the appropriate dashboard tools.
+          </p>
         </div>
       </div>
     </form>

@@ -5,7 +5,22 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { z } from "zod";
 import { authClient } from "@/lib/neon-auth-client";
-import { Check, Shield, Verified } from "@/components/shared/icons";
+import {
+  Building2,
+  Check,
+  CheckCircle2,
+  Eye,
+  EyeOff,
+  Home,
+  LockKeyhole,
+  Mail,
+  Shield,
+  ShieldCheck,
+  Sparkles,
+  User,
+  Users,
+  Wallet,
+} from "lucide-react";
 import { Input } from "@/components/ui/form-controls";
 import {
   ROLE_OPTIONS,
@@ -55,23 +70,30 @@ function PlanCard({
     <button
       type="button"
       onClick={onClick}
-      className={`w-full rounded-2xl border p-4 text-left transition ${
+      className={`w-full p-4 text-left border transition relative rounded-xl ${
         selected
-          ? "border-brandgreen-500 bg-brandgreen-50 shadow-sm"
-          : "border-navy-200 bg-white hover:border-navy-300"
+          ? "border-forest-900 bg-forest-50/80 shadow-xs ring-1 ring-forest-900"
+          : "border-[#d6ddd5] bg-white hover:bg-[#f8faf7] hover:border-forest-400"
       }`}
     >
       <div className="flex items-start justify-between gap-3">
         <div>
-          <div className="text-sm font-bold text-navy-950">{title}</div>
-          <p className="mt-1 text-xs leading-5 text-navy-500">{description}</p>
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-extrabold text-forest-950">{title}</span>
+            {featured && (
+              <span className="rounded-full bg-lime px-2 py-0.5 text-[10px] font-black uppercase text-forest-950">
+                Popular
+              </span>
+            )}
+          </div>
+          <p className="mt-1 text-xs leading-relaxed text-muted">{description}</p>
         </div>
-        <span className="text-sm font-black text-navy-950">{price}</span>
+        <span className="text-sm font-black tabular-nums text-forest-950 shrink-0">{price}</span>
       </div>
-      <div className="mt-3 flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-navy-500">
-        <span>{featured ? "Popular" : "Plan"}</span>
-        <span className={selected ? "text-brandgreen-700" : "text-navy-400"}>
-          {selected ? "Selected" : "Tap to choose"}
+      <div className="mt-3 flex items-center justify-between text-[11px] font-bold">
+        <span className="text-muted">Membership Tier</span>
+        <span className={selected ? "text-forest-900 font-extrabold flex items-center gap-1" : "text-muted"}>
+          {selected ? <><Check className="size-3.5" /> Selected</> : "Tap to choose"}
         </span>
       </div>
     </button>
@@ -87,6 +109,7 @@ export default function SignupForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
@@ -204,138 +227,175 @@ export default function SignupForm() {
 
   return (
     <form onSubmit={submit} className="space-y-5">
+      {/* Name and Email */}
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="block sm:col-span-2">
-          <span className="mb-1.5 block text-sm font-semibold text-navy-700">Full name</span>
+          <span className="mb-1.5 block text-xs font-bold text-forest-950">Full legal name</span>
           <Input
             value={name}
             onChange={(e) => setName(e.target.value)}
             type="text"
             autoComplete="name"
-            placeholder="Ada Okafor"
+            placeholder="e.g. Adaora Okafor"
+            leadingIcon={User}
+            required
           />
         </label>
 
         <label className="block sm:col-span-2">
-          <span className="mb-1.5 block text-sm font-semibold text-navy-700">Email</span>
+          <span className="mb-1.5 block text-xs font-bold text-forest-950">Email address</span>
           <Input
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             type="email"
             autoComplete="email"
-            placeholder="you@example.com"
+            placeholder="e.g. adaora@example.com"
             readOnly={isAdminInvitation}
+            leadingIcon={Mail}
+            required
           />
         </label>
       </div>
 
-      {!isAdminInvitation && <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <span className="text-sm font-semibold text-navy-700">Choose your role</span>
-          <span className="text-xs font-medium text-navy-400">Required</span>
+      {/* Role Selection */}
+      {!isAdminInvitation && (
+        <div className="space-y-2.5">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-forest-950">I am joining LinkConn Rent as:</span>
+            <span className="text-[11px] font-semibold text-forest-700">Select persona</span>
+          </div>
+          <div className="grid gap-2.5 sm:grid-cols-2">
+            {ROLE_OPTIONS.map((choice) => {
+              const isSelected = role === choice.role;
+              return (
+                <button
+                  key={choice.role}
+                  type="button"
+                  onClick={() => setRole(choice.role)}
+                  className={`p-3.5 text-left border rounded-xl transition ${
+                    isSelected
+                      ? "border-forest-950 bg-forest-950 text-white shadow-sm ring-1 ring-forest-900"
+                      : "border-[#d6ddd5] bg-white text-ink hover:bg-[#f8faf7] hover:border-forest-400"
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-black">{choice.title}</span>
+                    <span className={`size-4 grid place-items-center rounded-full text-[10px] ${
+                      isSelected ? "bg-lime text-forest-950 font-black" : "border border-muted"
+                    }`}>
+                      {isSelected ? "✓" : ""}
+                    </span>
+                  </div>
+                  <p className={`mt-1 text-[11px] leading-relaxed ${isSelected ? "text-forest-200" : "text-muted"}`}>
+                    {choice.description}
+                  </p>
+                </button>
+              );
+            })}
+          </div>
         </div>
-        <div className="grid gap-3 sm:grid-cols-2">
-          {ROLE_OPTIONS.map((choice) => (
-            <button
-              key={choice.role}
-              type="button"
-              onClick={() => setRole(choice.role)}
-              className={`rounded-2xl border p-4 text-left transition ${
-                role === choice.role
-                  ? "border-navy-950 bg-navy-950 text-white shadow-sm"
-                  : "border-navy-200 bg-white text-navy-800 hover:border-navy-300"
-              }`}
-            >
-              <div className="text-sm font-bold">{choice.title}</div>
-              <p className={`mt-1 text-xs leading-5 ${role === choice.role ? "text-white/75" : "text-navy-500"}`}>
-                {choice.description}
-              </p>
-            </button>
-          ))}
-        </div>
-      </div>}
+      )}
 
-      {!isAdminInvitation && <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <span className="text-sm font-semibold text-navy-700">Choose your plan</span>
-          <span className="text-xs font-medium text-navy-400">
-            {role === "Landlord" ? "Billing selects monthly or annual" : "Annual billing"}
-          </span>
-        </div>
-        <div className="grid gap-3">
-          {selectedPlans.map((plan) => {
-            const displayPrice =
-              plan.priceMonthly === 0 && plan.priceAnnual === 0
-                ? "Free"
-                : role === "Tenant"
+      {/* Plan Selection */}
+      {!isAdminInvitation && (
+        <div className="space-y-2.5">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-forest-950">Select your membership plan:</span>
+            <span className="text-[11px] text-muted font-medium">
+              {role === "Landlord" ? "Monthly or Annual available" : "100% Free for Tenants"}
+            </span>
+          </div>
+          <div className="grid gap-2">
+            {selectedPlans.map((plan) => {
+              const displayPrice =
+                plan.priceMonthly === 0 && plan.priceAnnual === 0
+                  ? "Free"
+                  : role === "Tenant"
                   ? `₦${plan.priceAnnual.toLocaleString("en-NG")}`
                   : billingPeriod === "monthly"
-                    ? `₦${plan.priceMonthly.toLocaleString("en-NG")}/mo`
-                    : `₦${plan.priceAnnual.toLocaleString("en-NG")}/mo billed yearly`;
+                  ? `₦${plan.priceMonthly.toLocaleString("en-NG")}/mo`
+                  : `₦${plan.priceAnnual.toLocaleString("en-NG")}/mo billed yearly`;
 
-            return (
-              <PlanCard
-                key={plan.key}
-                title={plan.name}
-                description={plan.description}
-                price={displayPrice}
-                selected={planKey === plan.key}
-                featured={plan.popular}
-                onClick={() =>
-                  setPlan(
-                    plan.key,
-                    role === "Landlord" && plan.key !== "landlord-standard"
-                      ? billingPeriod
-                      : getBillingPeriod(role, plan.key)
-                  )
-                }
-              />
-            );
-          })}
+              return (
+                <PlanCard
+                  key={plan.key}
+                  title={plan.name}
+                  description={plan.description}
+                  price={displayPrice}
+                  selected={planKey === plan.key}
+                  featured={plan.popular}
+                  onClick={() =>
+                    setPlan(
+                      plan.key,
+                      role === "Landlord" && plan.key !== "landlord-standard"
+                        ? billingPeriod
+                        : getBillingPeriod(role, plan.key)
+                    )
+                  }
+                />
+              );
+            })}
+          </div>
         </div>
-      </div>}
+      )}
 
+      {/* Landlord Billing Cycle Switcher */}
       {!isAdminInvitation && role === "Landlord" && (
-        <div className="flex items-center justify-between rounded-2xl border border-navy-100 bg-navy-50/70 px-4 py-3">
+        <div className="flex items-center justify-between rounded-xl border border-[#d6ddd5] bg-sand-100 p-3">
           <div>
-            <div className="text-sm font-semibold text-navy-900">Billing cycle</div>
-            <p className="text-xs text-navy-500">Monthly saves flexibility. Annual is cheaper over a year.</p>
+            <div className="text-xs font-extrabold text-forest-950">Billing Cycle</div>
+            <p className="text-[11px] text-muted">Annual billing saves up to 20% on landlord management fees.</p>
           </div>
           <button
             type="button"
             onClick={() => setPlan(planKey, billingPeriod === "monthly" ? "annual" : "monthly")}
-            className="rounded-full bg-white px-4 py-2 text-xs font-bold text-navy-800 shadow-sm ring-1 ring-navy-200 transition hover:bg-navy-50"
+            className="rounded-lg bg-white px-3 py-1.5 text-xs font-black text-forest-900 border border-[#d6ddd5] hover:bg-sand-50 transition"
           >
-            {billingPeriod === "monthly" ? "Switch to annual" : "Switch to monthly"}
+            {billingPeriod === "monthly" ? "Switch to Annual" : "Switch to Monthly"}
           </button>
         </div>
       )}
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <label className="block">
-          <span className="mb-1.5 block text-sm font-semibold text-navy-700">Password</span>
-          <Input
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            type="password"
-            autoComplete="new-password"
-            placeholder={isAdminInvitation ? "At least 12 characters" : "At least 8 characters"}
-          />
+      {/* Passwords */}
+      <div className="grid gap-3 sm:grid-cols-2">
+        <label className="block relative">
+          <span className="mb-1.5 block text-xs font-bold text-forest-950">Password</span>
+          <div className="relative">
+            <Input
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              type={showPassword ? "text" : "password"}
+              autoComplete="new-password"
+              placeholder={isAdminInvitation ? "Min 12 characters" : "Min 8 characters"}
+              leadingIcon={LockKeyhole}
+              required
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((p) => !p)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-ink transition"
+            >
+              {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+            </button>
+          </div>
         </label>
+
         <label className="block">
-          <span className="mb-1.5 block text-sm font-semibold text-navy-700">Confirm password</span>
+          <span className="mb-1.5 block text-xs font-bold text-forest-950">Confirm password</span>
           <Input
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
-            type="password"
+            type={showPassword ? "text" : "password"}
             autoComplete="new-password"
             placeholder="Repeat password"
+            leadingIcon={LockKeyhole}
+            required
           />
         </label>
       </div>
 
       {error && (
-        <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-xs font-medium text-red-700">
           {error}
         </div>
       )}
@@ -344,12 +404,10 @@ export default function SignupForm() {
         <motion.div
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          className="rounded-2xl border border-brandgreen-200 bg-brandgreen-50 px-4 py-3 text-sm text-brandgreen-900"
+          className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-xs font-bold text-emerald-900 flex items-center gap-2"
         >
-          <div className="flex items-start gap-2">
-            <Verified className="mt-0.5 h-4 w-4 shrink-0" />
-            <p>{success}</p>
-          </div>
+          <CheckCircle2 className="size-4 text-emerald-600 shrink-0" />
+          <p>{success}</p>
         </motion.div>
       )}
 
@@ -357,19 +415,19 @@ export default function SignupForm() {
         whileTap={{ scale: 0.99 }}
         type="submit"
         disabled={loading}
-        className="flex w-full items-center justify-center gap-2 rounded-2xl bg-navy-950 px-4 py-3.5 text-sm font-bold text-white shadow-lg shadow-navy-950/15 transition-colors hover:bg-navy-900 disabled:cursor-not-allowed disabled:opacity-70"
+        className="stitch-button w-full justify-center py-3 text-sm font-black disabled:cursor-not-allowed disabled:opacity-70 shadow-sm"
       >
-        {loading ? "Creating account..." : "Create account"}
+        {loading ? "Creating your secure account..." : "Create Account & Continue"}
       </motion.button>
 
-      <div className="grid gap-3 rounded-2xl border border-navy-100 bg-navy-50/70 p-4 text-sm text-navy-600">
+      <div className="rounded-xl border border-forest-100 bg-forest-50/70 p-3.5 text-xs text-forest-950 space-y-1.5">
         <div className="flex items-start gap-2">
-          <Shield className="mt-0.5 h-4 w-4 shrink-0 text-brandgreen-600" />
-          <p>{isAdminInvitation ? "Your role is granted only after the one-time invitation is accepted." : "Your role and plan are saved in session-scoped flow state and carried through verification."}</p>
-        </div>
-        <div className="flex items-start gap-2">
-          <Check className="mt-0.5 h-4 w-4 shrink-0 text-brandgreen-600" />
-          <p>We will redirect you back to onboarding after email verification.</p>
+          <ShieldCheck className="mt-0.5 size-4 shrink-0 text-forest-700" />
+          <p className="leading-relaxed">
+            {isAdminInvitation
+              ? "Your role is granted after one-time invitation acceptance."
+              : "We will send a 6-digit confirmation code to verify your inbox before activating your dashboard."}
+          </p>
         </div>
       </div>
     </form>
