@@ -31,6 +31,8 @@ export type Property = {
   description: string;
 };
 
+export type PropertyCostView = "rent" | "move-in";
+
 export type Maintenance = {
   id: string;
   title: string;

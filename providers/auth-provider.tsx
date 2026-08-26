@@ -594,7 +594,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
 
         toastInfo("Redirecting to payment", `Opening ${plan.name} checkout.`);
-        useAuthFlowStore.getState().clearFlow();
         window.location.assign(checkoutData.data.authorizationUrl);
         return { ok: true };
       }

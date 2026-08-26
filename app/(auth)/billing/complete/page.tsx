@@ -15,11 +15,11 @@ export default function BillingCompletePage() {
   const clearFlow = useAuthFlowStore((state) => state.clearFlow);
   const message = "Verifying your payment...";
   const [error, setError] = useState("");
+  const reference = searchParams.get("reference");
+  const visibleError = error || (!reference ? "Missing payment reference." : "");
 
   useEffect(() => {
-    const reference = searchParams.get("reference");
     if (!reference) {
-      setError("Missing payment reference.");
       toastError("Payment verification failed", "Missing payment reference.");
       return;
     }
@@ -47,28 +47,28 @@ export default function BillingCompletePage() {
     return () => {
       active = false;
     };
-  }, [clearFlow, router, searchParams]);
+  }, [clearFlow, reference, router]);
 
   return (
-    <section className="min-h-[100dvh] bg-[radial-gradient(circle_at_top_left,_rgba(184,227,110,0.18),_transparent_34%),linear-gradient(180deg,#fdf9f0_0%,#f1eee5_100%)] px-4 py-8 sm:px-6 lg:px-8">
+    <section className="min-h-[100dvh] bg-sand-100 px-4 py-8 sm:px-6 lg:px-8">
       <div className="mx-auto flex min-h-[calc(100dvh-4rem)] max-w-3xl items-center justify-center">
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          className="w-full rounded-[2rem] border border-white/80 bg-white/95 p-6 text-center shadow-[0_24px_80px_rgba(18,55,42,0.12)]"
+          className="w-full border border-line bg-white p-6 text-center"
         >
           <Link href="/" className="mx-auto mb-6 inline-flex items-center" aria-label="LinkConn Rent home"><Logo variant="lockup" priority className="h-14 w-auto" sizes="118px" /></Link>
-          {error ? (
+          {visibleError ? (
             <div className="space-y-4">
               <TriangleAlert className="mx-auto h-12 w-12 text-red-500" />
               <div>
                 <h1 className="text-2xl font-black tracking-tight text-navy-950">Payment not completed</h1>
-                <p className="mt-2 text-sm leading-7 text-navy-600">{error}</p>
+                <p className="mt-2 text-sm leading-7 text-navy-600">{visibleError}</p>
               </div>
               <button
                 type="button"
                 onClick={() => router.replace("/pricing")}
-                className="rounded-2xl bg-navy-950 px-5 py-3 text-sm font-bold text-white transition hover:bg-navy-800"
+                className="stitch-button"
               >
                 Back to pricing
               </button>
@@ -80,7 +80,7 @@ export default function BillingCompletePage() {
                 <h1 className="text-2xl font-black tracking-tight text-navy-950">Completing checkout</h1>
                 <p className="mt-2 text-sm leading-7 text-navy-600">{message}</p>
               </div>
-              <div className="inline-flex items-center gap-2 rounded-full bg-brandgreen-50 px-4 py-2 text-xs font-bold text-brandgreen-700">
+              <div className="inline-flex items-center gap-2 bg-forest-50 px-4 py-2 text-xs font-bold text-forest-700">
                 <ShieldCheck className="h-4 w-4" />
                 Secure Paystack verification
               </div>

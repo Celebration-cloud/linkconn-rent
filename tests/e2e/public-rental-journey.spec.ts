@@ -151,6 +151,7 @@ test("property discovery keeps search and staged mobile filters in the URL", asy
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/properties", { waitUntil: "domcontentloaded" });
+  await page.waitForLoadState("networkidle");
 
   const search = page.getByRole("textbox", { name: "Search properties" });
   await search.fill("Yaba studio");
@@ -182,6 +183,81 @@ test("property discovery keeps search and staged mobile filters in the URL", asy
   const sortSheet = page.getByRole("dialog", { name: "Sort properties" });
   await sortSheet.getByRole("button", { name: "Newest" }).click();
   await expect(page).toHaveURL(/sort=newest/);
+});
+
+test("property discovery adapts its complete workspace across tablet and desktop", async ({
+  page,
+}) => {
+  for (const viewport of [
+    { width: 768, height: 900 },
+    { width: 1024, height: 900 },
+  ]) {
+    await page.setViewportSize(viewport);
+    await page.goto("/properties", { waitUntil: "domcontentloaded" });
+    await page.waitForLoadState("networkidle");
+
+    const tabletControls = page.getByRole("group", { name: "Tablet property controls" });
+    await expect(tabletControls.getByRole("button", { name: "Filters" })).toBeVisible();
+    await expect(tabletControls.getByRole("button", { name: "Move-in cost" })).toBeVisible();
+    await tabletControls.getByRole("button", { name: "Filters" }).click();
+    await expect(page.getByRole("region", { name: "Tablet property filters" })).toBeVisible();
+    await expect(page.getByRole("dialog", { name: "More property filters" })).toHaveCount(0);
+    expect(
+      await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
+    ).toBe(true);
+  }
+
+  for (const viewport of [
+    { width: 1280, height: 900 },
+    { width: 1440, height: 900 },
+  ]) {
+    await page.setViewportSize(viewport);
+    await page.goto("/properties", { waitUntil: "domcontentloaded" });
+    await page.waitForLoadState("networkidle");
+
+    await expect(page.getByRole("heading", { name: "All filters" })).toBeVisible();
+    for (const label of [
+      "Rent period",
+      "Bedrooms",
+      "Rent range",
+      "Bathrooms",
+      "Property types",
+      "Amenities",
+    ]) {
+      await expect(page.getByText(label, { exact: true }).first()).toBeVisible();
+    }
+    const desktopControls = page.getByRole("group", { name: "Desktop property controls" });
+    await expect(desktopControls.getByRole("combobox", { name: "Sort properties" })).toBeVisible();
+    await expect(desktopControls.getByRole("link", { name: "Map" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Compare" }).first()).toBeVisible();
+    await expect(page.locator('button[aria-label^="Save "]').first()).toBeVisible();
+    expect(
+      await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
+    ).toBe(true);
+  }
+});
+
+test("desktop search stays anchored and the cost lens restores after viewing a property", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/properties", { waitUntil: "domcontentloaded" });
+
+  const search = page.getByRole("textbox", { name: "Search properties" });
+  await page.evaluate(() => window.scrollTo(0, 900));
+  await expect.poll(async () => (await search.boundingBox())?.y ?? 0).toBeGreaterThanOrEqual(64);
+  await expect.poll(async () => (await search.boundingBox())?.y ?? 100).toBeLessThan(82);
+
+  const moveInLens = page.getByRole("button", { name: "Move-in cost" });
+  await moveInLens.click();
+  await expect(moveInLens).toHaveAttribute("aria-pressed", "true");
+  await page.getByRole("link", { name: "View details" }).first().click();
+  await page.getByRole("link", { name: "Properties", exact: true }).click();
+  await expect(page).toHaveURL(/\/properties(?:\?|$)/);
+  await expect(page.getByRole("button", { name: "Move-in cost" })).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
 });
 
 test("Leaflet map remains usable at acceptance viewports", async (

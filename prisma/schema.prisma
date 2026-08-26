@@ -252,6 +252,7 @@ model Profile {
   applications             Application[]               @relation("TenantApplications")
   maintenance              MaintenanceRequest[]
   payments                 Payment[]
+  accountPlanPayments      AccountPlanPayment[]
   savedProperties          SavedProperty[]
   requestedViewings        Viewing[]                   @relation("TenantViewings")
   hostedViewings           Viewing[]                   @relation("LandlordViewings")
@@ -283,6 +284,26 @@ model Profile {
   verificationFindings     VerificationReviewFinding[] @relation("VerificationFindingReviewer")
 
   @@map("profiles")
+}
+
+model AccountPlanPayment {
+  id            String        @id @default(uuid())
+  profileId     String
+  profile       Profile       @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  reference     String        @unique
+  planKey       String
+  billingPeriod String
+  amountMinor   Int
+  currency      String        @default("NGN")
+  status        PaymentStatus @default(Processing)
+  paidAt        DateTime?
+  failureReason String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@index([profileId, status, createdAt])
+  @@index([profileId, paidAt])
+  @@map("account_plan_payments")
 }
 
 model AdminInvitation {

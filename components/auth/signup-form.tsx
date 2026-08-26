@@ -55,22 +55,22 @@ function PlanCard({
     <button
       type="button"
       onClick={onClick}
-      className={`w-full rounded-2xl border p-4 text-left transition ${
+      className={`w-full border p-4 text-left transition ${
         selected
-          ? "border-brandgreen-500 bg-brandgreen-50 shadow-sm"
-          : "border-navy-200 bg-white hover:border-navy-300"
+          ? "border-forest-800 bg-forest-50"
+          : "border-line bg-white hover:border-forest-400"
       }`}
     >
       <div className="flex items-start justify-between gap-3">
         <div>
-          <div className="text-sm font-bold text-navy-950">{title}</div>
-          <p className="mt-1 text-xs leading-5 text-navy-500">{description}</p>
+          <div className="text-sm font-bold text-ink">{title}</div>
+          <p className="mt-1 text-xs leading-5 text-muted">{description}</p>
         </div>
-        <span className="text-sm font-black text-navy-950">{price}</span>
+        <span className="text-sm font-extrabold tabular-nums text-ink">{price}</span>
       </div>
-      <div className="mt-3 flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-navy-500">
-        <span>{featured ? "Popular" : "Plan"}</span>
-        <span className={selected ? "text-brandgreen-700" : "text-navy-400"}>
+      <div className="mt-3 flex items-center justify-between text-[11px] font-bold text-muted">
+        <span>{featured ? "Recommended plan" : "Plan option"}</span>
+        <span className={selected ? "text-forest-700" : "text-muted"}>
           {selected ? "Selected" : "Tap to choose"}
         </span>
       </div>
@@ -240,10 +240,10 @@ export default function SignupForm() {
               key={choice.role}
               type="button"
               onClick={() => setRole(choice.role)}
-              className={`rounded-2xl border p-4 text-left transition ${
+              className={`border p-4 text-left transition ${
                 role === choice.role
-                  ? "border-navy-950 bg-navy-950 text-white shadow-sm"
-                  : "border-navy-200 bg-white text-navy-800 hover:border-navy-300"
+                  ? "border-forest-950 bg-forest-950 text-white"
+                  : "border-line bg-white text-forest-900 hover:border-forest-400"
               }`}
             >
               <div className="text-sm font-bold">{choice.title}</div>
@@ -296,7 +296,7 @@ export default function SignupForm() {
       </div>}
 
       {!isAdminInvitation && role === "Landlord" && (
-        <div className="flex items-center justify-between rounded-2xl border border-navy-100 bg-navy-50/70 px-4 py-3">
+        <div className="flex flex-col justify-between gap-3 border border-line bg-sand-100 px-4 py-4 sm:flex-row sm:items-center">
           <div>
             <div className="text-sm font-semibold text-navy-900">Billing cycle</div>
             <p className="text-xs text-navy-500">Monthly saves flexibility. Annual is cheaper over a year.</p>
@@ -304,7 +304,7 @@ export default function SignupForm() {
           <button
             type="button"
             onClick={() => setPlan(planKey, billingPeriod === "monthly" ? "annual" : "monthly")}
-            className="rounded-full bg-white px-4 py-2 text-xs font-bold text-navy-800 shadow-sm ring-1 ring-navy-200 transition hover:bg-navy-50"
+            className="stitch-button stitch-button-secondary shrink-0"
           >
             {billingPeriod === "monthly" ? "Switch to annual" : "Switch to monthly"}
           </button>
@@ -335,7 +335,7 @@ export default function SignupForm() {
       </div>
 
       {error && (
-        <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div role="alert" className="border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           {error}
         </div>
       )}
@@ -344,7 +344,7 @@ export default function SignupForm() {
         <motion.div
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          className="rounded-2xl border border-brandgreen-200 bg-brandgreen-50 px-4 py-3 text-sm text-brandgreen-900"
+          className="border border-forest-200 bg-forest-50 px-4 py-3 text-sm text-forest-900"
         >
           <div className="flex items-start gap-2">
             <Verified className="mt-0.5 h-4 w-4 shrink-0" />
@@ -357,12 +357,12 @@ export default function SignupForm() {
         whileTap={{ scale: 0.99 }}
         type="submit"
         disabled={loading}
-        className="flex w-full items-center justify-center gap-2 rounded-2xl bg-navy-950 px-4 py-3.5 text-sm font-bold text-white shadow-lg shadow-navy-950/15 transition-colors hover:bg-navy-900 disabled:cursor-not-allowed disabled:opacity-70"
+        className="stitch-button w-full disabled:cursor-not-allowed disabled:opacity-70"
       >
         {loading ? "Creating account..." : "Create account"}
       </motion.button>
 
-      <div className="grid gap-3 rounded-2xl border border-navy-100 bg-navy-50/70 p-4 text-sm text-navy-600">
+      <div className="grid gap-3 border border-line bg-sand-100 p-4 text-sm text-muted">
         <div className="flex items-start gap-2">
           <Shield className="mt-0.5 h-4 w-4 shrink-0 text-brandgreen-600" />
           <p>{isAdminInvitation ? "Your role is granted only after the one-time invitation is accepted." : "Your role and plan are saved in session-scoped flow state and carried through verification."}</p>

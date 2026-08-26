@@ -238,7 +238,7 @@ export default function VerifyEmailPanel({ token }: Props) {
 
   return (
     <div className="space-y-5">
-      <div className="rounded-3xl border border-brandgreen-100 bg-brandgreen-50/70 p-4 text-sm text-brandgreen-900">
+      <div className="border border-forest-200 bg-forest-50 p-4 text-sm text-forest-900">
         <div className="flex items-start gap-2">
           <Verified className="mt-0.5 h-4 w-4 shrink-0" />
           <p>Enter the 6-digit code sent to your email to finish verification and continue.</p>
@@ -264,7 +264,7 @@ export default function VerifyEmailPanel({ token }: Props) {
         <motion.div
           animate={{ opacity: [0.55, 1, 0.55] }}
           transition={{ duration: 1.3, repeat: Infinity }}
-          className="rounded-2xl border border-navy-100 bg-navy-50 px-4 py-4 text-sm text-navy-600"
+          className="border border-line bg-sand-100 px-4 py-4 text-sm text-muted"
         >
           Sending verification code...
         </motion.div>
@@ -293,13 +293,13 @@ export default function VerifyEmailPanel({ token }: Props) {
           </div>
 
           {error && (
-            <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            <div role="alert" className="border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
               {error}
             </div>
           )}
 
           {status && (
-            <div className="rounded-2xl border border-brandgreen-200 bg-brandgreen-50 px-4 py-3 text-sm text-brandgreen-900">
+            <div role="status" className="border border-forest-200 bg-forest-50 px-4 py-3 text-sm text-forest-900">
               <div className="flex items-start gap-2">
                 <Check className="mt-0.5 h-4 w-4 shrink-0" />
                 <p>{status}</p>
@@ -310,7 +310,7 @@ export default function VerifyEmailPanel({ token }: Props) {
           <button
             type="button"
             onClick={() => void verifyCode()}
-            className="w-full rounded-2xl bg-navy-950 px-4 py-3.5 text-sm font-bold text-white shadow-lg shadow-navy-950/15 transition-colors hover:bg-navy-900 disabled:cursor-not-allowed disabled:opacity-70"
+            className="stitch-button w-full disabled:cursor-not-allowed disabled:opacity-70"
             disabled={loading || otp.length !== 6}
           >
             {loading ? "Verifying..." : "Verify email"}
@@ -320,14 +320,14 @@ export default function VerifyEmailPanel({ token }: Props) {
             type="button"
             onClick={() => void resend()}
             disabled={codeLoading || resendSeconds > 0}
-            className="w-full rounded-2xl border border-navy-200 bg-white px-4 py-3.5 text-sm font-bold text-navy-900 transition-colors hover:bg-navy-50 disabled:cursor-not-allowed disabled:opacity-60"
+            className="stitch-button stitch-button-secondary w-full disabled:cursor-not-allowed disabled:opacity-60"
           >
             {resendSeconds > 0 ? `Resend code in ${resendSeconds}s` : "Resend 6-digit code"}
           </button>
         </>
       )}
 
-      <div className="grid gap-3 rounded-2xl border border-navy-100 bg-navy-50/70 p-4 text-sm text-navy-600">
+      <div className="grid gap-3 border border-line bg-sand-100 p-4 text-sm text-muted">
         <div className="flex items-start gap-2">
           <Shield className="mt-0.5 h-4 w-4 shrink-0 text-brandgreen-600" />
           <p>Unverified users are routed here automatically until the code is confirmed.</p>

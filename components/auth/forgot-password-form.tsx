@@ -73,10 +73,10 @@ export default function ForgotPasswordForm({
         />
       </label>
 
-      {error && <div role="alert" className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}
+      {error && <div role="alert" className="border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}
 
       {success && (
-        <div role="status" className="rounded-2xl border border-brandgreen-200 bg-brandgreen-50 px-4 py-3 text-sm text-brandgreen-900">
+        <div role="status" className="border border-forest-200 bg-forest-50 px-4 py-3 text-sm text-forest-900">
           <div className="flex items-start gap-2">
             <Check className="mt-0.5 h-4 w-4 shrink-0" />
             <p>{success}</p>
@@ -87,12 +87,12 @@ export default function ForgotPasswordForm({
       <button
         type="submit"
         disabled={loading}
-        className="w-full rounded-2xl bg-navy-950 px-4 py-3.5 text-sm font-bold text-white shadow-lg shadow-navy-950/15 transition-colors hover:bg-navy-900 disabled:cursor-not-allowed disabled:opacity-70"
+        className="stitch-button w-full disabled:cursor-not-allowed disabled:opacity-70"
       >
         {loading ? "Sending..." : "Send reset link"}
       </button>
 
-      <div className="rounded-2xl border border-navy-100 bg-navy-50/70 px-4 py-3 text-sm text-navy-600">
+      <div className="border border-line bg-sand-100 px-4 py-3 text-sm text-muted">
         <div className="flex items-start gap-2">
           <Shield className="mt-0.5 h-4 w-4 shrink-0 text-brandgreen-600" />
           <p>We’ll send a secure link that returns you to the password reset page.</p>

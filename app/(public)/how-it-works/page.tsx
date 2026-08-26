@@ -7,9 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function HowItWorksPage() {
-  return (
-    <div className="min-h-screen bg-sand-100 pt-24">
-      <HowItWorksClient />
-    </div>
-  );
+  return <HowItWorksClient />;
 }

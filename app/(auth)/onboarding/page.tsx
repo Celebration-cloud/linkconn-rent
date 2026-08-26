@@ -109,8 +109,7 @@ export default function OnboardingPage() {
       </header>
       <div className="stitch-container grid min-w-0 gap-8 py-6 lg:grid-cols-[17rem_minmax(0,1fr)] lg:py-12">
         <aside className="hidden lg:sticky lg:top-24 lg:block lg:max-h-[calc(100dvh-7rem)] lg:overflow-y-auto lg:pr-2">
-          <p className="text-xs font-bold uppercase tracking-[0.16em] text-forest-700">Verification</p>
-          <h1 className="mt-2 text-2xl font-extrabold tracking-tight text-ink">Set up your {role.toLowerCase()} profile</h1>
+          <h1 className="text-2xl font-extrabold tracking-[-.025em] text-ink">Set up your {role.toLowerCase()} profile</h1>
           <p className="mt-3 text-sm leading-6 text-muted">We verify the details that keep applications and rent transactions safer.</p>
 
           <ol className="mt-8 space-y-5">
@@ -130,8 +129,8 @@ export default function OnboardingPage() {
             })}
           </ol>
 
-          <div className="mt-8 rounded-xl border border-line bg-sand-100 p-4">
-            <p className="text-xs font-bold uppercase tracking-[0.14em] text-forest-700">Selected plan</p>
+          <div className="mt-8 border border-line bg-sand-100 p-4">
+            <p className="text-xs font-bold text-forest-700">Selected plan</p>
             <p className="mt-2 font-extrabold text-ink">{planMeta.name}</p>
             <p className="mt-1 text-xs leading-5 text-muted">{planMeta.description}</p>
             <div className="mt-3 flex items-center gap-2 text-xs font-bold text-forest-800">
@@ -141,11 +140,10 @@ export default function OnboardingPage() {
           </div>
         </aside>
 
-        <section className="h-fit min-w-0 rounded-xl border border-line bg-white p-5 shadow-[0_8px_30px_rgba(18,55,42,0.07)] sm:p-7">
+        <section className="h-fit min-w-0 border border-line bg-white p-5 sm:p-7">
           <div className="mb-6 border-b border-line pb-5">
             <div>
-              <span className="text-xs font-bold uppercase tracking-[0.16em] text-forest-700">Identity verification</span>
-              <h2 className="mt-2 text-2xl font-extrabold tracking-tight text-ink sm:text-3xl">
+              <h2 className="text-2xl font-extrabold tracking-[-.025em] text-ink sm:text-3xl">
                 Verify your identity
               </h2>
               <p className="mt-2 text-sm leading-6 text-muted">Your NIN and contact details are encrypted in transit and reviewed before approval.</p>
