@@ -70,14 +70,22 @@ function PlanCard({
     <button
       type="button"
       onClick={onClick}
+<<<<<<< HEAD
       className={`w-full p-4 text-left border transition relative rounded-xl ${
         selected
           ? "border-forest-900 bg-forest-50/80 shadow-xs ring-1 ring-forest-900"
           : "border-[#d6ddd5] bg-white hover:bg-[#f8faf7] hover:border-forest-400"
+=======
+      className={`w-full border p-4 text-left transition ${
+        selected
+          ? "border-forest-800 bg-forest-50"
+          : "border-line bg-white hover:border-forest-400"
+>>>>>>> 362c8a8f9856d33b209f9781c5013ef48e47c6ac
       }`}
     >
       <div className="flex items-start justify-between gap-3">
         <div>
+<<<<<<< HEAD
           <div className="flex items-center gap-2">
             <span className="text-sm font-extrabold text-forest-950">{title}</span>
             {featured && (
@@ -94,6 +102,17 @@ function PlanCard({
         <span className="text-muted">Membership Tier</span>
         <span className={selected ? "text-forest-900 font-extrabold flex items-center gap-1" : "text-muted"}>
           {selected ? <><Check className="size-3.5" /> Selected</> : "Tap to choose"}
+=======
+          <div className="text-sm font-bold text-ink">{title}</div>
+          <p className="mt-1 text-xs leading-5 text-muted">{description}</p>
+        </div>
+        <span className="text-sm font-extrabold tabular-nums text-ink">{price}</span>
+      </div>
+      <div className="mt-3 flex items-center justify-between text-[11px] font-bold text-muted">
+        <span>{featured ? "Recommended plan" : "Plan option"}</span>
+        <span className={selected ? "text-forest-700" : "text-muted"}>
+          {selected ? "Selected" : "Tap to choose"}
+>>>>>>> 362c8a8f9856d33b209f9781c5013ef48e47c6ac
         </span>
       </div>
     </button>
@@ -294,7 +313,30 @@ export default function SignupForm() {
             })}
           </div>
         </div>
+<<<<<<< HEAD
       )}
+=======
+        <div className="grid gap-3 sm:grid-cols-2">
+          {ROLE_OPTIONS.map((choice) => (
+            <button
+              key={choice.role}
+              type="button"
+              onClick={() => setRole(choice.role)}
+              className={`border p-4 text-left transition ${
+                role === choice.role
+                  ? "border-forest-950 bg-forest-950 text-white"
+                  : "border-line bg-white text-forest-900 hover:border-forest-400"
+              }`}
+            >
+              <div className="text-sm font-bold">{choice.title}</div>
+              <p className={`mt-1 text-xs leading-5 ${role === choice.role ? "text-white/75" : "text-navy-500"}`}>
+                {choice.description}
+              </p>
+            </button>
+          ))}
+        </div>
+      </div>}
+>>>>>>> 362c8a8f9856d33b209f9781c5013ef48e47c6ac
 
       {/* Plan Selection */}
       {!isAdminInvitation && (
@@ -341,7 +383,11 @@ export default function SignupForm() {
 
       {/* Landlord Billing Cycle Switcher */}
       {!isAdminInvitation && role === "Landlord" && (
+<<<<<<< HEAD
         <div className="flex items-center justify-between rounded-xl border border-[#d6ddd5] bg-sand-100 p-3">
+=======
+        <div className="flex flex-col justify-between gap-3 border border-line bg-sand-100 px-4 py-4 sm:flex-row sm:items-center">
+>>>>>>> 362c8a8f9856d33b209f9781c5013ef48e47c6ac
           <div>
             <div className="text-xs font-extrabold text-forest-950">Billing Cycle</div>
             <p className="text-[11px] text-muted">Annual billing saves up to 20% on landlord management fees.</p>
@@ -349,7 +395,11 @@ export default function SignupForm() {
           <button
             type="button"
             onClick={() => setPlan(planKey, billingPeriod === "monthly" ? "annual" : "monthly")}
+<<<<<<< HEAD
             className="rounded-lg bg-white px-3 py-1.5 text-xs font-black text-forest-900 border border-[#d6ddd5] hover:bg-sand-50 transition"
+=======
+            className="stitch-button stitch-button-secondary shrink-0"
+>>>>>>> 362c8a8f9856d33b209f9781c5013ef48e47c6ac
           >
             {billingPeriod === "monthly" ? "Switch to Annual" : "Switch to Monthly"}
           </button>
@@ -395,7 +445,11 @@ export default function SignupForm() {
       </div>
 
       {error && (
+<<<<<<< HEAD
         <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-xs font-medium text-red-700">
+=======
+        <div role="alert" className="border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+>>>>>>> 362c8a8f9856d33b209f9781c5013ef48e47c6ac
           {error}
         </div>
       )}
@@ -404,7 +458,11 @@ export default function SignupForm() {
         <motion.div
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
+<<<<<<< HEAD
           className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-xs font-bold text-emerald-900 flex items-center gap-2"
+=======
+          className="border border-forest-200 bg-forest-50 px-4 py-3 text-sm text-forest-900"
+>>>>>>> 362c8a8f9856d33b209f9781c5013ef48e47c6ac
         >
           <CheckCircle2 className="size-4 text-emerald-600 shrink-0" />
           <p>{success}</p>
@@ -415,12 +473,20 @@ export default function SignupForm() {
         whileTap={{ scale: 0.99 }}
         type="submit"
         disabled={loading}
+<<<<<<< HEAD
         className="stitch-button w-full justify-center py-3 text-sm font-black disabled:cursor-not-allowed disabled:opacity-70 shadow-sm"
+=======
+        className="stitch-button w-full disabled:cursor-not-allowed disabled:opacity-70"
+>>>>>>> 362c8a8f9856d33b209f9781c5013ef48e47c6ac
       >
         {loading ? "Creating your secure account..." : "Create Account & Continue"}
       </motion.button>
 
+<<<<<<< HEAD
       <div className="rounded-xl border border-forest-100 bg-forest-50/70 p-3.5 text-xs text-forest-950 space-y-1.5">
+=======
+      <div className="grid gap-3 border border-line bg-sand-100 p-4 text-sm text-muted">
+>>>>>>> 362c8a8f9856d33b209f9781c5013ef48e47c6ac
         <div className="flex items-start gap-2">
           <ShieldCheck className="mt-0.5 size-4 shrink-0 text-forest-700" />
           <p className="leading-relaxed">

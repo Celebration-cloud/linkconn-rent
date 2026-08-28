@@ -17,6 +17,20 @@ export type PlanChoice = {
   billingPeriod: BillingPeriod;
 };
 
+export type AccountPlanPaymentMetadata = PlanChoice & {
+  purpose: "account-plan";
+  profileId: string;
+};
+
+export type AccountPlanTransaction = {
+  status: string;
+  reference: string;
+  amount: number;
+  currency: string;
+  customerEmail: string;
+  metadata: AccountPlanPaymentMetadata;
+};
+
 export type PlanMeta = {
   key: PlanKey;
   role: SignupRole;
@@ -57,7 +71,7 @@ export const PLAN_LIBRARY: Record<SignupRole, PlanMeta[]> = {
         "Unlimited browsing of listings",
         "Direct chat with verified landlords",
         "Schedule inspection slots free",
-        "Rent escrow payment security",
+        "Protected Payment records and receipts",
       ],
       cta: "Start Free",
       popular: false,
@@ -68,13 +82,13 @@ export const PLAN_LIBRARY: Record<SignupRole, PlanMeta[]> = {
       key: "tenant-premium",
       role: "Tenant",
       name: "Premium Match",
-      description: "Priority access and faster matching.",
+      description: "More tools for an active property search.",
       features: [
-        "24-hour early access to new listings",
+        "Saved-property and matching tools",
         "Verified Tenant profile badge",
         "Instant email and SMS matching alerts",
         "Unlimited saved searches and bookmarks",
-        "Priority background check review",
+        "Priority verification review",
       ],
       cta: "Upgrade Now",
       popular: true,
@@ -107,7 +121,7 @@ export const PLAN_LIBRARY: Record<SignupRole, PlanMeta[]> = {
       features: [
         "Up to 10 active listings",
         "Featured placement in search results",
-        "Free priority physical audits",
+        "Priority verification review",
         "Automated rent invoicing via email and SMS",
         "Priority support",
       ],
@@ -123,8 +137,8 @@ export const PLAN_LIBRARY: Record<SignupRole, PlanMeta[]> = {
       description: "For real estate teams with multiple buildings.",
       features: [
         "Unlimited active property listings",
-        "Instant 24-hour verification visits",
-        "Dedicated account property manager",
+        "Expanded verification support",
+        "Portfolio support for property teams",
         "Custom agency branding",
         "Financial collection analytics",
       ],
@@ -179,6 +193,27 @@ export function getCheckoutAmount(plan: PlanMeta, billingPeriod: BillingPeriod):
   if (plan.priceMonthly === 0 && plan.priceAnnual === 0) return 0;
   if (plan.role === "Tenant") return plan.priceAnnual;
   return billingPeriod === "monthly" ? plan.priceMonthly : plan.priceAnnual * 12;
+}
+
+export function validateAccountPlanPayment(
+  transaction: AccountPlanTransaction,
+  profile: { id: string; email: string; role: SignupRole },
+) {
+  if (transaction.status !== "success") return false;
+  if (transaction.currency !== "NGN") return false;
+  if (transaction.customerEmail.toLowerCase() !== profile.email.toLowerCase()) return false;
+  if (transaction.metadata.purpose !== "account-plan") return false;
+  if (transaction.metadata.profileId !== profile.id) return false;
+  if (transaction.metadata.role !== profile.role) return false;
+  if (!PLAN_LIBRARY[profile.role].some((plan) => plan.key === transaction.metadata.planKey)) {
+    return false;
+  }
+
+  const plan = getPlanMeta(profile.role, transaction.metadata.planKey);
+  const expectedAmount = Math.round(
+    getCheckoutAmount(plan, transaction.metadata.billingPeriod) * 100,
+  );
+  return expectedAmount > 0 && transaction.amount === expectedAmount;
 }
 
 export function formatPlanLabel(plan: PlanMeta, billingPeriod: BillingPeriod): string {

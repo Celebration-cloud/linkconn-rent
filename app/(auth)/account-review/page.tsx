@@ -93,7 +93,11 @@ export default function AccountReviewPage() {
   return (
     <main
       id="main-content"
+<<<<<<< HEAD
       className="min-h-[100dvh] bg-[#eef2ed] px-4 py-6 sm:px-6 flex flex-col justify-between"
+=======
+      className="min-h-[100dvh] bg-sand-100 px-4 py-6 sm:px-6"
+>>>>>>> 362c8a8f9856d33b209f9781c5013ef48e47c6ac
     >
       <header className="mx-auto flex w-full max-w-5xl items-center justify-between border-b border-[#d6ddd5] pb-4">
         <Link href="/" className="flex min-h-11 items-center" aria-label="LinkConn Rent home">
@@ -116,13 +120,18 @@ export default function AccountReviewPage() {
             reducedMotion ? { opacity: 0 } : { opacity: 0, y: 20, scale: 0.99 }
           }
           animate={{ opacity: 1, y: 0, scale: 1 }}
+<<<<<<< HEAD
           className="overflow-hidden rounded-2xl border border-[#d6ddd5] bg-white shadow-[0_20px_60px_rgba(18,55,42,0.1)]"
+=======
+          className="w-full overflow-hidden border border-line bg-white"
+>>>>>>> 362c8a8f9856d33b209f9781c5013ef48e47c6ac
         >
           <div
             className={`h-2.5 w-full ${
               rejected ? "bg-amber-500" : "bg-forest-800"
             }`}
           />
+<<<<<<< HEAD
           <div className="grid gap-8 p-6 sm:p-8 lg:grid-cols-[1fr_20rem] lg:p-10">
             {/* Left Content Area */}
             <div className="space-y-6">
@@ -143,6 +152,37 @@ export default function AccountReviewPage() {
                 </span>
                 <span className="text-xs font-semibold text-muted">SLA: &lt; 24 Hours</span>
               </div>
+=======
+          <div className="grid gap-8 p-6 sm:p-8 lg:grid-cols-[1fr_18rem] lg:p-10">
+            <div>
+              <span
+                className={`inline-flex size-14 items-center justify-center rounded-2xl ${
+                  rejected
+                    ? "bg-amber-100 text-amber-800"
+                    : "bg-forest-100 text-forest-800"
+                }`}
+              >
+                {rejected ? (
+                  <TriangleAlert className="size-7" />
+                ) : (
+                  <FileSearch className="size-7" />
+                )}
+              </span>
+              <p className="mt-6 text-xs font-bold text-forest-700">
+                Account verification
+              </p>
+              <h1 className="mt-2 max-w-xl text-3xl font-extrabold tracking-tight text-ink sm:text-4xl">
+                {rejected
+                  ? "We need a little more information"
+                  : "Your profile is in the review queue"}
+              </h1>
+              <p className="mt-4 max-w-2xl text-sm leading-7 text-muted sm:text-base">
+                {rejected
+                  ? user?.accountReviewReason ||
+                    "An administrator could not approve the current submission. Update your details and submit it again."
+                  : `Thanks${user?.firstName ? `, ${user.firstName}` : ""}. An administrator will check your identity and account details before your workspace is activated.`}
+              </p>
+>>>>>>> 362c8a8f9856d33b209f9781c5013ef48e47c6ac
 
               <div>
                 <h1 className="text-2xl font-black tracking-tight text-forest-950 sm:text-3xl lg:text-4xl">
@@ -229,12 +269,20 @@ export default function AccountReviewPage() {
               </div>
             </div>
 
+<<<<<<< HEAD
             {/* Right Sidebar Timeline */}
             <aside className="rounded-2xl border border-[#d6ddd5] bg-[#f8faf7] p-5 space-y-4">
               <h2 className="text-xs font-extrabold uppercase tracking-wider text-forest-950">
                 Verification Journey
               </h2>
               <ol className="space-y-4 text-xs">
+=======
+            <aside className="bg-sand-100 p-5">
+              <p className="text-xs font-bold text-forest-700">
+                What happens next
+              </p>
+              <ol className="mt-5 space-y-5">
+>>>>>>> 362c8a8f9856d33b209f9781c5013ef48e47c6ac
                 {[
                   {
                     icon: CheckCircle2,

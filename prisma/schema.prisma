@@ -293,6 +293,7 @@ model Profile {
 }
 
 model AccountPlanPayment {
+<<<<<<< HEAD
   id               String        @id @default(uuid())
   profileId        String
   profile          Profile       @relation(fields: [profileId], references: [id], onDelete: Cascade)
@@ -313,6 +314,23 @@ model AccountPlanPayment {
   updatedAt        DateTime      @updatedAt
 
   @@index([profileId, status, accessEndsAt])
+=======
+  id            String        @id @default(uuid())
+  profileId     String
+  profile       Profile       @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  reference     String        @unique
+  planKey       String
+  billingPeriod String
+  amountMinor   Int
+  currency      String        @default("NGN")
+  status        PaymentStatus @default(Processing)
+  paidAt        DateTime?
+  failureReason String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@index([profileId, status, createdAt])
+>>>>>>> 362c8a8f9856d33b209f9781c5013ef48e47c6ac
   @@index([profileId, paidAt])
   @@map("account_plan_payments")
 }

@@ -16,9 +16,9 @@ export default function OnboardingStepIndicator({
   return (
     <div className="w-full">
       {/* Progress bar */}
-      <div className="relative mb-6 h-1.5 w-full overflow-hidden rounded-full bg-navy-100">
+      <div className="relative mb-6 h-1.5 w-full overflow-hidden bg-sand-300">
         <motion.div
-          className="absolute inset-y-0 left-0 origin-left rounded-full bg-gradient-to-r from-brandgreen-500 to-brandgreen-400"
+          className="absolute inset-y-0 left-0 origin-left bg-forest-700"
           initial={{ scaleX: 0 }}
           animate={{ scaleX: (currentStep + 1) / steps.length }}
           transition={{ duration: 0.4, ease: "easeInOut" }}

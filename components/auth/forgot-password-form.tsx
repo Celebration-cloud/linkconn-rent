@@ -75,6 +75,7 @@ export default function ForgotPasswordForm({
         />
       </label>
 
+<<<<<<< HEAD
       {error && (
         <div role="alert" className="rounded-lg border border-red-200 bg-red-50 p-3 text-xs font-medium text-red-700">
           {error}
@@ -85,18 +86,36 @@ export default function ForgotPasswordForm({
         <div role="status" className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-xs font-bold text-emerald-900 flex items-start gap-2">
           <CheckCircle2 className="size-4 text-emerald-600 shrink-0 mt-0.5" />
           <p className="leading-relaxed">{success}</p>
+=======
+      {error && <div role="alert" className="border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}
+
+      {success && (
+        <div role="status" className="border border-forest-200 bg-forest-50 px-4 py-3 text-sm text-forest-900">
+          <div className="flex items-start gap-2">
+            <Check className="mt-0.5 h-4 w-4 shrink-0" />
+            <p>{success}</p>
+          </div>
+>>>>>>> 362c8a8f9856d33b209f9781c5013ef48e47c6ac
         </div>
       )}
 
       <button
         type="submit"
         disabled={loading}
+<<<<<<< HEAD
         className="stitch-button w-full justify-center py-3 text-sm font-black disabled:cursor-not-allowed disabled:opacity-70 shadow-sm"
+=======
+        className="stitch-button w-full disabled:cursor-not-allowed disabled:opacity-70"
+>>>>>>> 362c8a8f9856d33b209f9781c5013ef48e47c6ac
       >
         {loading ? "Sending reset instructions..." : "Send Password Reset Link"}
       </button>
 
+<<<<<<< HEAD
       <div className="rounded-lg border border-forest-100 bg-forest-50/70 p-3 text-xs text-forest-950">
+=======
+      <div className="border border-line bg-sand-100 px-4 py-3 text-sm text-muted">
+>>>>>>> 362c8a8f9856d33b209f9781c5013ef48e47c6ac
         <div className="flex items-start gap-2">
           <ShieldCheck className="mt-0.5 size-4 shrink-0 text-forest-700" />
           <p className="leading-relaxed">

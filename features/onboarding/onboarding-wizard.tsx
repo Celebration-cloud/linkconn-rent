@@ -338,7 +338,7 @@ export default function OnboardingWizard({ role }: OnboardingWizardProps) {
         <OnboardingStepIndicator steps={steps} currentStep={currentStep} />
 
         {/* Role badge */}
-        <div className="flex items-center gap-2 rounded-2xl border border-navy-100 bg-navy-50/70 px-4 py-2.5">
+        <div className="flex items-center gap-2 border border-line bg-sand-100 px-4 py-2.5">
           <span className="h-2 w-2 rounded-full bg-brandgreen-400" />
           <span className="text-xs font-medium text-navy-700">
             Setting up your <strong>{role}</strong> account
@@ -370,7 +370,7 @@ export default function OnboardingWizard({ role }: OnboardingWizardProps) {
 
         {/* Error */}
         {submitError && (
-          <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-xs text-red-700">
+          <div role="alert" className="border border-red-200 bg-red-50 px-4 py-3 text-xs text-red-700">
             {submitError}
           </div>
         )}
@@ -382,7 +382,7 @@ export default function OnboardingWizard({ role }: OnboardingWizardProps) {
               type="button"
               onClick={handleBack}
               disabled={isSubmitting || isSavingDraft}
-              className="flex items-center gap-1.5 rounded-2xl border border-navy-200 bg-white px-5 py-3 text-sm font-semibold text-navy-800 transition hover:bg-navy-50 disabled:opacity-50"
+              className="stitch-button stitch-button-secondary disabled:opacity-50"
             >
               <ArrowLeft className="h-4 w-4" />
               Back
@@ -394,7 +394,7 @@ export default function OnboardingWizard({ role }: OnboardingWizardProps) {
             name="intent"
             value={isLastStep ? "submit" : "next"}
             disabled={isSubmitting || isSavingDraft}
-            className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-navy-950 px-5 py-3 text-sm font-bold text-white transition hover:bg-navy-800 disabled:opacity-60"
+            className="stitch-button flex-1 disabled:opacity-60"
           >
             {isSubmitting ? (
               <>

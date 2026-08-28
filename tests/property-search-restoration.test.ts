@@ -21,6 +21,7 @@ const validState = {
     hasPreviousPage: false,
   },
   compareIds: [FALLBACK_PROPERTIES[0].id],
+  costView: "move-in" as const,
   lastVisiblePage: 1,
   scrollY: 420,
 };
@@ -34,11 +35,12 @@ describe("property search restoration", () => {
       "types=Apartment,Duplex&sort=newest",
     );
     expect(first).toBe(second);
-    expect(getPropertySearchStorageKey(first)).toContain("v3:");
+    expect(getPropertySearchStorageKey(first)).toContain("v4:");
   });
 
   it("accepts current unexpired restoration state", () => {
     expect(parsePropertySearchRestoration(JSON.stringify(validState), 1_000)).toMatchObject({
+      costView: "move-in",
       lastVisiblePage: 1,
       scrollY: 420,
     });

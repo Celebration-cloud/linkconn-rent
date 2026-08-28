@@ -133,7 +133,11 @@ export default function LoginForm({
       </label>
 
       {error && (
+<<<<<<< HEAD
         <div role="alert" className="rounded-lg border border-red-200 bg-red-50 p-3 text-xs font-medium text-red-700">
+=======
+        <div role="alert" className="border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+>>>>>>> 362c8a8f9856d33b209f9781c5013ef48e47c6ac
           {error}
         </div>
       )}
@@ -147,7 +151,25 @@ export default function LoginForm({
         {loading ? "Authenticating & verifying workspace…" : "Sign In to Account"}
       </motion.button>
 
+<<<<<<< HEAD
       <div className="rounded-lg border border-forest-100 bg-forest-50/70 p-3 text-xs text-forest-950">
+=======
+      <div className="flex items-center justify-between text-sm">
+        <button
+          type="button"
+          onClick={() => router.push(`${forgotPasswordHref}?next=${encodeURIComponent(next)}`)}
+          className="min-h-11 font-bold text-forest-700 hover:underline"
+        >
+          Reset password
+        </button>
+        <span className="inline-flex items-center gap-1 text-muted">
+          <Sparkle className="h-4 w-4 text-forest-600" />
+          Email only
+        </span>
+      </div>
+
+      <div className="border border-forest-100 bg-forest-50 px-4 py-3 text-sm text-forest-900">
+>>>>>>> 362c8a8f9856d33b209f9781c5013ef48e47c6ac
         <div className="flex items-start gap-2">
           <ShieldCheck className="mt-0.5 size-4 shrink-0 text-forest-700" />
           <p className="leading-relaxed">
